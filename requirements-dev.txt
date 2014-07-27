@@ -1,2 +1,4 @@
 -r requirements.txt
 pip-tools==0.3.4
+py==1.4.22
+pytest==2.6.0
