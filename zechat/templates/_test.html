@@ -1,0 +1,24 @@
+<!doctype html>
+<meta charset="utf-8">
+
+{%- set cdnjs = '//cdnjs.cloudflare.com/ajax/libs' %}
+
+<link rel="stylesheet" href="{{cdnjs}}/jasmine/2.0.0/jasmine.css">
+<link rel="shortcut icon" type="image/png"
+      href="{{cdnjs}}/jasmine/2.0.0/jasmine_favicon.png">
+
+<script src="{{cdnjs}}/jasmine/2.0.0/jasmine.js"></script>
+<script src="{{cdnjs}}/jasmine/2.0.0/jasmine-html.js"></script>
+<script src="{{cdnjs}}/jasmine/2.0.0/boot.js"></script>
+
+<body>
+
+<script>
+describe("foo", function() {
+
+  it("should say hi", function() {
+    expect(1).toEqual(1);
+  });
+
+});
+</script>
