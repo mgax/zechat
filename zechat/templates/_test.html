@@ -13,12 +13,5 @@
 
 <body>
 
-<script>
-describe("foo", function() {
-
-  it("should say hi", function() {
-    expect(1).toEqual(1);
-  });
-
-});
-</script>
+{% assets 'app.js' %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+{% assets 'testsuite.js' %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
