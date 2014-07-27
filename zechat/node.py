@@ -15,5 +15,9 @@ def save():
 
 @views.route('/get_messages', methods=['POST'])
 def get_messages():
-    return flask.jsonify(message_list=[flask.json.loads(m.data)
-                                       for m in Message.query])
+    identity = flask.request.get_json()['identity']
+    message_list = [
+        flask.json.loads(m.data)
+        for m in Message.query.filter_by(recipient=identity)
+    ]
+    return flask.jsonify(message_list=message_list)
