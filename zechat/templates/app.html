@@ -34,6 +34,19 @@
   <div class="conversation-compose"></div>
 </script>
 
+<script id="compose-html" type="text/template">
+  <div class="row">
+    <div class="col-xs-10">
+      <input class="form-control" name="message"
+             placeholder="Write a reply…"
+             autofocus autocomplete=off>
+    </div>
+    <div class="col-xs-2 compose-button-cell">
+      <button class="btn btn-default" type="submit">send</button>
+    </div>
+  </div>
+</script>
+
 <script>
   $(function() {
     zc.initialize();

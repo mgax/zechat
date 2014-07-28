@@ -39,6 +39,19 @@ class zc.ConversationLayout extends Backbone.Marionette.LayoutView
     compose: '.conversation-compose'
 
 
+class zc.ComposeView extends Backbone.Marionette.ItemView
+
+  tagName: 'form'
+
+  template: '#compose-html'
+
+
+class zc.Compose extends Backbone.Marionette.Controller
+
+  createView: ->
+    return new zc.ComposeView
+
+
 zc.initialize = (options) ->
   zc.app = new Backbone.Marionette.Application
 
@@ -51,3 +64,7 @@ zc.initialize = (options) ->
     @layout = new zc.ConversationLayout
     @layout.render()
     zc.app.layout.main.show(@layout)
+
+    @compose = new zc.Compose
+      app: @app
+    @layout.compose.show(@compose.createView())
