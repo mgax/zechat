@@ -45,11 +45,24 @@ class zc.ComposeView extends Backbone.Marionette.ItemView
 
   template: '#compose-html'
 
+  ui:
+    message: '[name=message]'
+
+  events:
+    'submit': (evt) ->
+      evt.preventDefault()
+      message = @ui.message.val()
+      @ui.message.val("")
+      this.trigger('send', message)
+
 
 class zc.Compose extends Backbone.Marionette.Controller
 
   createView: ->
-    return new zc.ComposeView
+    view = new zc.ComposeView
+    view.on 'send', (message) =>
+      console.log('send', message)
+    return view
 
 
 zc.initialize = (options) ->
