@@ -39,6 +39,23 @@ class zc.ConversationLayout extends Backbone.Marionette.LayoutView
     compose: '.conversation-compose'
 
 
+class zc.MessageView extends Backbone.Marionette.ItemView
+
+  template: '#message-html'
+
+
+class zc.HistoryView extends Backbone.Marionette.CollectionView
+
+  childView: zc.MessageView
+
+
+class zc.History extends Backbone.Marionette.Controller
+
+  createView: ->
+    return new zc.HistoryView
+      collection: @options.app.request('message_col')
+
+
 class zc.ComposeView extends Backbone.Marionette.ItemView
 
   tagName: 'form'
@@ -84,8 +101,8 @@ zc.initialize = (options) ->
 
   app.message_col = new Backbone.Collection
 
-  app.reqres.setHandler 'urls', ->
-    return options.urls
+  app.reqres.setHandler 'message_col', -> app.message_col
+  app.reqres.setHandler 'urls', -> options.urls
 
   app.transport = new zc.Transport(app: app)
 
@@ -105,6 +122,8 @@ zc.initialize = (options) ->
     @layout.render()
     @app.layout.main.show(@layout)
 
-    @compose = new zc.Compose
-      app: @app
+    @history = new zc.History(app: @app)
+    @layout.history.show(@history.createView())
+
+    @compose = new zc.Compose(app: @app)
     @layout.compose.show(@compose.createView())
