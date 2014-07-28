@@ -20,11 +20,19 @@
 
 <title>ZeChat</title>
 
-<body>
-
 {% assets 'app.js' %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
 
-<div class="app-container row">
-  <div class="col-xs-4 app-contacts"></div>
-  <div class="col-xs-8 app-messages"></div>
-</div>
+<script id="app-layout-html" type="text/template">
+  <div class="app-container row">
+    <div class="col-xs-4 app-contacts"></div>
+    <div class="col-xs-8 app-main"></div>
+  </div>
+</script>
+
+<script>
+  $(function() {
+    zc.initialize();
+  });
+</script>
+
+<body>
