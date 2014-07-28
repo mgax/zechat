@@ -65,8 +65,30 @@ class zc.Compose extends Backbone.Marionette.Controller
     return view
 
 
+class zc.Transport extends Backbone.Marionette.Controller
+
+  initialize: (options) ->
+    transport_url = @options.app.request('urls')['transport']
+    @ws = new WebSocket(transport_url)
+    @ws.onmessage = _.bind(@on_message, @)
+
+  on_message: (evt) ->
+    @trigger('message', JSON.parse(evt.data))
+
+  send: (data) ->
+    @ws.send(JSON.stringify(data))
+
+
 zc.initialize = (options) ->
   zc.app = new Backbone.Marionette.Application
+
+  zc.app.reqres.setHandler 'urls', ->
+    return options.urls
+
+  zc.app.transport = new zc.Transport(app: zc.app)
+
+  zc.app.transport.on 'message', (data) =>
+    console.log(data)
 
   zc.app.layout = new zc.AppLayout
     el: $('body')

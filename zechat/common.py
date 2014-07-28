@@ -34,4 +34,9 @@ def test_page():
 
 @views.route('/')
 def app_page():
-    return flask.render_template('app.html')
+    transport_url = ''.join([
+        'ws://',
+        flask.url_for('.app_page', _external=True).lstrip('http://'),
+        'ws/transport',
+    ])
+    return flask.render_template('app.html', transport_url=transport_url)
