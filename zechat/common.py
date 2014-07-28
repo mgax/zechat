@@ -18,9 +18,20 @@ assets.register('testsuite.js', Bundle(
     output='gen/testsuite.js',
 ))
 
+assets.register('app.css', Bundle(
+    'app.less',
+    filters='less',
+    output='gen/app.css',
+))
+
 views = flask.Blueprint('common', __name__)
 
 
 @views.route('/_test')
 def test_page():
     return flask.render_template('_test.html')
+
+
+@views.route('/')
+def app_page():
+    return flask.render_template('app.html')
