@@ -80,28 +80,28 @@ class zc.Transport extends Backbone.Marionette.Controller
 
 
 zc.initialize = (options) ->
-  zc.app = new Backbone.Marionette.Application
+  app = zc.app = new Backbone.Marionette.Application
 
-  zc.app.reqres.setHandler 'urls', ->
+  app.reqres.setHandler 'urls', ->
     return options.urls
 
-  zc.app.transport = new zc.Transport(app: zc.app)
+  app.transport = new zc.Transport(app: app)
 
-  zc.app.transport.on 'message', (data) =>
+  app.transport.on 'message', (data) =>
     console.log(data)
 
-  zc.app.commands.setHandler 'send-message', (data) ->
-    zc.app.transport.send(data)
+  app.commands.setHandler 'send-message', (data) ->
+    app.transport.send(data)
 
-  zc.app.layout = new zc.AppLayout
+  app.layout = new zc.AppLayout
     el: $('body')
 
-  zc.app.layout.render()
+  app.layout.render()
 
-  zc.app.module 'conversation', ->
+  app.module 'conversation', ->
     @layout = new zc.ConversationLayout
     @layout.render()
-    zc.app.layout.main.show(@layout)
+    @app.layout.main.show(@layout)
 
     @compose = new zc.Compose
       app: @app
