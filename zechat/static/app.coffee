@@ -82,13 +82,15 @@ class zc.Transport extends Backbone.Marionette.Controller
 zc.initialize = (options) ->
   app = zc.app = new Backbone.Marionette.Application
 
+  app.message_col = new Backbone.Collection
+
   app.reqres.setHandler 'urls', ->
     return options.urls
 
   app.transport = new zc.Transport(app: app)
 
   app.transport.on 'message', (data) =>
-    console.log(data)
+    app.message_col.add(data)
 
   app.commands.setHandler 'send-message', (data) ->
     app.transport.send(data)
