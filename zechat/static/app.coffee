@@ -61,7 +61,7 @@ class zc.Compose extends Backbone.Marionette.Controller
   createView: ->
     view = new zc.ComposeView
     view.on 'send', (message) =>
-      console.log('send', message)
+      @options.app.commands.execute('send-message', text: message)
     return view
 
 
@@ -89,6 +89,9 @@ zc.initialize = (options) ->
 
   zc.app.transport.on 'message', (data) =>
     console.log(data)
+
+  zc.app.commands.setHandler 'send-message', (data) ->
+    zc.app.transport.send(data)
 
   zc.app.layout = new zc.AppLayout
     el: $('body')
