@@ -28,6 +28,13 @@ class zc.AppLayout extends Backbone.Marionette.LayoutView
     main: '.app-main'
 
 
+class zc.ConversationLayout extends Backbone.Marionette.LayoutView
+
+  className: 'conversation-container'
+
+  template: '#conversation-layout-html'
+
+
 zc.initialize = (options) ->
   zc.app = new Backbone.Marionette.Application
 
@@ -35,3 +42,8 @@ zc.initialize = (options) ->
     el: $('body')
 
   zc.app.layout.render()
+
+  zc.app.module 'conversation', ->
+    @layout = new zc.ConversationLayout
+    @layout.render()
+    zc.app.layout.main.show(@layout)
