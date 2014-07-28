@@ -34,6 +34,10 @@ class zc.ConversationLayout extends Backbone.Marionette.LayoutView
 
   template: '#conversation-layout-html'
 
+  regions:
+    history: '.conversation-history'
+    compose: '.conversation-compose'
+
 
 zc.initialize = (options) ->
   zc.app = new Backbone.Marionette.Application
