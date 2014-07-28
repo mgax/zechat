@@ -1,5 +1,8 @@
 import flask
 from zechat.models import db, Message
+from flask.ext.uwsgi_websocket import GeventWebSocket
+
+websocket = GeventWebSocket()
 
 views = flask.Blueprint('node', __name__)
 
@@ -21,3 +24,13 @@ def get_messages():
         for m in Message.query.filter_by(recipient=identity)
     ]
     return flask.jsonify(message_list=message_list)
+
+
+@websocket.route('/ws/transport')
+def transport(ws):
+    while True:
+        msg = ws.receive()
+        if msg is None:
+            break
+
+        ws.send(msg)
