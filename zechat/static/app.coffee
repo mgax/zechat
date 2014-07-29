@@ -45,25 +45,26 @@ class zc.Persist extends Backbone.Marionette.Controller
 zc.initialize = (options) ->
   app = zc.app = new Backbone.Marionette.Application
 
-  app.identity = new Backbone.Model
-    fingerprint: 'foo'
-  app.message_col = new Backbone.Collection
+  app.models =
+    identity: new Backbone.Model
+      fingerprint: 'foo'
+    message_col: new Backbone.Collection
 
   app.persist_identity = new zc.Persist
     key: 'identity'
-    model: app.identity
+    model: app.models.identity
 
   zc.set_identity = (fingerprint) ->
-    app.identity.set('fingerprint', fingerprint)
+    app.models.identity.set('fingerprint', fingerprint)
 
-  app.reqres.setHandler 'identity', -> app.identity
-  app.reqres.setHandler 'message_col', -> app.message_col
+  app.reqres.setHandler 'identity', -> app.models.identity
+  app.reqres.setHandler 'message_col', -> app.models.message_col
   app.reqres.setHandler 'urls', -> options.urls
 
   app.transport = new zc.Transport(app: app)
 
   app.transport.on 'message', (data) =>
-    app.message_col.add(data)
+    app.models.message_col.add(data)
 
   app.commands.setHandler 'send-message', (data) ->
     app.transport.send(data)
