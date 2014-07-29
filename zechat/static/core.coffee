@@ -85,7 +85,10 @@ class zc.Transport extends Backbone.Marionette.Controller
     @ws = new WebSocket(transport_url)
     @ws.onmessage = _.bind(@on_receive, @)
     @ws.onopen = _.bind(@on_open, @)
-    @send(authenticate: @options.app.request('identity').get('fingerprint'))
+    @send(
+      type: 'authenticate'
+      identity: @options.app.request('identity').get('fingerprint')
+    )
 
   on_open: ->
     current_queue = @queue

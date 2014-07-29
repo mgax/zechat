@@ -19,9 +19,10 @@ class Node(object):
         finally:
             del self.transport_map[ws.id]
 
-    def relay(self, msg):
+    def relay(self, msg, recipient):
         for client in self.transport_map.values():
-            client.send(msg)
+            if recipient in client.identities:
+                client.send(msg)
 
 
 class Transport(object):
@@ -29,6 +30,7 @@ class Transport(object):
     def __init__(self, node, ws):
         self.node = node
         self.ws = ws
+        self.identities = set()
 
     def messages(self):
         while True:
@@ -47,8 +49,14 @@ class Transport(object):
             self.message(msg)
 
     def message(self, msg):
-        assert msg['type'] == 'message'
-        self.node.relay(msg)
+        if msg['type'] == 'authenticate':
+            self.identities.add(msg['identity'])
+
+        elif msg['type'] == 'message':
+            self.node.relay(msg, msg['recipient'])
+
+        else:
+            raise RuntimeError("Unknown message type %r" % msg['type'])
 
     def send(self, msg):
         self.ws.send(json.dumps(msg))

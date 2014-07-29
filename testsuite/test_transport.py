@@ -20,9 +20,13 @@ def msg(recipient, text):
     return dict(type='message', recipient=recipient, message=dict(text=text))
 
 
+def auth(identity):
+    return dict(type='authenticate', identity=identity)
+
+
 def test_handle(node):
     ws = mock_ws('A')
-    incoming = [msg('A', 'foo'), msg('A', 'bar')]
+    incoming = [auth('A'), msg('A', 'foo'), msg('A', 'bar')]
     ws.receive.side_effect = [json.dumps(i) for i in incoming] + [None]
     with node.transport(ws) as transport:
         transport.handle()
@@ -31,9 +35,25 @@ def test_handle(node):
 
 def test_peer_receives_messages(node):
     peer = mock_ws('B')
-    with node.transport(peer):
+    with node.transport(peer) as peer_transport:
+        peer_transport.message(auth('B'))
         with node.transport(mock_ws('A')) as sender_transport:
             sender_transport.message(msg('B', 'foo'))
             sender_transport.message(msg('B', 'bar'))
 
     assert peer.out == [msg('B', 'foo'), msg('B', 'bar')]
+
+
+def test_messages_filtered_by_recipient(node):
+    a = mock_ws('A')
+    b = mock_ws('B')
+    with node.transport(a) as tr_a, node.transport(b) as tr_b:
+        tr_a.message(auth('A'))
+        tr_b.message(auth('B'))
+
+        with node.transport(mock_ws('sender')) as sender_transport:
+            sender_transport.message(msg('A', 'foo'))
+            sender_transport.message(msg('B', 'bar'))
+
+    assert a.out == [msg('A', 'foo')]
+    assert b.out == [msg('B', 'bar')]
