@@ -1,5 +1,6 @@
 import pytest
 from mock import Mock, call
+from flask import json
 
 
 @pytest.fixture
@@ -11,12 +12,12 @@ def node():
 def mock_ws(client_id):
     ws = Mock(id=client_id)
     ws.out = []
-    ws.send.side_effect = ws.out.append
+    ws.send.side_effect = lambda i: ws.out.append(json.loads(i))
     return ws
 
 
 def handle(node, ws, incoming):
-    ws.receive.side_effect = incoming + [None]
+    ws.receive.side_effect = [json.dumps(i) for i in incoming] + [None]
     with node.transport(ws) as transport:
         transport.handle()
     return ws.out
