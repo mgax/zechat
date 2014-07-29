@@ -54,10 +54,12 @@ class zc.Compose extends Backbone.Marionette.Controller
   send: (message) ->
     identity = @options.app.request('identity')
     data =
-      text: message
-      time: zc.utcnow_iso()
-      sender: identity.get('fingerprint')
+      type: 'message'
       recipient: @options.peer
+      message:
+        text: message
+        time: zc.utcnow_iso()
+        sender: identity.get('fingerprint')
     @options.app.commands.execute('send-message', data)
 
 

@@ -82,10 +82,14 @@ class zc.Transport extends Backbone.Marionette.Controller
   connect: ->
     transport_url = @options.app.request('urls')['transport']
     @ws = new WebSocket(transport_url)
-    @ws.onmessage = _.bind(@on_message, @)
+    @ws.onmessage = _.bind(@on_receive, @)
 
-  on_message: (evt) ->
-    @options.app.vent.trigger('message', JSON.parse(evt.data))
+  on_receive: (evt) ->
+    msg = JSON.parse(evt.data)
+    identity = @options.app.request('identity')
+    my_fingerprint = identity.get('fingerprint')
+    if msg.type == 'message' and msg.recipient == my_fingerprint
+      @options.app.vent.trigger('message', msg.message)
 
   send: (data) ->
     @ws.send(JSON.stringify(data))

@@ -13,10 +13,12 @@ describe 'message sending', ->
     compose.send('hello world')
 
     expect(send_message).toHaveBeenCalledWith
-      text: 'hello world'
-      time: now
-      sender: 'myself'
+      type: 'message'
       recipient: 'friend'
+      message:
+        text: 'hello world'
+        time: now
+        sender: 'myself'
 
   it 'should store messages in the right collection', ->
     app = new Backbone.Marionette.Application
