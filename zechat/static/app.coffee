@@ -1,6 +1,10 @@
 zc = window.zc = {}
 
 
+zc.utcnow_iso = ->
+  (new Date()).toJSON()
+
+
 class zc.Peer
 
   constructor: (options) ->
@@ -77,12 +81,15 @@ class zc.Compose extends Backbone.Marionette.Controller
 
   createView: ->
     view = new zc.ComposeView
-    view.on 'send', (message) =>
-      data =
-        text: message
-        time: (new Date()).toJSON()
-      @options.app.commands.execute('send-message', data)
+    view.on('send', _.bind(@send, @))
     return view
+
+  send: (message) ->
+    identity = @options.app.request('identity')
+    data =
+      text: message
+      time: zc.utcnow_iso()
+    @options.app.commands.execute('send-message', data)
 
 
 class zc.Transport extends Backbone.Marionette.Controller
