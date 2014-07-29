@@ -23,14 +23,18 @@ def handle(node, ws, incoming):
     return ws.out
 
 
+def msg(recipient, text):
+    return dict(recipient=recipient, text=text)
+
+
 def test_roundtrip(node):
-    out = handle(node, mock_ws('one'), ['foo', 'bar'])
-    assert out == ['foo', 'bar']
+    out = handle(node, mock_ws('one'), [msg('one', 'foo'), msg('one', 'bar')])
+    assert out == [msg('one', 'foo'), msg('one', 'bar')]
 
 
 def test_peer_receives_messages(node):
     peer_ws = mock_ws('two')
     with node.transport(peer_ws):
-        handle(node, mock_ws('one'), ['foo', 'bar'])
+        handle(node, mock_ws('one'), [msg('two', 'foo'), msg('two', 'bar')])
 
-    assert peer_ws.out == ['foo', 'bar']
+    assert peer_ws.out == [msg('two', 'foo'), msg('two', 'bar')]
