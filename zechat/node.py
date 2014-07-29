@@ -37,8 +37,11 @@ def transport(ws):
     try:
         while True:
             msg = ws.receive()
-            if msg is None:
+            if msg is None:  # disconnect
                 break
+
+            if not msg:  # ping?
+                continue
 
             logger.debug("message: %s", msg)
             for client in client_map.values():
