@@ -73,5 +73,7 @@ class zc.Conversation extends Backbone.Marionette.Controller
 
 
 zc.modules.conversation = ->
-  @app.reqres.setHandler 'create_conversation', =>
-    return new zc.Conversation(app: @app)
+  @app.commands.setHandler 'open-conversation', =>
+    conversation = new zc.Conversation(app: @app)
+    @app.commands.execute('show-main', conversation.layout)
+    conversation.render()

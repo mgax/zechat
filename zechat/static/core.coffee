@@ -66,10 +66,9 @@ zc.modules.core = ->
   @app.commands.setHandler 'send-message', (data) =>
     @transport.send(data)
 
+  @app.commands.setHandler 'show-main', (view) =>
+    @layout.main.show(view)
+
   @app.vent.on 'start', =>
     @layout = new zc.AppLayout(el: @app.request('root_el'))
     @layout.render()
-
-    conversation = @app.request('create_conversation')
-    @layout.main.show(conversation.layout)
-    conversation.render()
