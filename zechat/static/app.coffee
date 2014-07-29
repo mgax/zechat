@@ -96,6 +96,9 @@ zc.initialize = (options) ->
     fingerprint: 'foo'
   app.message_col = new Backbone.Collection
 
+  zc.set_identity = (fingerprint) ->
+    app.identity.set('fingerprint', fingerprint)
+
   app.reqres.setHandler 'identity', -> app.identity
   app.reqres.setHandler 'message_col', -> app.message_col
   app.reqres.setHandler 'urls', -> options.urls
