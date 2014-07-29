@@ -18,6 +18,10 @@ class Node(object):
         finally:
             del self.transport_map[ws.id]
 
+    def relay(self, msg):
+        for client in self.transport_map.values():
+            client.send(msg)
+
 
 class Transport(object):
 
@@ -39,8 +43,7 @@ class Transport(object):
 
     def handle(self):
         for msg in self.messages():
-            for client in self.node.transport_map.values():
-                client.send(msg)
+            self.node.relay(msg)
 
     def send(self, msg):
         self.ws.send(msg)
