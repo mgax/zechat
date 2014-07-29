@@ -75,6 +75,20 @@ class zc.Compose extends Backbone.Marionette.Controller
     @options.app.commands.execute('send-message', data)
 
 
+class zc.Conversation extends Backbone.Marionette.Controller
+
+  initialize: ->
+    @layout = new zc.ConversationLayout
+    @history = new zc.History(app: @options.app)
+    @compose = new zc.Compose(app: @options.app)
+
+  render: ->
+    @layout.render()
+    @layout.history.show(@history.createView())
+    @layout.compose.show(@compose.createView())
+
+
+
 class zc.Transport extends Backbone.Marionette.Controller
 
   initialize: (options) ->
@@ -129,18 +143,15 @@ zc.initialize = (options) ->
   app.commands.setHandler 'send-message', (data) ->
     app.transport.send(data)
 
+  app.module 'conversation', ->
+    @app.reqres.setHandler 'create_conversation', =>
+      return new zc.Conversation(app: @app)
+
   app.layout = new zc.AppLayout
     el: $('body')
 
   app.layout.render()
 
-  app.module 'conversation', ->
-    @layout = new zc.ConversationLayout
-    @layout.render()
-    @app.layout.main.show(@layout)
-
-    @history = new zc.History(app: @app)
-    @layout.history.show(@history.createView())
-
-    @compose = new zc.Compose(app: @app)
-    @layout.compose.show(@compose.createView())
+  conversation = app.request('create_conversation')
+  app.layout.main.show(conversation.layout)
+  conversation.render()
