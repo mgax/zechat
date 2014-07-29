@@ -9,7 +9,8 @@
 <script src="{{cdnjs}}/jasmine/2.0.0/jasmine-html.js"></script>
 <script src="{{cdnjs}}/jasmine/2.0.0/boot.js"></script>
 
+{% include '_js.html' with context %}
+
 <body>
 
-{% assets 'app.js' %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
 {% assets 'testsuite.js' %}<script src="{{ ASSET_URL }}"></script>{% endassets %}

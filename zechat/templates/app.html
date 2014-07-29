@@ -5,21 +5,12 @@
     {{-cdnjs}}/twitter-bootstrap/3.2.0/css/bootstrap.min.css">
 <link rel="stylesheet" href="
     {{-cdnjs}}/twitter-bootstrap/3.2.0/css/bootstrap-theme.min.css">
-
 {% assets 'app.css' -%}
     <link rel="stylesheet" href="{{ ASSET_URL }}">{% endassets %}
 
-<script src="{{cdnjs}}/jquery/2.1.1/jquery.min.js"></script>
-<script src="{{cdnjs}}/d3/3.4.9/d3.min.js"></script>
-<script src="{{cdnjs}}/twitter-bootstrap/3.2.0/js/bootstrap.min.js"></script>
-<script src="{{cdnjs}}/underscore.js/1.6.0/underscore-min.js"></script>
-<script src="{{cdnjs}}/backbone.js/1.1.2/backbone-min.js"></script>
-<script src="
-  {{-cdnjs}}/backbone.marionette/2.0.3/backbone.marionette.min.js"></script>
+{% include '_js.html' with context %}
 
 <title>ZeChat</title>
-
-{% assets 'app.js' %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
 
 <script id="app-layout-html" type="text/template">
   <div class="app-container row">
