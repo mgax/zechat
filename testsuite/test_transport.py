@@ -1,7 +1,7 @@
 from mock import Mock, call
 
 
-def test_transport_roundtrip():
+def test_roundtrip():
     from zechat.node import transport
 
     ws = Mock(id='one')
