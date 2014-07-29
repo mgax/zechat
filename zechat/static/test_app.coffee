@@ -18,11 +18,20 @@ describe 'message sending', ->
       sender: 'myself'
       recipient: 'friend'
 
-  it 'should receive a message', ->
+  it 'should store messages in the right collection', ->
     app = new Backbone.Marionette.Application
-    message_col = new Backbone.Collection
-    app.reqres.setHandler 'message_col', -> message_col
+    message_manager = new zc.MessageManager(app: app)
     receiver = new zc.Receiver(app: app)
-    app.vent.trigger('message', text: 'one')
-    app.vent.trigger('message', text: 'two')
-    expect(message_col.toJSON()).toEqual([{text: 'one'}, {text: 'two'}])
+
+    app.vent.trigger('message', sender: 'a', text: 'one')
+    app.vent.trigger('message', sender: 'b', text: 'two')
+    app.vent.trigger('message', sender: 'b', text: 'three')
+
+    expect(app.request('message_collection', 'a').toJSON()).toEqual([
+      {sender: 'a', text: 'one'}
+    ])
+
+    expect(app.request('message_collection', 'b').toJSON()).toEqual([
+      {sender: 'b', text: 'two'}
+      {sender: 'b', text: 'three'}
+    ])

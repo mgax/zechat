@@ -23,7 +23,7 @@ class zc.History extends Backbone.Marionette.Controller
 
   createView: ->
     return new zc.HistoryView
-      collection: @options.app.request('message_col')
+      collection: @options.collection
 
 
 class zc.ComposeView extends Backbone.Marionette.ItemView
@@ -63,8 +63,9 @@ class zc.Compose extends Backbone.Marionette.Controller
 class zc.Conversation extends Backbone.Marionette.Controller
 
   initialize: ->
+    @collection = @options.app.request('message_collection', @options.peer)
     @layout = new zc.ConversationLayout
-    @history = new zc.History(app: @options.app)
+    @history = new zc.History(app: @options.app, collection: @collection)
     @compose = new zc.Compose(app: @options.app, peer: @options.peer)
 
   render: ->

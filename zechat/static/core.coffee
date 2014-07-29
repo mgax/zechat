@@ -48,15 +48,30 @@ class zc.Receiver extends Backbone.Marionette.Controller
     @options.app.vent.on('message', _.bind(@on_message, @))
 
   on_message: (data) ->
-    message_col = @options.app.request('message_col')
+    message_col = @options.app.request('message_collection', data.sender)
     message_col.add(data)
+
+
+class zc.MessageManager extends Backbone.Marionette.Controller
+
+  initialize: ->
+    @collection_map = {}
+    @options.app.reqres.setHandler('message_collection',
+      _.bind(@get_message_collection, @))
+
+  get_message_collection: (peer) ->
+    unless @collection_map[peer]
+      @collection_map[peer] = new Backbone.Collection
+
+    return @collection_map[peer]
 
 
 zc.modules.core = ->
   @models =
     identity: new Backbone.Model
       fingerprint: 'foo'
-    message_col: new Backbone.Collection
+
+  @message_manager = new zc.MessageManager(app: @app)
 
   @persist_identity = new zc.Persist
     key: 'identity'
@@ -66,7 +81,6 @@ zc.modules.core = ->
     @models.identity.set('fingerprint', fingerprint)
 
   @app.reqres.setHandler 'identity', => @models.identity
-  @app.reqres.setHandler 'message_col', => @models.message_col
 
   @transport = new zc.Transport(app: @app)
   @receiver = new zc.Receiver(app: @app)
