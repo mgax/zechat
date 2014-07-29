@@ -1,6 +1,9 @@
+import logging
 import flask
 from zechat.models import db, Message
 from flask.ext.uwsgi_websocket import GeventWebSocket
+
+logger = logging.getLogger(__name__)
 
 websocket = GeventWebSocket()
 
@@ -33,4 +36,5 @@ def transport(ws):
         if msg is None:
             break
 
+        logger.debug("message: %s", msg)
         ws.send(msg)
