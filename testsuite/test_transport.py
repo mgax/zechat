@@ -8,27 +8,27 @@ def node():
     return Node()
 
 
-def run_transport(node, incoming, client_id='one'):
+def mock_ws(client_id):
     ws = Mock(id=client_id)
+    ws.out = []
+    ws.send.side_effect = ws.out.append
+    return ws
+
+
+def communicate(node, ws, incoming):
     ws.receive.side_effect = incoming + [None]
     node.handle_transport(ws)
-    return [c[0][0] for c in ws.send.call_args_list]
+    return ws.out
 
 
 def test_roundtrip(node):
-    assert run_transport(node, ['foo', 'bar']) == ['foo', 'bar']
+    out = communicate(node, mock_ws('one'), ['foo', 'bar'])
+    assert out == ['foo', 'bar']
 
 
 def test_peer_receives_messages(node):
-    client_map = node.client_map
+    peer_ws = mock_ws('two')
+    with node.register_client(peer_ws):
+        communicate(node, mock_ws('one'), ['foo', 'bar'])
 
-    peer_ws = Mock(id='two')
-    client_map[peer_ws.id] = peer_ws
-    try:
-        run_transport(node, ['foo', 'bar'])
-    finally:
-        del client_map[peer_ws.id]
-
-    peer_out = [c[0][0] for c in peer_ws.send.call_args_list]
-
-    assert peer_out == ['foo', 'bar']
+    assert peer_ws.out == ['foo', 'bar']
