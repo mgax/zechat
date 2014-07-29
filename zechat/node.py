@@ -9,6 +9,8 @@ websocket = GeventWebSocket()
 
 views = flask.Blueprint('node', __name__)
 
+client_map = {}
+
 
 @views.route('/save', methods=['POST'])
 def save():
@@ -31,10 +33,16 @@ def get_messages():
 
 @websocket.route('/ws/transport')
 def transport(ws):
-    while True:
-        msg = ws.receive()
-        if msg is None:
-            break
+    client_map[ws.id] = ws
+    try:
+        while True:
+            msg = ws.receive()
+            if msg is None:
+                break
 
-        logger.debug("message: %s", msg)
-        ws.send(msg)
+            logger.debug("message: %s", msg)
+            for client in client_map.values():
+                client.send(msg)
+
+    finally:
+        del client_map[ws.id]
