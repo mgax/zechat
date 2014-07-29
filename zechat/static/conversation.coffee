@@ -40,7 +40,8 @@ class zc.ComposeView extends Backbone.Marionette.ItemView
       evt.preventDefault()
       message = @ui.message.val()
       @ui.message.val("")
-      this.trigger('send', message)
+      if message
+        this.trigger('send', message)
 
 
 class zc.Compose extends Backbone.Marionette.Controller
