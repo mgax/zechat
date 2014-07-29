@@ -11,3 +11,18 @@ def run_transport(incoming, client_id='one'):
 
 def test_roundtrip():
     assert run_transport(['foo', 'bar']) == ['foo', 'bar']
+
+
+def test_peer_receives_messages():
+    from zechat.node import client_map
+
+    peer_ws = Mock(id='two')
+    client_map[peer_ws.id] = peer_ws
+    try:
+        run_transport(['foo', 'bar'])
+    finally:
+        del client_map[peer_ws.id]
+
+    peer_out = [c[0][0] for c in peer_ws.send.call_args_list]
+
+    assert peer_out == ['foo', 'bar']
