@@ -1,5 +1,6 @@
 import logging
 from contextlib import contextmanager
+from flask import json
 
 logger = logging.getLogger(__name__)
 
@@ -39,14 +40,15 @@ class Transport(object):
                 continue
 
             logger.debug("message: %s", msg)
-            yield msg
+            yield json.loads(msg)
 
     def handle(self):
         for msg in self.messages():
+            assert msg['type'] == 'message'
             self.node.relay(msg)
 
     def send(self, msg):
-        self.ws.send(msg)
+        self.ws.send(json.dumps(msg))
 
 
 def init_app(app):

@@ -24,7 +24,7 @@ def handle(node, ws, incoming):
 
 
 def msg(recipient, text):
-    return dict(recipient=recipient, text=text)
+    return dict(type='message', recipient=recipient, message=dict(text=text))
 
 
 def test_roundtrip(node):
