@@ -28,8 +28,21 @@ class zc.Header extends Backbone.Marionette.Controller
   createView: ->
     view = new zc.HeaderView
     view.on 'click-configure', =>
-      console.log('configure')
+      configure = new zc.Configure
+      @options.app.commands.execute('show-main', configure.createView())
     return view
+
+
+class zc.ConfigureView extends Backbone.Marionette.ItemView
+
+  className: 'configure-container tall'
+  template: '#configure-html'
+
+
+class zc.Configure extends Backbone.Marionette.Controller
+
+  createView: ->
+    return new zc.ConfigureView
 
 
 class zc.Transport extends Backbone.Marionette.Controller
