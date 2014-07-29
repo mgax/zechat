@@ -1,30 +1,34 @@
 import os
 import flask
-from flask.ext.assets import Environment, Bundle
 
-os.environ['COFFEE_NO_BARE'] = 'on'
+def init_app(app):
+    from flask.ext.assets import Environment, Bundle
 
-assets = Environment()
+    os.environ['COFFEE_NO_BARE'] = 'on'
 
-assets.register('app.js', Bundle(
-    'app.coffee',
-    'core.coffee',
-    'conversation.coffee',
-    filters='coffeescript',
-    output='gen/app.js',
-))
+    assets = Environment(app)
 
-assets.register('testsuite.js', Bundle(
-    'test_app.coffee',
-    filters='coffeescript',
-    output='gen/testsuite.js',
-))
+    assets.register('app.js', Bundle(
+        'app.coffee',
+        'core.coffee',
+        'conversation.coffee',
+        filters='coffeescript',
+        output='gen/app.js',
+    ))
 
-assets.register('app.css', Bundle(
-    'app.less',
-    filters='less',
-    output='gen/app.css',
-))
+    assets.register('testsuite.js', Bundle(
+        'test_app.coffee',
+        filters='coffeescript',
+        output='gen/testsuite.js',
+    ))
+
+    assets.register('app.css', Bundle(
+        'app.less',
+        filters='less',
+        output='gen/app.css',
+    ))
+
+    app.register_blueprint(views)
 
 views = flask.Blueprint('common', __name__)
 

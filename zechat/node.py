@@ -1,14 +1,11 @@
 import logging
-from flask.ext.uwsgi_websocket import GeventWebSocket
 
 logger = logging.getLogger(__name__)
 
-websocket = GeventWebSocket()
 
 client_map = {}
 
 
-@websocket.route('/ws/transport')
 def transport(ws):
     client_map[ws.id] = ws
     try:
@@ -26,3 +23,9 @@ def transport(ws):
 
     finally:
         del client_map[ws.id]
+
+
+def init_app(app):
+    from flask.ext.uwsgi_websocket import GeventWebSocket
+    websocket = GeventWebSocket(app)
+    websocket.route('/ws/transport')(transport)

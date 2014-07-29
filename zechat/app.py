@@ -8,16 +8,15 @@ DEFAULTS = {
 
 def create_app():
     from zechat import models
-    from zechat.node import websocket
-    from zechat.common import views as common_views, assets
+    from zechat import node
+    from zechat import common
     app = flask.Flask(__name__)
     app.config.update(DEFAULTS)
     app.config.from_pyfile('../settings.py', silent=False)
     app.jinja_env.globals['cdnjs'] = app.config['CDNJS_URL']
     models.db.init_app(app)
-    assets.init_app(app)
-    websocket.init_app(app)
-    app.register_blueprint(common_views)
+    node.init_app(app)
+    common.init_app(app)
     return app
 
 
