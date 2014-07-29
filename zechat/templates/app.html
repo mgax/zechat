@@ -27,7 +27,13 @@
 </script>
 
 <script id="configure-html" type="text/template">
-  configure
+  <div class="form-group">
+    <label for="configure-fingerprint">Fingerprint</label>
+    <input id="configure-fingerprint" class="form-control"
+           name="fingerprint" value="<%= fingerprint %>">
+  </div>
+
+  <button type="submit" class="btn btn-default">Save</button>
 </script>
 
 <script id="conversation-layout-html" type="text/template">

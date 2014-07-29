@@ -2,6 +2,16 @@ zc.utcnow_iso = ->
   (new Date()).toJSON()
 
 
+zc.serialize_form = (el) ->
+  pairs = $(el).serializeArray()
+  return _.object(_.pluck(pairs, 'name'), _.pluck(pairs, 'value'))
+
+
+class zc.BlankView extends Backbone.Marionette.ItemView
+
+  template: -> ''
+
+
 class zc.AppLayout extends Backbone.Marionette.LayoutView
 
   template: '#app-layout-html'
@@ -28,21 +38,39 @@ class zc.Header extends Backbone.Marionette.Controller
   createView: ->
     view = new zc.HeaderView
     view.on 'click-configure', =>
-      configure = new zc.Configure
+      configure = new zc.Configure(app: @options.app)
       @options.app.commands.execute('show-main', configure.createView())
     return view
 
 
 class zc.ConfigureView extends Backbone.Marionette.ItemView
 
+  tagName: 'form'
   className: 'configure-container tall'
   template: '#configure-html'
+
+  events:
+    'submit': (evt) ->
+      evt.preventDefault()
+      data = zc.serialize_form(@el)
+      @trigger('save', data)
+
+  onShow: ->
+    $input = @$el.find('[name=fingerprint]')
+    $input.focus()
+    $input[0].setSelectionRange(0, $input.val().length)
 
 
 class zc.Configure extends Backbone.Marionette.Controller
 
   createView: ->
-    return new zc.ConfigureView
+    identity = @options.app.request('identity')
+    view = new zc.ConfigureView(model: identity)
+    view.on 'save', (data) =>
+      identity.set('fingerprint', data.fingerprint)
+      @options.app.commands.execute('show-main', new zc.BlankView)
+
+    return view
 
 
 class zc.Transport extends Backbone.Marionette.Controller
@@ -131,3 +159,6 @@ zc.modules.core = ->
 
     @header = new zc.Header(app: @app)
     @layout.header.show(@header.createView())
+
+  @models.identity.on 'change', =>
+    window.location.reload()
