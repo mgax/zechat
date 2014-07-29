@@ -22,7 +22,8 @@ _node = Node()
 
 class Transport(object):
 
-    def __init__(self, ws):
+    def __init__(self, node, ws):
+        self.node = node
         self.ws = ws
 
     def messages(self):
@@ -38,14 +39,14 @@ class Transport(object):
             yield msg
 
     def run(self):
-        with _node.register_client(self.ws):
+        with self.node.register_client(self.ws):
             for msg in self.messages():
-                for client in _node.client_map.values():
+                for client in self.node.client_map.values():
                     client.send(msg)
 
 
 def transport(ws):
-    Transport(ws).run()
+    Transport(_node, ws).run()
 
 
 def init_app(app):
