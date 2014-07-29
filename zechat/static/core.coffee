@@ -22,7 +22,7 @@ class zc.Transport extends Backbone.Marionette.Controller
     @ws.onmessage = _.bind(@on_message, @)
 
   on_message: (evt) ->
-    @trigger('message', JSON.parse(evt.data))
+    @options.app.vent.trigger('message', JSON.parse(evt.data))
 
   send: (data) ->
     @ws.send(JSON.stringify(data))
@@ -42,6 +42,16 @@ class zc.Persist extends Backbone.Marionette.Controller
     localStorage.setItem(@key, JSON.stringify(@model))
 
 
+class zc.Receiver extends Backbone.Marionette.Controller
+
+  initialize: ->
+    @options.app.vent.on('message', _.bind(@on_message, @))
+
+  on_message: (data) ->
+    message_col = @options.app.request('message_col')
+    message_col.add(data)
+
+
 zc.modules.core = ->
   @models =
     identity: new Backbone.Model
@@ -59,9 +69,7 @@ zc.modules.core = ->
   @app.reqres.setHandler 'message_col', => @models.message_col
 
   @transport = new zc.Transport(app: @app)
-
-  @transport.on 'message', (data) =>
-    @models.message_col.add(data)
+  @receiver = new zc.Receiver(app: @app)
 
   @app.commands.setHandler 'send-message', (data) =>
     @transport.send(data)

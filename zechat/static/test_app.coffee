@@ -17,3 +17,12 @@ describe 'message sending', ->
       time: now
       sender: 'myself'
       recipient: 'friend'
+
+  it 'should receive a message', ->
+    app = new Backbone.Marionette.Application
+    message_col = new Backbone.Collection
+    app.reqres.setHandler 'message_col', -> message_col
+    receiver = new zc.Receiver(app: app)
+    app.vent.trigger('message', text: 'one')
+    app.vent.trigger('message', text: 'two')
+    expect(message_col.toJSON()).toEqual([{text: 'one'}, {text: 'two'}])
