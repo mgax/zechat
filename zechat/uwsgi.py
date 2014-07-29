@@ -1,7 +1,12 @@
+import logging
 import os
-from zechat.app import app as application
+from zechat.app import app
+
+application = app.wsgi_app
 
 if os.environ.get('FLASK_DEBUG') == 'on':
     from werkzeug.debug import DebuggedApplication
-    application.debug = True
+    app.debug = True
     application = DebuggedApplication(application, evalex=True)
+
+logging.basicConfig(level=logging.DEBUG if app.debug else logging.INFO)
