@@ -89,12 +89,30 @@ class zc.Transport extends Backbone.Marionette.Controller
     @ws.send(JSON.stringify(data))
 
 
+class zc.Persist extends Backbone.Marionette.Controller
+
+  initialize: ->
+    @key = @options.key
+    @model = @options.model
+    value = localStorage.getItem(@key)
+    if value
+      @model.set(JSON.parse(value))
+    @model.on('change', _.bind(@save, @))
+
+  save: ->
+    localStorage.setItem(@key, JSON.stringify(@model))
+
+
 zc.initialize = (options) ->
   app = zc.app = new Backbone.Marionette.Application
 
   app.identity = new Backbone.Model
     fingerprint: 'foo'
   app.message_col = new Backbone.Collection
+
+  app.persist_identity = new zc.Persist
+    key: 'identity'
+    model: app.identity
 
   zc.set_identity = (fingerprint) ->
     app.identity.set('fingerprint', fingerprint)
