@@ -7,18 +7,16 @@ logger = logging.getLogger(__name__)
 class Node(object):
 
     def __init__(self):
-        self.client_map = {}
+        self.transport_map = {}
 
     @contextmanager
-    def register_client(self, transport):
-        self.client_map[transport.ws.id] = transport
-        try:
-            yield
-        finally:
-            del self.client_map[transport.ws.id]
-
     def transport(self, ws):
-        return Transport(self, ws)
+        transport = Transport(self, ws)
+        self.transport_map[ws.id] = transport
+        try:
+            yield transport
+        finally:
+            del self.transport_map[ws.id]
 
 
 class Transport(object):
@@ -40,10 +38,9 @@ class Transport(object):
             yield msg
 
     def handle(self):
-        with self.node.register_client(self):
-            for msg in self.messages():
-                for client in self.node.client_map.values():
-                    client.send(msg)
+        for msg in self.messages():
+            for client in self.node.transport_map.values():
+                client.send(msg)
 
     def send(self, msg):
         self.ws.send(msg)
@@ -57,4 +54,5 @@ def init_app(app):
 
     @websocket.route('/ws/transport')
     def transport(ws):
-        node.transport(ws).handle()
+        with node.transport(ws) as transprot:
+            transprot.handle()
