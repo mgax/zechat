@@ -10,15 +10,15 @@ class Node(object):
         self.client_map = {}
 
     @contextmanager
-    def register_client(self, ws):
-        self.client_map[ws.id] = ws
+    def register_client(self, transport):
+        self.client_map[transport.ws.id] = transport
         try:
             yield
         finally:
-            del self.client_map[ws.id]
+            del self.client_map[transport.ws.id]
 
-    def handle_transport(self, ws):
-        Transport(self, ws).run()
+    def transport(self, ws):
+        return Transport(self, ws)
 
 
 class Transport(object):
@@ -39,11 +39,14 @@ class Transport(object):
             logger.debug("message: %s", msg)
             yield msg
 
-    def run(self):
-        with self.node.register_client(self.ws):
+    def handle(self):
+        with self.node.register_client(self):
             for msg in self.messages():
                 for client in self.node.client_map.values():
                     client.send(msg)
+
+    def send(self, msg):
+        self.ws.send(msg)
 
 
 def init_app(app):
@@ -54,4 +57,4 @@ def init_app(app):
 
     @websocket.route('/ws/transport')
     def transport(ws):
-        node.handle_transport(ws)
+        node.transport(ws).handle()

@@ -15,20 +15,21 @@ def mock_ws(client_id):
     return ws
 
 
-def communicate(node, ws, incoming):
+def handle(node, ws, incoming):
     ws.receive.side_effect = incoming + [None]
-    node.handle_transport(ws)
+    node.transport(ws).handle()
     return ws.out
 
 
 def test_roundtrip(node):
-    out = communicate(node, mock_ws('one'), ['foo', 'bar'])
+    out = handle(node, mock_ws('one'), ['foo', 'bar'])
     assert out == ['foo', 'bar']
 
 
 def test_peer_receives_messages(node):
+    from zechat.node import Transport
     peer_ws = mock_ws('two')
-    with node.register_client(peer_ws):
-        communicate(node, mock_ws('one'), ['foo', 'bar'])
+    with node.register_client(Transport(node, peer_ws)):
+        handle(node, mock_ws('one'), ['foo', 'bar'])
 
     assert peer_ws.out == ['foo', 'bar']
