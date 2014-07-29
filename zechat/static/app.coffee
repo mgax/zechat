@@ -78,7 +78,10 @@ class zc.Compose extends Backbone.Marionette.Controller
   createView: ->
     view = new zc.ComposeView
     view.on 'send', (message) =>
-      @options.app.commands.execute('send-message', text: message)
+      data =
+        text: message
+        time: (new Date()).toJSON()
+      @options.app.commands.execute('send-message', data)
     return view
 
 

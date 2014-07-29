@@ -12,6 +12,7 @@
     <link rel="stylesheet" href="{{ ASSET_URL }}">{% endassets %}
 
 <script src="{{cdnjs}}/jquery/2.1.1/jquery.min.js"></script>
+<script src="{{cdnjs}}/d3/3.4.9/d3.min.js"></script>
 <script src="{{cdnjs}}/twitter-bootstrap/3.2.0/js/bootstrap.min.js"></script>
 <script src="{{cdnjs}}/underscore.js/1.6.0/underscore-min.js"></script>
 <script src="{{cdnjs}}/backbone.js/1.1.2/backbone-min.js"></script>
@@ -35,7 +36,10 @@
 </script>
 
 <script id="message-html" type="text/template">
-  <%= text %>
+  <div class="message-time"><%=
+    d3.time.format('%b-%-d %H:%M')(d3.time.format.iso.parse(time))
+    %></div>
+  <div class="message-text"><%= text %></div>
 </script>
 
 <script id="compose-html" type="text/template">
