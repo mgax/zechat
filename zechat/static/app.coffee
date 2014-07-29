@@ -71,6 +71,7 @@ class zc.Compose extends Backbone.Marionette.Controller
     data =
       text: message
       time: zc.utcnow_iso()
+      sender: identity.get('fingerprint')
     @options.app.commands.execute('send-message', data)
 
 
@@ -91,8 +92,11 @@ class zc.Transport extends Backbone.Marionette.Controller
 zc.initialize = (options) ->
   app = zc.app = new Backbone.Marionette.Application
 
+  app.identity = new Backbone.Model
+    fingerprint: 'foo'
   app.message_col = new Backbone.Collection
 
+  app.reqres.setHandler 'identity', -> app.identity
   app.reqres.setHandler 'message_col', -> app.message_col
   app.reqres.setHandler 'urls', -> options.urls
 
