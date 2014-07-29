@@ -20,8 +20,6 @@ class Node(object):
     def handle_transport(self, ws):
         Transport(self, ws).run()
 
-_node = Node()
-
 
 class Transport(object):
 
@@ -48,11 +46,12 @@ class Transport(object):
                     client.send(msg)
 
 
-def transport(ws, node=_node):
-    node.handle_transport(ws)
-
-
 def init_app(app):
     from flask.ext.uwsgi_websocket import GeventWebSocket
     websocket = GeventWebSocket(app)
-    websocket.route('/ws/transport')(transport)
+
+    node = Node()
+
+    @websocket.route('/ws/transport')
+    def transport(ws):
+        node.handle_transport(ws)
