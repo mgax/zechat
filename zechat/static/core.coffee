@@ -77,12 +77,21 @@ class zc.Configure extends Backbone.Marionette.Controller
 class zc.Transport extends Backbone.Marionette.Controller
 
   initialize: (options) ->
+    @queue = []
     @options.app.vent.on('start', _.bind(@connect, @))
 
   connect: ->
     transport_url = @options.app.request('urls')['transport']
     @ws = new WebSocket(transport_url)
     @ws.onmessage = _.bind(@on_receive, @)
+    @ws.onopen = _.bind(@on_open, @)
+    @send(authenticate: @options.app.request('identity').get('fingerprint'))
+
+  on_open: ->
+    current_queue = @queue
+    @queue = []
+    current_queue.forEach (msg) =>
+      @send(msg)
 
   on_receive: (evt) ->
     msg = JSON.parse(evt.data)
@@ -91,8 +100,11 @@ class zc.Transport extends Backbone.Marionette.Controller
     if msg.type == 'message' and msg.recipient == my_fingerprint
       @options.app.vent.trigger('message', msg.message)
 
-  send: (data) ->
-    @ws.send(JSON.stringify(data))
+  send: (msg) ->
+    if @ws.readyState == WebSocket.OPEN
+      @ws.send(JSON.stringify(msg))
+    else
+      @queue.push(msg)
 
 
 class zc.Persist extends Backbone.Marionette.Controller
