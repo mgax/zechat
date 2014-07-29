@@ -7,8 +7,29 @@ class zc.AppLayout extends Backbone.Marionette.LayoutView
   template: '#app-layout-html'
 
   regions:
+    header: '.app-header'
     contacts: '.app-contacts'
     main: '.app-main'
+
+
+class zc.HeaderView extends Backbone.Marionette.ItemView
+
+  className: 'header-container tall'
+  template: '#header-html'
+
+  events:
+    'click .header-btn-configure': (evt) ->
+      evt.preventDefault()
+      @trigger('click-configure')
+
+
+class zc.Header extends Backbone.Marionette.Controller
+
+  createView: ->
+    view = new zc.HeaderView
+    view.on 'click-configure', =>
+      console.log('configure')
+    return view
 
 
 class zc.Transport extends Backbone.Marionette.Controller
@@ -94,3 +115,6 @@ zc.modules.core = ->
   @app.vent.on 'start', =>
     @layout = new zc.AppLayout(el: @app.request('root_el'))
     @layout.render()
+
+    @header = new zc.Header(app: @app)
+    @layout.header.show(@header.createView())

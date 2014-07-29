@@ -14,9 +14,16 @@
 
 <script id="app-layout-html" type="text/template">
   <div class="row tall">
-    <div class="col-xs-4 tall app-contacts"></div>
+    <div class="col-xs-4 tall">
+      <div class="app-header"></div>
+      <div class="app-contacts"></div>
+    </div>
     <div class="col-xs-8 tall app-main"></div>
   </div>
+</script>
+
+<script id="header-html" type="text/template">
+  <a class="btn btn-default btn-xs header-btn-configure">configure</a>
 </script>
 
 <script id="conversation-layout-html" type="text/template">
