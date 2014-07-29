@@ -17,6 +17,9 @@ class Node(object):
         finally:
             del self.client_map[ws.id]
 
+    def handle_transport(self, ws):
+        Transport(self, ws).run()
+
 _node = Node()
 
 
@@ -45,8 +48,8 @@ class Transport(object):
                     client.send(msg)
 
 
-def transport(ws):
-    Transport(_node, ws).run()
+def transport(ws, node=_node):
+    node.handle_transport(ws)
 
 
 def init_app(app):

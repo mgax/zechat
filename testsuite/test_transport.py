@@ -1,26 +1,31 @@
+import pytest
 from mock import Mock, call
 
 
-def run_transport(incoming, client_id='one'):
-    from zechat.node import transport
+@pytest.fixture
+def node():
+    from zechat.node import Node
+    return Node()
+
+
+def run_transport(node, incoming, client_id='one'):
     ws = Mock(id=client_id)
     ws.receive.side_effect = incoming + [None]
-    transport(ws)
+    node.handle_transport(ws)
     return [c[0][0] for c in ws.send.call_args_list]
 
 
-def test_roundtrip():
-    assert run_transport(['foo', 'bar']) == ['foo', 'bar']
+def test_roundtrip(node):
+    assert run_transport(node, ['foo', 'bar']) == ['foo', 'bar']
 
 
-def test_peer_receives_messages():
-    from zechat.node import _node
-    client_map = _node.client_map
+def test_peer_receives_messages(node):
+    client_map = node.client_map
 
     peer_ws = Mock(id='two')
     client_map[peer_ws.id] = peer_ws
     try:
-        run_transport(['foo', 'bar'])
+        run_transport(node, ['foo', 'bar'])
     finally:
         del client_map[peer_ws.id]
 
