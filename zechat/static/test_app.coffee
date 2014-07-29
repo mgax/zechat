@@ -8,7 +8,7 @@ describe 'message sending', ->
     app.reqres.setHandler 'identity', -> identity
     send_message = jasmine.createSpy('send_message')
     app.commands.setHandler('send-message', send_message)
-    compose = new zc.Compose(app: app)
+    compose = new zc.Compose(app: app, peer: 'friend')
 
     compose.send('hello world')
 
@@ -16,3 +16,4 @@ describe 'message sending', ->
       text: 'hello world'
       time: now
       sender: 'myself'
+      recipient: 'friend'

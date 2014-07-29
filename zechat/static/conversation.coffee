@@ -56,6 +56,7 @@ class zc.Compose extends Backbone.Marionette.Controller
       text: message
       time: zc.utcnow_iso()
       sender: identity.get('fingerprint')
+      recipient: @options.peer
     @options.app.commands.execute('send-message', data)
 
 
@@ -64,7 +65,7 @@ class zc.Conversation extends Backbone.Marionette.Controller
   initialize: ->
     @layout = new zc.ConversationLayout
     @history = new zc.History(app: @options.app)
-    @compose = new zc.Compose(app: @options.app)
+    @compose = new zc.Compose(app: @options.app, peer: @options.peer)
 
   render: ->
     @layout.render()
@@ -73,7 +74,7 @@ class zc.Conversation extends Backbone.Marionette.Controller
 
 
 zc.modules.conversation = ->
-  @app.commands.setHandler 'open-conversation', =>
-    conversation = new zc.Conversation(app: @app)
+  @app.commands.setHandler 'open-conversation', (peer) =>
+    conversation = new zc.Conversation(app: @app, peer: peer)
     @app.commands.execute('show-main', conversation.layout)
     conversation.render()
