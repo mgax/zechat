@@ -36,7 +36,8 @@ class zc.HeaderView extends Backbone.Marionette.ItemView
 class zc.Header extends Backbone.Marionette.Controller
 
   createView: ->
-    view = new zc.HeaderView
+    identity = @options.app.request('identity')
+    view = new zc.HeaderView(model: identity)
     view.on 'click-configure', =>
       configure = new zc.Configure(app: @options.app)
       @options.app.commands.execute('show-main', configure.createView())
