@@ -16,25 +16,24 @@ def mock_ws(client_id):
     return ws
 
 
-def handle(node, ws, incoming):
-    ws.receive.side_effect = [json.dumps(i) for i in incoming] + [None]
-    with node.transport(ws) as transport:
-        transport.handle()
-    return ws.out
-
-
 def msg(recipient, text):
     return dict(type='message', recipient=recipient, message=dict(text=text))
 
 
-def test_roundtrip(node):
-    out = handle(node, mock_ws('A'), [msg('A', 'foo'), msg('A', 'bar')])
-    assert out == [msg('A', 'foo'), msg('A', 'bar')]
+def test_handle(node):
+    ws = mock_ws('A')
+    incoming = [msg('A', 'foo'), msg('A', 'bar')]
+    ws.receive.side_effect = [json.dumps(i) for i in incoming] + [None]
+    with node.transport(ws) as transport:
+        transport.handle()
+    assert ws.out == [msg('A', 'foo'), msg('A', 'bar')]
 
 
 def test_peer_receives_messages(node):
     peer = mock_ws('B')
     with node.transport(peer):
-        handle(node, mock_ws('A'), [msg('B', 'foo'), msg('B', 'bar')])
+        with node.transport(mock_ws('A')) as sender_transport:
+            sender_transport.message(msg('B', 'foo'))
+            sender_transport.message(msg('B', 'bar'))
 
     assert peer.out == [msg('B', 'foo'), msg('B', 'bar')]
