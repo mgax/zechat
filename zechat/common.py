@@ -8,6 +8,7 @@ assets = Environment()
 
 assets.register('app.js', Bundle(
     'app.coffee',
+    'core.coffee',
     'conversation.coffee',
     filters='coffeescript',
     output='gen/app.js',
