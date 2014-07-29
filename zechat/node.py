@@ -44,8 +44,11 @@ class Transport(object):
 
     def handle(self):
         for msg in self.messages():
-            assert msg['type'] == 'message'
-            self.node.relay(msg)
+            self.message(msg)
+
+    def message(self, msg):
+        assert msg['type'] == 'message'
+        self.node.relay(msg)
 
     def send(self, msg):
         self.ws.send(json.dumps(msg))
