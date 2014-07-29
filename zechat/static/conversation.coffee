@@ -1,6 +1,6 @@
 class zc.ConversationLayout extends Backbone.Marionette.LayoutView
 
-  className: 'conversation-container'
+  className: 'conversation-container tall'
 
   template: '#conversation-layout-html'
 
