@@ -33,8 +33,8 @@ def test_roundtrip(node):
 
 
 def test_peer_receives_messages(node):
-    peer_ws = mock_ws('two')
-    with node.transport(peer_ws):
+    peer = mock_ws('two')
+    with node.transport(peer):
         handle(node, mock_ws('one'), [msg('two', 'foo'), msg('two', 'bar')])
 
-    assert peer_ws.out == [msg('two', 'foo'), msg('two', 'bar')]
+    assert peer.out == [msg('two', 'foo'), msg('two', 'bar')]
