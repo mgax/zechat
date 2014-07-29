@@ -1,4 +1,5 @@
 import pytest
+from mock import Mock, call
 import flask
 
 
@@ -51,3 +52,14 @@ def test_fetch_messages_for_identity(app):
             {'text': 'baz', 'recipient': 'one'},
         ]
     }
+
+
+def test_transport_roundtrip():
+    from zechat.node import transport
+
+    ws = Mock(id='one')
+    ws.receive.side_effect = ['foo', 'bar', None]
+
+    transport(ws)
+
+    assert ws.send.call_args_list == [call('foo'), call('bar')]
