@@ -3,16 +3,21 @@ from contextlib import contextmanager
 
 logger = logging.getLogger(__name__)
 
-client_map = {}
 
+class Node(object):
 
-@contextmanager
-def register_client(ws):
-    client_map[ws.id] = ws
-    try:
-        yield
-    finally:
-        del client_map[ws.id]
+    def __init__(self):
+        self.client_map = {}
+
+    @contextmanager
+    def register_client(self, ws):
+        self.client_map[ws.id] = ws
+        try:
+            yield
+        finally:
+            del self.client_map[ws.id]
+
+_node = Node()
 
 
 class Transport(object):
@@ -33,9 +38,9 @@ class Transport(object):
             yield msg
 
     def run(self):
-        with register_client(self.ws):
+        with _node.register_client(self.ws):
             for msg in self.messages():
-                for client in client_map.values():
+                for client in _node.client_map.values():
                     client.send(msg)
 
 

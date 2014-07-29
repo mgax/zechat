@@ -14,7 +14,8 @@ def test_roundtrip():
 
 
 def test_peer_receives_messages():
-    from zechat.node import client_map
+    from zechat.node import _node
+    client_map = _node.client_map
 
     peer_ws = Mock(id='two')
     client_map[peer_ws.id] = peer_ws
