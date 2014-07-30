@@ -1,8 +1,23 @@
 import logging
 from contextlib import contextmanager
+from base64 import b64encode, b64decode
 from flask import json
+from Crypto.PublicKey import RSA
+from Crypto.Cipher import PKCS1_OAEP
 
 logger = logging.getLogger(__name__)
+
+
+class Crypto(object):
+
+    def __init__(self, key):
+        self.key = RSA.importKey(key)
+
+    def encrypt(self, data):
+        return b64encode(PKCS1_OAEP.new(self.key).encrypt(data))
+
+    def decrypt(self, data_b64):
+        return PKCS1_OAEP.new(self.key).decrypt(b64decode(data_b64))
 
 
 class Node(object):
