@@ -79,6 +79,7 @@ class zc.Transport extends Backbone.Marionette.Controller
   initialize: (options) ->
     @queue = []
     @options.app.vent.on('start', _.bind(@connect, @))
+    @options.app.commands.setHandler 'send-packet', _.bind(@send, @)
 
   connect: ->
     transport_url = @options.app.request('urls')['transport']
@@ -166,9 +167,6 @@ zc.modules.core = ->
 
   @transport = new zc.Transport(app: @app)
   @receiver = new zc.Receiver(app: @app)
-
-  @app.commands.setHandler 'send-packet', (data) =>
-    @transport.send(data)
 
   @app.commands.setHandler 'show-main', (view) =>
     @layout.main.show(view)
