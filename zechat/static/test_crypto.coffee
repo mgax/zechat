@@ -33,20 +33,16 @@ describe 'crypto', ->
 
     data = 'foo'
 
-    Crypt.make PRIVATE_KEY, (err, signer) ->
-        signer.sign data, (err, signed) ->
-            Crypt.make PUBLIC_KEY, (err, verifier) ->
-                verifier.verify signed, (err, verified) ->
-                    expect(verified).toEqual(data)
-                    done()
+    new zc.Crypto(PRIVATE_KEY).sign 'foo', (signature) ->
+      new zc.Crypto(PUBLIC_KEY).verify 'foo', signature, (ok) ->
+        expect(ok).toEqual(true)
+        done()
 
   it 'should encrypt and decrypt', (done) ->
 
     data = 'foo'
 
-    Crypt.make PUBLIC_KEY, (err, encrypter) ->
-        encrypter.encrypt data, (err, encrypted) ->
-            Crypt.make PRIVATE_KEY, (err, decrypter) ->
-                decrypter.decrypt encrypted, (err, decrypted) ->
-                    expect(decrypted).toEqual(data)
-                    done()
+    new zc.Crypto(PUBLIC_KEY).encrypt 'foo', (encrypted) ->
+      new zc.Crypto(PRIVATE_KEY).decrypt encrypted, (out) ->
+        expect(out).toEqual(data)
+        done()

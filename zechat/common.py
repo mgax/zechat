@@ -11,6 +11,7 @@ def init_app(app):
     assets.register('app.js', Bundle(
         'app.coffee',
         'core.coffee',
+        'crypto.coffee',
         'conversation.coffee',
         filters='coffeescript',
         output='gen/app.js',
