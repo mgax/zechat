@@ -19,10 +19,10 @@ class Node(object):
         finally:
             del self.transport_map[ws.id]
 
-    def relay(self, msg, recipient):
+    def relay(self, pkt, recipient):
         for client in self.transport_map.values():
             if recipient in client.identities:
-                client.send(msg)
+                client.send(pkt)
 
 
 class Transport(object):
@@ -32,34 +32,35 @@ class Transport(object):
         self.ws = ws
         self.identities = set()
 
-    def messages(self):
+    def iter_packets(self):
         while True:
-            msg = self.ws.receive()
-            if msg is None:  # disconnect
+            data = self.ws.receive()
+            if data is None:  # disconnect
                 break
 
-            if not msg:  # ping?
+            if not data:  # ping?
                 continue
 
-            logger.debug("message: %s", msg)
-            yield json.loads(msg)
+            pkt = json.loads(data)
+            logger.debug("packet: %r", pkt)
+            yield pkt
 
     def handle(self):
-        for msg in self.messages():
-            self.message(msg)
+        for pkt in self.iter_packets():
+            self.packet(pkt)
 
-    def message(self, msg):
-        if msg['type'] == 'authenticate':
-            self.identities.add(msg['identity'])
+    def packet(self, pkt):
+        if pkt['type'] == 'authenticate':
+            self.identities.add(pkt['identity'])
 
-        elif msg['type'] == 'message':
-            self.node.relay(msg, msg['recipient'])
+        elif pkt['type'] == 'message':
+            self.node.relay(pkt, pkt['recipient'])
 
         else:
-            raise RuntimeError("Unknown message type %r" % msg['type'])
+            raise RuntimeError("Unknown packet type %r" % pkt['type'])
 
-    def send(self, msg):
-        self.ws.send(json.dumps(msg))
+    def send(self, pkt):
+        self.ws.send(json.dumps(pkt))
 
 
 def init_app(app):
