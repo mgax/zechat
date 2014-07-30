@@ -34,6 +34,13 @@ HjVC9WFWgszQSzs/l/7/z7ZonucLz/fp1WmijT59kDY=
 """
 
 
+SIGNATURE = """\
+idOKmo9dRD6UyNWt1PD0Q0t6/CoSimbDZ0AeDU2ZOL9n781z9RQjiJgZiXjN4LD+
+vP+cp6+cvb/oFJz6Qd3jNGYxfjdqtMGwEm//TejZcS/Qt91O3yt4NoQi2EF7uvXL
+lhvY8830XYlCQ7ocH0xeWunlh6tbdBKF50M5/ZgZ1q4=
+"""
+
+
 def crypto(key):
     from zechat.node import Crypto
     return Crypto(key)
@@ -47,3 +54,17 @@ def test_encrypt():
     sender = crypto(PUBLIC_KEY)
     recipient = crypto(PRIVATE_KEY)
     assert recipient.decrypt(sender.encrypt('foo')) == 'foo'
+
+
+def test_verify():
+    assert crypto(PRIVATE_KEY).verify('foo', SIGNATURE)
+
+
+def test_sign():
+    signature = crypto(PRIVATE_KEY).sign('foo')
+    assert crypto(PUBLIC_KEY).verify('foo', signature)
+
+
+def test_verify_invalid_signature():
+    bad_signature = crypto(PRIVATE_KEY).sign('other message')
+    assert not crypto(PUBLIC_KEY).verify('foo', bad_signature)

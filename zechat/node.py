@@ -4,6 +4,8 @@ from base64 import b64encode, b64decode
 from flask import json
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
+from Crypto.Hash import SHA256
+from Crypto.Signature import PKCS1_PSS
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +20,13 @@ class Crypto(object):
 
     def decrypt(self, data_b64):
         return PKCS1_OAEP.new(self.key).decrypt(b64decode(data_b64))
+
+    def sign(self, data):
+        return b64encode(PKCS1_PSS.new(self.key).sign(SHA256.new(data)))
+
+    def verify(self, data, signature_b64):
+        signature = b64decode(signature_b64)
+        return PKCS1_PSS.new(self.key).verify(SHA256.new(data), signature)
 
 
 class Node(object):
