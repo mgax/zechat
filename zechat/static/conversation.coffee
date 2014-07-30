@@ -60,7 +60,7 @@ class zc.Compose extends Backbone.Marionette.Controller
         text: message
         time: zc.utcnow_iso()
         sender: identity.get('fingerprint')
-    @options.app.commands.execute('send-message', data)
+    @options.app.commands.execute('send-packet', data)
 
 
 class zc.Conversation extends Backbone.Marionette.Controller

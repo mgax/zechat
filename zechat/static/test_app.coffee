@@ -1,18 +1,18 @@
-describe 'message sending', ->
+describe 'packet sending', ->
 
-  it 'should send the message', ->
+  it 'should send the packet', ->
     now = zc.utcnow_iso()
     spyOn(zc, 'utcnow_iso').and.returnValue(now)
     app = new Backbone.Marionette.Application
     identity = new Backbone.Model(fingerprint: 'myself')
     app.reqres.setHandler 'identity', -> identity
-    send_message = jasmine.createSpy('send_message')
-    app.commands.setHandler('send-message', send_message)
+    send_packet = jasmine.createSpy('send_packet')
+    app.commands.setHandler('send-packet', send_packet)
     compose = new zc.Compose(app: app, peer: 'friend')
 
     compose.send('hello world')
 
-    expect(send_message).toHaveBeenCalledWith
+    expect(send_packet).toHaveBeenCalledWith
       type: 'message'
       recipient: 'friend'
       message:

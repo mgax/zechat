@@ -167,7 +167,7 @@ zc.modules.core = ->
   @transport = new zc.Transport(app: @app)
   @receiver = new zc.Receiver(app: @app)
 
-  @app.commands.setHandler 'send-message', (data) =>
+  @app.commands.setHandler 'send-packet', (data) =>
     @transport.send(data)
 
   @app.commands.setHandler 'show-main', (view) =>
