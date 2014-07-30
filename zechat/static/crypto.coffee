@@ -4,7 +4,7 @@ class zc.Crypto
     @key = key
 
   create_crypt: (callback) ->
-    Crypt.make @key, (_, crypt) ->
+    Crypt.make @key, json: false, (_, crypt) ->
       callback(crypt)
 
   sign: (data, callback) ->
@@ -14,7 +14,11 @@ class zc.Crypto
 
   verify: (data, signature, callback) ->
     @create_crypt (crypt) ->
-      crypt.verify signature_pack, (_, verified) ->
+      options =
+        data: window.btoa(data)
+        signature: signature
+        version: 1
+      crypt.verify options, (_, verified) ->
         callback(verified == data)
 
   encrypt: (data, callback) ->

@@ -29,6 +29,13 @@ describe 'crypto', ->
     -----END PUBLIC KEY-----
     """
 
+  SIGNATURE =
+    """
+    idOKmo9dRD6UyNWt1PD0Q0t6/CoSimbDZ0AeDU2ZOL9n781z9RQjiJgZiXjN4LD+
+    vP+cp6+cvb/oFJz6Qd3jNGYxfjdqtMGwEm//TejZcS/Qt91O3yt4NoQi2EF7uvXL
+    lhvY8830XYlCQ7ocH0xeWunlh6tbdBKF50M5/ZgZ1q4=
+    """
+
   it 'should sign and verify signature', (done) ->
 
     data = 'foo'
@@ -37,6 +44,11 @@ describe 'crypto', ->
       new zc.Crypto(PUBLIC_KEY).verify 'foo', signature, (ok) ->
         expect(ok).toEqual(true)
         done()
+
+  it 'should verify this particular signature', (done) ->
+    new zc.Crypto(PUBLIC_KEY).verify 'foo', SIGNATURE, (ok) ->
+      expect(ok).toEqual(true)
+      done()
 
   it 'should encrypt and decrypt', (done) ->
 
