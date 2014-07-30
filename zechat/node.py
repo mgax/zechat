@@ -15,18 +15,24 @@ class Crypto(object):
     def __init__(self, key):
         self.key = RSA.importKey(key)
 
+    def _cipher(self):
+        return PKCS1_OAEP.new(self.key)
+
+    def _signer(self):
+        return PKCS1_PSS.new(self.key)
+
     def encrypt(self, data):
-        return b64encode(PKCS1_OAEP.new(self.key).encrypt(data))
+        return b64encode(self._cipher().encrypt(data))
 
     def decrypt(self, data_b64):
-        return PKCS1_OAEP.new(self.key).decrypt(b64decode(data_b64))
+        return self._cipher().decrypt(b64decode(data_b64))
 
     def sign(self, data):
-        return b64encode(PKCS1_PSS.new(self.key).sign(SHA256.new(data)))
+        return b64encode(self._signer().sign(SHA256.new(data)))
 
     def verify(self, data, signature_b64):
         signature = b64decode(signature_b64)
-        return PKCS1_PSS.new(self.key).verify(SHA256.new(data), signature)
+        return self._signer().verify(SHA256.new(data), signature)
 
 
 class Node(object):
