@@ -7,6 +7,14 @@ class zc.Crypto
     Crypt.make @key, json: false, (_, crypt) ->
       callback(crypt)
 
+  create_rsa: ->
+    rv = new RSAKey()
+    if @key.indexOf('BEGIN RSA PRIVATE KEY') > -1
+      rv.readPrivateKeyFromPEMString(@key)
+    else
+      rv.readPublicKeyFromPEMString(@key)
+    return rv
+
   sign: (data, callback) ->
     @create_crypt (crypt) ->
       crypt.sign data, (_, signed) ->
@@ -22,13 +30,9 @@ class zc.Crypto
         callback(verified == data)
 
   encrypt: (data, callback) ->
-    priv_key = new RSAKey()
-    priv_key.readPublicKeyFromPEMString(@key)
-    decrypted = priv_key.encryptOAEP(data)
+    decrypted = @create_rsa().encryptOAEP(data)
     callback(hex2b64(decrypted))
 
   decrypt: (data, callback) ->
-    priv_key = new RSAKey()
-    priv_key.readPrivateKeyFromPEMString(@key)
-    decrypted = priv_key.decryptOAEP(b64tohex(data))
+    decrypted = @create_rsa().decryptOAEP(b64tohex(data))
     callback(decrypted)
