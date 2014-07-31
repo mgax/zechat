@@ -1,3 +1,28 @@
+zc.format_pem = (key, title) ->
+  rv = "-----BEGIN " + title + "-----\n"
+  while key
+    rv += key.slice(0, 64) + "\n"
+    key = key.slice(64)
+  rv += "-----END " + title + "-----\n"
+
+  return rv
+
+
+zc.generate_key = (size) ->
+  size = 1024 unless size
+  k = new RSAKey()
+  k.generate(size, '10001')
+  key = k.privateKeyToPkcs1PemString()
+  return zc.format_pem(key, "RSA PRIVATE KEY")
+
+
+zc.get_public_key = (private_key) ->
+  key = new RSAKey()
+  key.readPrivateKeyFromPEMString(private_key)
+  public_key = key.publicKeyToX509PemString()
+  return zc.format_pem(public_key, "PUBLIC KEY")
+
+
 class zc.Crypto
 
   constructor: (key) ->

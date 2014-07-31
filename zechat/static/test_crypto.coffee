@@ -80,3 +80,16 @@ describe 'crypto', ->
     new zc.Crypto(PRIVATE_KEY).decrypt 'garbage message', (out) ->
       expect(out).toEqual(null)
       done()
+
+  it 'should generate a usable key', (done) ->
+    private_key = zc.generate_key()
+    public_key = zc.get_public_key(private_key)
+
+    new zc.Crypto(private_key).sign 'foo', (signature) ->
+      new zc.Crypto(public_key).verify 'foo', signature, (ok) ->
+        expect(ok).toEqual(true)
+
+        new zc.Crypto(public_key).encrypt 'foo', (encrypted) ->
+          new zc.Crypto(private_key).decrypt encrypted, (out) ->
+            expect(out).toEqual('foo')
+            done()
