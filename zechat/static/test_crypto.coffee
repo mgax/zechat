@@ -75,3 +75,8 @@ describe 'crypto', ->
     new zc.Crypto(PRIVATE_KEY).decrypt ENCRYPTED, (out) ->
       expect(out).toEqual('foo')
       done()
+
+  it 'should return null for malformed message', (done) ->
+    new zc.Crypto(PRIVATE_KEY).decrypt 'garbage message', (out) ->
+      expect(out).toEqual(null)
+      done()

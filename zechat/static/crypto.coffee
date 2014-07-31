@@ -34,5 +34,10 @@ class zc.Crypto
     callback(hex2b64(decrypted))
 
   decrypt: (data, callback) ->
-    decrypted = @create_rsa().decryptOAEP(b64tohex(data))
+    try
+      decrypted = @create_rsa().decryptOAEP(b64tohex(data))
+    catch e
+      if e == "Hash mismatch"
+        return callback(null)
+      throw e
     callback(decrypted)
