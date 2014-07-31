@@ -8,12 +8,11 @@ zc.format_pem = (key, title) ->
   return rv
 
 
-zc.generate_key = (size) ->
-  size = 1024 unless size
+zc.generate_key = (size, callback) ->
   k = new RSAKey()
   k.generate(size, '10001')
   key = k.privateKeyToPkcs1PemString()
-  return zc.format_pem(key, "RSA PRIVATE KEY")
+  _.defer(callback, zc.format_pem(key, "RSA PRIVATE KEY"))
 
 
 zc.get_public_key = (private_key) ->

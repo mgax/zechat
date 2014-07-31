@@ -82,21 +82,22 @@ describe 'crypto', ->
       done()
 
   it 'should return null for message encrypted with other key', (done) ->
-    other_key = zc.get_public_key(zc.generate_key())
-    new zc.Crypto(other_key).encrypt 'foo', (encrypted) ->
-      new zc.Crypto(PRIVATE_KEY).decrypt encrypted, (out) ->
-        expect(out).toEqual(null)
-        done()
+    zc.generate_key 1024, (other_key) ->
+      other_public_key = zc.get_public_key(other_key)
+      new zc.Crypto(other_public_key).encrypt 'foo', (encrypted) ->
+        new zc.Crypto(PRIVATE_KEY).decrypt encrypted, (out) ->
+          expect(out).toEqual(null)
+          done()
 
   it 'should generate a usable key', (done) ->
-    private_key = zc.generate_key()
-    public_key = zc.get_public_key(private_key)
+    zc.generate_key 1024, (private_key) ->
+      public_key = zc.get_public_key(private_key)
 
-    new zc.Crypto(private_key).sign 'foo', (signature) ->
-      new zc.Crypto(public_key).verify 'foo', signature, (ok) ->
-        expect(ok).toEqual(true)
+      new zc.Crypto(private_key).sign 'foo', (signature) ->
+        new zc.Crypto(public_key).verify 'foo', signature, (ok) ->
+          expect(ok).toEqual(true)
 
-        new zc.Crypto(public_key).encrypt 'foo', (encrypted) ->
-          new zc.Crypto(private_key).decrypt encrypted, (out) ->
-            expect(out).toEqual('foo')
-            done()
+          new zc.Crypto(public_key).encrypt 'foo', (encrypted) ->
+            new zc.Crypto(private_key).decrypt encrypted, (out) ->
+              expect(out).toEqual('foo')
+              done()
