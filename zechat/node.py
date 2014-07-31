@@ -1,6 +1,7 @@
 import logging
 from contextlib import contextmanager
 from base64 import b64encode, b64decode
+import hashlib
 from flask import json
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
@@ -33,6 +34,10 @@ class Crypto(object):
     def verify(self, data, signature_b64):
         signature = b64decode(signature_b64)
         return self._signer().verify(SHA256.new(data), signature)
+
+    def fingerprint(self):
+        data = self.key.publickey().exportKey('DER')
+        return hashlib.sha1(data).hexdigest()[:32]
 
 
 class Node(object):

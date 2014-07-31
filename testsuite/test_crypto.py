@@ -68,3 +68,9 @@ def test_sign():
 def test_verify_invalid_signature():
     bad_signature = crypto(PRIVATE_KEY).sign('other message')
     assert not crypto(PUBLIC_KEY).verify('foo', bad_signature)
+
+
+def test_fingerprint():
+    fingerprint = 'afab363f857ad4cd8789c8bbb3941ae2'
+    assert crypto(PUBLIC_KEY).fingerprint() == fingerprint
+    assert crypto(PRIVATE_KEY).fingerprint() == fingerprint
