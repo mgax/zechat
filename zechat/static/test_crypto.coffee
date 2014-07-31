@@ -29,6 +29,13 @@ describe 'crypto', ->
     -----END PUBLIC KEY-----
     """
 
+  ENCRYPTED =
+    """
+    UWTjYts0rx3JuglN9DwgzJAcbDh1J36tqegPj8Rhyr5exfFwlhE+/WKEjhOlg+dK
+    P4iJjLybJ8SSFH8FUQIjsA0DU/VuCBn9jdyhlw8JX3kE5jSpp4O3Es+ByoLd/AwF
+    HjVC9WFWgszQSzs/l/7/z7ZonucLz/fp1WmijT59kDY=
+    """
+
   SIGNATURE =
     """
     idOKmo9dRD6UyNWt1PD0Q0t6/CoSimbDZ0AeDU2ZOL9n781z9RQjiJgZiXjN4LD+
@@ -58,3 +65,8 @@ describe 'crypto', ->
       new zc.Crypto(PRIVATE_KEY).decrypt encrypted, (out) ->
         expect(out).toEqual(data)
         done()
+
+  it 'should decrypt this particular message', (done) ->
+    new zc.Crypto(PRIVATE_KEY).decrypt ENCRYPTED, (out) ->
+      expect(out).toEqual('foo')
+      done()

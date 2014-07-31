@@ -22,11 +22,13 @@ class zc.Crypto
         callback(verified == data)
 
   encrypt: (data, callback) ->
-    @create_crypt (crypt) ->
-      crypt.encrypt data, (_, encrypted) ->
-        callback(encrypted)
+    priv_key = new RSAKey()
+    priv_key.readPublicKeyFromPEMString(@key)
+    decrypted = priv_key.encryptOAEP(data)
+    callback(hex2b64(decrypted))
 
-  decrypt: (encrypted, callback) ->
-    @create_crypt (crypt) ->
-      crypt.decrypt encrypted, (_, decrypted) ->
-          callback(decrypted)
+  decrypt: (data, callback) ->
+    priv_key = new RSAKey()
+    priv_key.readPrivateKeyFromPEMString(@key)
+    decrypted = priv_key.decryptOAEP(b64tohex(data))
+    callback(decrypted)
