@@ -44,9 +44,6 @@ describe 'crypto', ->
     """
 
   it 'should sign and verify signature', (done) ->
-
-    data = 'foo'
-
     new zc.Crypto(PRIVATE_KEY).sign 'foo', (signature) ->
       new zc.Crypto(PUBLIC_KEY).verify 'foo', signature, (ok) ->
         expect(ok).toEqual(true)
@@ -58,12 +55,9 @@ describe 'crypto', ->
       done()
 
   it 'should encrypt and decrypt', (done) ->
-
-    data = 'foo'
-
     new zc.Crypto(PUBLIC_KEY).encrypt 'foo', (encrypted) ->
       new zc.Crypto(PRIVATE_KEY).decrypt encrypted, (out) ->
-        expect(out).toEqual(data)
+        expect(out).toEqual('foo')
         done()
 
   it 'should decrypt this particular message', (done) ->
