@@ -43,6 +43,8 @@ describe 'crypto', ->
     lhvY8830XYlCQ7ocH0xeWunlh6tbdBKF50M5/ZgZ1q4=
     """
 
+  FINGERPRINT = "afab363f857ad4cd8789c8bbb3941ae2"
+
   it 'should sign and verify signature', (done) ->
     new zc.Crypto(PRIVATE_KEY).sign 'foo', (signature) ->
       new zc.Crypto(PUBLIC_KEY).verify 'foo', signature, (ok) ->
@@ -101,3 +103,11 @@ describe 'crypto', ->
             new zc.Crypto(private_key).decrypt encrypted, (out) ->
               expect(out).toEqual('foo')
               done()
+
+  it 'should calculate the fingerprint', (done) ->
+    new zc.Crypto(PRIVATE_KEY).fingerprint (private_fingerprint) ->
+      expect(private_fingerprint).toEqual(FINGERPRINT)
+
+      new zc.Crypto(PUBLIC_KEY).fingerprint (public_fingerprint) ->
+        expect(public_fingerprint).toEqual(FINGERPRINT)
+        done()
