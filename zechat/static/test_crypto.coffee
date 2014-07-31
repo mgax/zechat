@@ -54,6 +54,17 @@ describe 'crypto', ->
       expect(ok).toEqual(true)
       done()
 
+  it 'should return false for a different signature', (done) ->
+    new zc.Crypto(PRIVATE_KEY).sign 'foo', (signature) ->
+      new zc.Crypto(PUBLIC_KEY).verify 'bar', signature, (ok) ->
+        expect(ok).toEqual(false)
+        done()
+
+  it 'should return false for a malformed signature', (done) ->
+    new zc.Crypto(PUBLIC_KEY).verify 'foo', 'garbage signature', (ok) ->
+      expect(ok).toEqual(false)
+      done()
+
   it 'should encrypt and decrypt', (done) ->
     new zc.Crypto(PUBLIC_KEY).encrypt 'foo', (encrypted) ->
       new zc.Crypto(PRIVATE_KEY).decrypt encrypted, (out) ->
