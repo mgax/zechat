@@ -81,6 +81,13 @@ describe 'crypto', ->
       expect(out).toEqual(null)
       done()
 
+  it 'should return null for message encrypted with other key', (done) ->
+    other_key = zc.get_public_key(zc.generate_key())
+    new zc.Crypto(other_key).encrypt 'foo', (encrypted) ->
+      new zc.Crypto(PRIVATE_KEY).decrypt encrypted, (out) ->
+        expect(out).toEqual(null)
+        done()
+
   it 'should generate a usable key', (done) ->
     private_key = zc.generate_key()
     public_key = zc.get_public_key(private_key)
