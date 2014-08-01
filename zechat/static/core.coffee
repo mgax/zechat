@@ -18,6 +18,15 @@ zc.post_json = (url, data, callback) ->
   )
 
 
+Handlebars.registerHelper 'format_time', (iso_time) ->
+  time = d3.time.format.iso.parse(iso_time)
+  return d3.time.format('%b-%-d %H:%M')(time)
+
+
+Backbone.Marionette.TemplateCache.prototype.compileTemplate = (src) ->
+  Handlebars.compile(src)
+
+
 class zc.BlankView extends Backbone.Marionette.ItemView
 
   template: -> ''

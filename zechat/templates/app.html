@@ -26,27 +26,25 @@
   <a class="btn btn-default btn-xs header-btn-myid">My identity</a>
 </script>
 
-<script id="myid-html" type="text/template">
-  <p>Fingerprint: <code><%= fingerprint %></code></p>
+<script id="myid-html" type="text/template">{% raw %}
+  <p>Fingerprint: <code>{{ fingerprint }}</code></p>
 
   <p>
     <button type="button" class="btn btn-primary myid-publish">
       Publish
     </button>
   </p>
-</script>
+{% endraw %}</script>
 
 <script id="conversation-layout-html" type="text/template">
   <div class="conversation-history"></div>
   <div class="conversation-compose"></div>
 </script>
 
-<script id="message-html" type="text/template">
-  <div class="message-time"><%=
-    d3.time.format('%b-%-d %H:%M')(d3.time.format.iso.parse(time))
-    %></div>
-  <div class="message-text"><%= text %></div>
-</script>
+<script id="message-html" type="text/template">{% raw %}
+  <div class="message-time">{{format_time time}}</div>
+  <div class="message-text">{{ text }}</div>
+{% endraw %}</script>
 
 <script id="compose-html" type="text/template">
   <div class="row">
