@@ -19,3 +19,10 @@ def create_app(**config):
     node.init_app(app)
     common.init_app(app)
     return app
+
+
+def create_manager(app):
+    from flask.ext.script import Manager
+
+    manager = Manager(app)
+    return manager
