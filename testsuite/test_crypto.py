@@ -41,6 +41,9 @@ lhvY8830XYlCQ7ocH0xeWunlh6tbdBKF50M5/ZgZ1q4=
 """
 
 
+FINGERPRINT = 'afab363f857ad4cd8789c8bbb3941ae2'
+
+
 def crypto(key):
     from zechat.node import Crypto
     return Crypto(key)
@@ -71,6 +74,5 @@ def test_verify_invalid_signature():
 
 
 def test_fingerprint():
-    fingerprint = 'afab363f857ad4cd8789c8bbb3941ae2'
-    assert crypto(PUBLIC_KEY).fingerprint() == fingerprint
-    assert crypto(PRIVATE_KEY).fingerprint() == fingerprint
+    assert crypto(PUBLIC_KEY).fingerprint() == FINGERPRINT
+    assert crypto(PRIVATE_KEY).fingerprint() == FINGERPRINT
