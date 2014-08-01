@@ -7,6 +7,17 @@ zc.serialize_form = (el) ->
   return _.object(_.pluck(pairs, 'name'), _.pluck(pairs, 'value'))
 
 
+zc.post_json = (url, data, callback) ->
+  $.ajax(
+    type: "POST"
+    url: url
+    data: JSON.stringify(data)
+    contentType: "application/json"
+    dataType: "json"
+    success: callback
+  )
+
+
 class zc.BlankView extends Backbone.Marionette.ItemView
 
   template: -> ''
