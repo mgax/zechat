@@ -132,7 +132,14 @@ def post_identity():
 
     identity.public_key = public_key
     models.db.session.commit()
-    return flask.jsonify(ok=True)
+    return flask.jsonify(
+        ok=True,
+        url=flask.url_for(
+            '.get_identity',
+            fingerprint=fingerprint,
+            _external=True,
+        ),
+    )
 
 
 @views.route('/id/<fingerprint>')
