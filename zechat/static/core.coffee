@@ -177,6 +177,3 @@ zc.modules.core = ->
 
     @header = new zc.Header(app: @app)
     @layout.header.show(@header.createView())
-
-  @models.identity.on 'change', =>
-    window.location.reload()

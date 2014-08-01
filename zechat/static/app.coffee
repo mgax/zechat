@@ -11,7 +11,12 @@ zc.initialize = (options) ->
 
   app.reqres.setHandler 'urls', -> options.urls
   app.reqres.setHandler 'root_el', -> $('body')
-  app.vent.trigger('start')
 
-  myself = app.request('identity').get('fingerprint')
-  app.commands.execute('open-conversation', myself)
+  setup_identity = zc.setup_identity(app)
+  setup_identity.then (fingerprint) ->
+    app.vent.trigger('start')
+    app.commands.execute('open-conversation', fingerprint)
+
+  _.defer ->
+    if setup_identity.isPending()
+      $('body').text('generating identity ...')
