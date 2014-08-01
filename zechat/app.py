@@ -18,6 +18,3 @@ def create_app():
     node.init_app(app)
     common.init_app(app)
     return app
-
-
-app = create_app()
