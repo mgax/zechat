@@ -46,32 +46,15 @@ class zc.Header extends Backbone.Marionette.Controller
 
 class zc.IdentityView extends Backbone.Marionette.ItemView
 
-  tagName: 'form'
   className: 'myid-container tall'
   template: '#myid-html'
-
-  events:
-    'submit': (evt) ->
-      evt.preventDefault()
-      data = zc.serialize_form(@el)
-      @trigger('save', data)
-
-  onShow: ->
-    $input = @$el.find('[name=fingerprint]')
-    $input.focus()
-    $input[0].setSelectionRange(0, $input.val().length)
 
 
 class zc.Identity extends Backbone.Marionette.Controller
 
   createView: ->
-    identity = @options.app.request('identity')
-    view = new zc.IdentityView(model: identity)
-    view.on 'save', (data) =>
-      identity.set('fingerprint', data.fingerprint)
-      @options.app.commands.execute('show-main', new zc.BlankView)
-
-    return view
+    model = @options.app.request('identity')
+    return new zc.IdentityView(model: model)
 
 
 class zc.Transport extends Backbone.Marionette.Controller
