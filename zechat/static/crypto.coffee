@@ -1,5 +1,7 @@
 zc.format_pem = (key, title) ->
   rv = "-----BEGIN " + title + "-----\n"
+  while key.length % 4 != 0
+    key = key + '='
   while key
     rv += key.slice(0, 64) + "\n"
     key = key.slice(64)
