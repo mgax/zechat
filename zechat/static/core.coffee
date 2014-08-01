@@ -44,19 +44,6 @@ class zc.Header extends Backbone.Marionette.Controller
     return view
 
 
-class zc.IdentityView extends Backbone.Marionette.ItemView
-
-  className: 'myid-container tall'
-  template: '#myid-html'
-
-
-class zc.Identity extends Backbone.Marionette.Controller
-
-  createView: ->
-    model = @options.app.request('identity')
-    return new zc.IdentityView(model: model)
-
-
 class zc.Transport extends Backbone.Marionette.Controller
 
   initialize: (options) ->

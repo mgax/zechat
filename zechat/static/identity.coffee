@@ -12,3 +12,16 @@ zc.setup_identity = (app) ->
         deferred.resolve(model.get('fingerprint'))
 
   return deferred.promise
+
+
+class zc.IdentityView extends Backbone.Marionette.ItemView
+
+  className: 'myid-container tall'
+  template: '#myid-html'
+
+
+class zc.Identity extends Backbone.Marionette.Controller
+
+  createView: ->
+    model = @options.app.request('identity')
+    return new zc.IdentityView(model: model)
