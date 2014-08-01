@@ -1,8 +1,8 @@
--e git+https://github.com/mitsuhiko/flask.git@0ce47a365f4618f19b5b5c59c33f70c4f69157c0#egg=Flask-dev
 click==2.4
 Flask-Assets==0.10
 Flask-SQLAlchemy==1.0
 Flask-uWSGI-WebSocket==0.2.5
+Flask==0.10.1
 gevent==1.0.1
 greenlet==0.4.2
 itsdangerous==0.24
