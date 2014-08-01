@@ -24,12 +24,17 @@ class zc.IdentityView extends Backbone.Marionette.ItemView
       evt.preventDefault()
       @trigger('click-publish')
 
+    'click .myid-delete': (evt) ->
+      evt.preventDefault()
+      @trigger('click-delete')
+
 
 class zc.Identity extends Backbone.Marionette.Controller
 
   createView: ->
     model = @options.app.request('identity')
     view = new zc.IdentityView(model: model)
+
     view.on 'click-publish', =>
       url = @options.app.request('urls').post_identity
       data = {
@@ -39,4 +44,9 @@ class zc.Identity extends Backbone.Marionette.Controller
       zc.post_json url, data, (resp) =>
         model.set('public_url', resp.url)
         view.render()
+
+    view.on 'click-delete', =>
+      model.clear()
+      window.location.reload()
+
     return view
