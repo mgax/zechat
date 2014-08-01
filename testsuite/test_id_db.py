@@ -51,3 +51,14 @@ def test_check_fingerprint(app):
     resp = json_post(client, '/id/', data, parse=False)
     assert resp.status_code == 400
     assert flask.json.loads(resp.data) == {'error': 'fingerprint mismatch'}
+
+
+def test_republish_with_same_fingerprint(app):
+    from test_crypto import PUBLIC_KEY, FINGERPRINT
+    client = app.test_client()
+    data = {'fingerprint': FINGERPRINT, 'public_key': PUBLIC_KEY}
+    json_post(client, '/id/', data)
+    json_post(client, '/id/', data)
+    json_post(client, '/id/', data)
+    resp = json_get(client, '/id/' + FINGERPRINT)
+    assert resp == data

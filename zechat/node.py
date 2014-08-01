@@ -114,14 +114,23 @@ def _check_fingerprint(public_key, fingerprint):
 @views.route('/id/', methods=['POST'])
 def post_identity():
     data = flask.request.get_json()
-    if not _check_fingerprint(data['public_key'], data['fingerprint']):
+    public_key = data['public_key']
+    fingerprint = data['fingerprint']
+
+    if not _check_fingerprint(public_key, fingerprint):
         return (flask.jsonify(error='fingerprint mismatch'), 400)
 
-    identity = models.Identity(
-        fingerprint=data['fingerprint'],
-        public_key=data['public_key'],
+    identity = (
+        models.Identity.query
+        .filter_by(fingerprint=fingerprint)
+        .first()
     )
-    models.db.session.add(identity)
+
+    if identity is None:
+        identity = models.Identity(fingerprint=fingerprint)
+        models.db.session.add(identity)
+
+    identity.public_key = public_key
     models.db.session.commit()
     return flask.jsonify(ok=True)
 
