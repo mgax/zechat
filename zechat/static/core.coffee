@@ -28,9 +28,9 @@ class zc.HeaderView extends Backbone.Marionette.ItemView
   template: '#header-html'
 
   events:
-    'click .header-btn-configure': (evt) ->
+    'click .header-btn-myid': (evt) ->
       evt.preventDefault()
-      @trigger('click-configure')
+      @trigger('click-myid')
 
 
 class zc.Header extends Backbone.Marionette.Controller
@@ -38,17 +38,17 @@ class zc.Header extends Backbone.Marionette.Controller
   createView: ->
     identity = @options.app.request('identity')
     view = new zc.HeaderView(model: identity)
-    view.on 'click-configure', =>
-      configure = new zc.Configure(app: @options.app)
-      @options.app.commands.execute('show-main', configure.createView())
+    view.on 'click-myid', =>
+      myid = new zc.Identity(app: @options.app)
+      @options.app.commands.execute('show-main', myid.createView())
     return view
 
 
-class zc.ConfigureView extends Backbone.Marionette.ItemView
+class zc.IdentityView extends Backbone.Marionette.ItemView
 
   tagName: 'form'
-  className: 'configure-container tall'
-  template: '#configure-html'
+  className: 'myid-container tall'
+  template: '#myid-html'
 
   events:
     'submit': (evt) ->
@@ -62,11 +62,11 @@ class zc.ConfigureView extends Backbone.Marionette.ItemView
     $input[0].setSelectionRange(0, $input.val().length)
 
 
-class zc.Configure extends Backbone.Marionette.Controller
+class zc.Identity extends Backbone.Marionette.Controller
 
   createView: ->
     identity = @options.app.request('identity')
-    view = new zc.ConfigureView(model: identity)
+    view = new zc.IdentityView(model: identity)
     view.on 'save', (data) =>
       identity.set('fingerprint', data.fingerprint)
       @options.app.commands.execute('show-main', new zc.BlankView)
