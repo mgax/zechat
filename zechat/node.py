@@ -2,11 +2,12 @@ import logging
 from contextlib import contextmanager
 from base64 import b64encode, b64decode
 import hashlib
-from flask import json
+import flask
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
 from Crypto.Hash import SHA256
 from Crypto.Signature import PKCS1_PSS
+from zechat import models
 
 logger = logging.getLogger(__name__)
 
@@ -76,7 +77,7 @@ class Transport(object):
             if not data:  # ping?
                 continue
 
-            pkt = json.loads(data)
+            pkt = flask.json.loads(data)
             logger.debug("packet: %r", pkt)
             yield pkt
 
@@ -95,7 +96,35 @@ class Transport(object):
             raise RuntimeError("Unknown packet type %r" % pkt['type'])
 
     def send(self, pkt):
-        self.ws.send(json.dumps(pkt))
+        self.ws.send(flask.json.dumps(pkt))
+
+
+views = flask.Blueprint('node', __name__)
+
+
+@views.route('/id/', methods=['POST'])
+def post_identity():
+    data = flask.request.get_json()
+    identity = models.Identity(
+        fingerprint=data['fingerprint'],
+        public_key=data['public_key'],
+    )
+    models.db.session.add(identity)
+    models.db.session.commit()
+    return flask.jsonify(ok=True)
+
+
+@views.route('/id/<fingerprint>')
+def get_identity(fingerprint):
+    identity = (
+        models.Identity.query
+        .filter_by(fingerprint=fingerprint)
+        .first_or_404()
+    )
+    return flask.jsonify(
+        fingerprint=identity.fingerprint,
+        public_key=identity.public_key,
+    )
 
 
 def init_app(app):
@@ -108,3 +137,5 @@ def init_app(app):
     def transport(ws):
         with node.transport(ws) as transprot:
             transprot.handle()
+
+    app.register_blueprint(views)
