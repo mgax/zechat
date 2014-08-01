@@ -37,5 +37,6 @@ class zc.Identity extends Backbone.Marionette.Controller
         public_key: zc.get_public_key(model.get('key'))
       }
       zc.post_json url, data, (resp) =>
-        console.log(resp)
+        model.set('public_url', resp.url)
+        view.render()
     return view

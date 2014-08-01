@@ -34,6 +34,13 @@
       Publish
     </button>
   </p>
+
+  {{#if public_url}}
+    <p>
+      Public URL:
+      <code>{{ public_url }}</code>
+    </p>
+  {{/if}}
 {% endraw %}</script>
 
 <script id="conversation-layout-html" type="text/template">
