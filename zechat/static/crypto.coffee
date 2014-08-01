@@ -9,6 +9,9 @@ zc.format_pem = (key, title) ->
 
 
 zc.generate_key = (size, callback) ->
+  unless size >= 1024
+    throw "key size must be at least 1024 bits"
+
   k = new RSAKey()
   k.generate(size, '10001')
   key = k.privateKeyToPkcs1PemString()
