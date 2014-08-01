@@ -2,7 +2,7 @@ import logging
 import os
 from zechat.app import create_app
 
-app = create_app()
+app = create_app(LISTEN_WEBSOCKET=True)
 application = app.wsgi_app
 
 if os.environ.get('FLASK_DEBUG') == 'on':

@@ -156,14 +156,16 @@ def get_identity(fingerprint):
 
 
 def init_app(app):
-    from flask.ext.uwsgi_websocket import GeventWebSocket
-    websocket = GeventWebSocket(app)
-
-    node = Node()
-
-    @websocket.route('/ws/transport')
-    def transport(ws):
-        with node.transport(ws) as transprot:
-            transprot.handle()
-
     app.register_blueprint(views)
+
+    if app.config.get('LISTEN_WEBSOCKET'):
+        from flask.ext.uwsgi_websocket import GeventWebSocket
+
+        node = Node()
+
+        websocket = GeventWebSocket(app)
+
+        @websocket.route('/ws/transport')
+        def transport(ws):
+            with node.transport(ws) as transprot:
+                transprot.handle()
