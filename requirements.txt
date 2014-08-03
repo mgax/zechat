@@ -12,8 +12,6 @@ itsdangerous==0.24
 Jinja2==2.7.3
 Mako==1.0.0
 MarkupSafe==0.23
-mock==1.0.1
-psycopg2==2.5.3
 pycrypto==2.6.1
 SQLAlchemy==0.9.7
 uWSGI==2.0.6
