@@ -31,6 +31,15 @@ inspiration, but each suffer from drawbacks:
   text) and your identity is tied to a particular server.
 
 
+## Architecture
+
+<!-- TODO -->
+
+
+## The plan
+
+<!-- TODO -->
+
 ### Browser crypto
 Admittedly, doing cryptography in the browser can be a [bad idea](jscrypto),
 but most of the risks are mitigated by loading the page via HTTPS. You do have
@@ -50,31 +59,31 @@ cryptography code with a native implementation.
 Clone the project:
 
 ```bash
-    git clone https://github.com/mgax/zechat.git
+git clone https://github.com/mgax/zechat.git
 ```
 
 Install dependencies:
 
 ```bash
-    pip install -r requirements.txt
-    pip install psycopg2  # assuming the database is postgresql
+pip install -r requirements.txt
+pip install psycopg2  # assuming the database is postgresql
 ```
 
 Write a configuration file (name it `seettings.py` in the project root):
 
 ```python
-    SQLALCHEMY_DATABASE_URI = 'postgresql:///zechat'
+SQLALCHEMY_DATABASE_URI = 'postgresql:///zechat'
 ```
 
 Create database and run migrations:
 
 ```bash
-    createdb zechat
-    ./manage.py db upgrade head
+createdb zechat
+./manage.py db upgrade head
 ```
 
 Run the server:
 
 ```bash
-    uwsgi --module zechat.uwsgi --gevent 100 --http :5000 --http-websockets
+uwsgi --module zechat.uwsgi --gevent 100 --http :5000 --http-websockets
 ```
