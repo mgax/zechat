@@ -33,12 +33,31 @@ inspiration, but each suffer from drawbacks:
 
 ## Architecture
 
-<!-- TODO -->
+Each participant has an **identity**, which is a public-private RSA key pair.
+The keys are used to sign and encrypt messages.
+
+Messages are relayed via **nodes**. They function much as email servers. An
+identity will list one or more nodes where inbound messages are to be
+delivered. A client will then connect to the node(s) and collect messages, both
+in real time, and messages received while it was offline. Nodes can only see
+the message recipient; the rest of the message is encrypted and only the
+recipient can decrypt it.
+
+### Minimal centralization
+Adam Ierymenko wrote a good [article on decentralization](decentralization). He
+makes a convincnig argument that full decentralization is impractical, maybe
+even impossible. ZeChat makes a choice to rely on a federation of nodes that
+are always online but have minimal knowledge of the messages they are relaying.
+They do see message recipients and, to some extent, can infer senders, so it's
+important for a participant to choose a node they trust, or even run their own.
+
+[decentralization]: http://adamierymenko.com/decentralization-i-want-to-believe/
 
 
 ## The plan
-
-<!-- TODO -->
+Work is progressing on a minimal functioning implementation of a node and
+web-based user interface. When it's ready, it will be possible to run several
+nodes, create identities, and exchange messages between them.
 
 ### Browser crypto
 Admittedly, doing cryptography in the browser can be a [bad idea](jscrypto),
