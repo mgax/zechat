@@ -11,6 +11,10 @@
 
 {% include '_js.html' with context %}
 
+<script>
+  zc.TESTING_URL_MAP = {{ url_map|tojson }};
+</script>
+
 <body>
 
 {% assets 'testsuite.js' %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
