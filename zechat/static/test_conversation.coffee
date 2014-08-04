@@ -2,6 +2,19 @@ describe 'conversation', ->
 
   FIX = zc.fixtures
 
+  it 'should generate a new identity', (done) ->
+    local_storage = new zc.MockLocalStorage()
+    zc.create_app(
+      urls: zc.TESTING_URL_MAP
+      el: $('<div>')[0]
+      local_storage: local_storage
+    )
+    .done (app) =>
+      identity = JSON.parse(local_storage.getItem('identity'))
+      expect(identity.fingerprint.length).toEqual(32)
+      zc.remove_handlers(app)
+      done()
+
   it 'should send a message and receive it back', (done) ->
     identity_json = JSON.stringify(key: FIX.PRIVATE_KEY)
 
