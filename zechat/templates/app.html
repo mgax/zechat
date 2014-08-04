@@ -17,6 +17,9 @@
     zc.create_app({
         urls: {{ url_map|tojson }},
         el: $('body')[0]
+    })
+    .then(function(app) {
+        zc.app = app;
     });
   });
 </script>
