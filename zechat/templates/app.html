@@ -9,68 +9,9 @@
     <link rel="stylesheet" href="{{ ASSET_URL }}">{% endassets %}
 
 {% include '_js.html' with context %}
+{% include '_jstemplates.html' with context %}
 
 <title>ZeChat</title>
-
-<script id="app-layout-html" type="text/template">
-  <div class="row tall">
-    <div class="col-xs-4 tall">
-      <div class="app-header"></div>
-      <div class="app-contacts"></div>
-    </div>
-    <div class="col-xs-8 tall app-main"></div>
-  </div>
-</script>
-
-<script id="header-html" type="text/template">
-  <a class="btn btn-default btn-xs header-btn-myid">My identity</a>
-</script>
-
-<script id="myid-html" type="text/template">{% raw %}
-  <p>Fingerprint: <code>{{ fingerprint }}</code></p>
-
-  <p>
-    <button type="button" class="btn btn-primary myid-publish">
-      Publish
-    </button>
-  </p>
-
-  {{#if public_url}}
-    <p>
-      Public URL:
-      <code>{{ public_url }}</code>
-    </p>
-  {{/if}}
-
-  <p>
-    <button type="button" class="btn btn-danger myid-delete">
-      Delete identity
-    </button>
-  </p>
-{% endraw %}</script>
-
-<script id="conversation-layout-html" type="text/template">
-  <div class="conversation-history"></div>
-  <div class="conversation-compose"></div>
-</script>
-
-<script id="message-html" type="text/template">{% raw %}
-  <div class="message-time">{{format_time time}}</div>
-  <div class="message-text">{{ text }}</div>
-{% endraw %}</script>
-
-<script id="compose-html" type="text/template">
-  <div class="row">
-    <div class="col-xs-10">
-      <input class="form-control" name="message"
-             placeholder="Write a reply…"
-             autofocus autocomplete=off>
-    </div>
-    <div class="col-xs-2 compose-button-cell">
-      <button class="btn btn-default" type="submit">send</button>
-    </div>
-  </div>
-</script>
 
 <script>
   $(function() {
