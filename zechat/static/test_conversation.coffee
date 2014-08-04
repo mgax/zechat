@@ -30,7 +30,8 @@ describe 'conversation', ->
       el: $app[0]
     )
 
-    _.defer ->
+    zc.waitfor(1000, -> $app.find('.conversation-compose').length or null)
+    .then ->
       $form = $app.find('.conversation-compose form')
       $form.find('[name=message]').val('hello world')
       $form.submit()
@@ -40,14 +41,14 @@ describe 'conversation', ->
         messages = $history.find('.message-text').text()
         return messages if messages.length > 0
 
-      zc.waitfor(2000, get_messages)
-      .then (messages) ->
-        expect(messages).toEqual("hello world")
-      .catch (err) ->
-        if err == 'timeout'
-          expect('timed out').toBe(false)
-          return
-        throw(err)
-      .finally ->
-        zc.remove_handlers(app)
-        done()
+      return zc.waitfor(2000, get_messages)
+    .then (messages) ->
+      expect(messages).toEqual("hello world")
+    .catch (err) ->
+      if err == 'timeout'
+        expect('timed out').toBe(false)
+        return
+      throw(err)
+    .finally ->
+      zc.remove_handlers(app)
+      done()
