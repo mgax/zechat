@@ -16,12 +16,11 @@ zc.wait_for = (options) ->
 describe 'conversation', ->
 
   # TODO don't touch browser's localstorage
-  # TODO use temporary node instance on the server
 
   it 'should send a message and receive it back', (done) ->
     $app = $('<div>')
     app = zc.create_app(
-      urls: {post_identity: '/id/', transport: 'ws://zechat.devel/ws/transport'}
+      urls: {post_identity: '/id/', transport: 'ws://zechat.devel/testing/ws/transport'}
       el: $app[0]
     )
 

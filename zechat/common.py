@@ -34,6 +34,13 @@ def init_app(app):
 
     app.register_blueprint(views)
 
+    if app.config.get('TESTING_SERVER'):
+        from werkzeug.wsgi import DispatcherMiddleware
+        testing_app = create_testing_app(app.config.get('LISTEN_WEBSOCKET'))
+        app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
+            '/testing': testing_app,
+        })
+
 views = flask.Blueprint('common', __name__)
 
 
@@ -50,3 +57,11 @@ def app_page():
         'ws/transport',
     ])
     return flask.render_template('app.html', transport_url=transport_url)
+
+
+def create_testing_app(LISTEN_WEBSOCKET):
+    from zechat import node
+    app = flask.Flask(__name__)
+    app.config['LISTEN_WEBSOCKET'] = LISTEN_WEBSOCKET
+    node.init_app(app)
+    return app
