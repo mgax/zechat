@@ -3,14 +3,16 @@ zc.waitfor = (timeout, check) ->
   deferred = Q.defer()
 
   poll = ->
+    dt = _.now() - t0
+    if dt > timeout
+      clearInterval(interval)
+      deferred.reject('timeout')
+    else
+
     rv = check()
     if rv?
       clearInterval(interval)
       deferred.resolve(rv)
-
-    else if _.now() - t0 > timeout
-      clearInterval(interval)
-      deferred.reject('timeout')
 
   interval = setInterval(poll, 100)
 
@@ -38,7 +40,7 @@ describe 'conversation', ->
         messages = $history.find('.message-text').text()
         return messages if messages.length > 0
 
-      zc.waitfor(2, get_messages)
+      zc.waitfor(2000, get_messages)
       .then (messages) ->
         expect(messages).toEqual("hello world")
       .catch (err) ->
