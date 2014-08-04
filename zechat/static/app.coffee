@@ -10,7 +10,7 @@ zc.initialize = (options) ->
     app.module name, zc.modules[name]
 
   app.reqres.setHandler 'urls', -> options.urls
-  app.reqres.setHandler 'root_el', -> $('body')
+  app.reqres.setHandler 'root_el', -> $(options.el)
 
   setup_identity = zc.setup_identity(app)
   setup_identity.then (fingerprint) ->
@@ -19,4 +19,4 @@ zc.initialize = (options) ->
 
   _.defer ->
     if setup_identity.isPending()
-      $('body').text('generating identity ...')
+      $(options.el).text('generating identity ...')

@@ -81,7 +81,7 @@
       },
     }|tojson }};
 
-    zc.initialize(options);
+    zc.initialize(_.extend(options, {el: $('body')[0]}));
   });
 </script>
 
