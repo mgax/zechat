@@ -14,14 +14,10 @@
 
 <script>
   $(function() {
-    var options = {{ {
-      'urls': {
-        'transport': transport_url,
-        'post_identity': url_for('node.post_identity'),
-      },
-    }|tojson }};
-
-    zc.app = zc.create_app(_.extend(options, {el: $('body')[0]}));
+    zc.create_app({
+        urls: {{ url_map|tojson }},
+        el: $('body')[0]
+    });
   });
 </script>
 

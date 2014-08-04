@@ -49,14 +49,17 @@ def test_page():
     return flask.render_template('_test.html')
 
 
+def get_url_map():
+    base_url = flask.url_for('.app_page', _external=True).lstrip('http://')
+    return {
+        'transport': ''.join(['ws://', base_url, 'ws/transport']),
+        'post_identity': flask.url_for('node.post_identity'),
+    }
+
+
 @views.route('/')
 def app_page():
-    transport_url = ''.join([
-        'ws://',
-        flask.url_for('.app_page', _external=True).lstrip('http://'),
-        'ws/transport',
-    ])
-    return flask.render_template('app.html', transport_url=transport_url)
+    return flask.render_template('app.html', url_map=get_url_map())
 
 
 def create_testing_app(LISTEN_WEBSOCKET):
