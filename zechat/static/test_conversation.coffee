@@ -1,4 +1,4 @@
-zc.waitfor = (timeout, check) ->
+zc.waitfor = (check, timeout=1000) ->
   t0 = _.now()
   deferred = Q.defer()
 
@@ -14,7 +14,7 @@ zc.waitfor = (timeout, check) ->
       clearInterval(interval)
       deferred.resolve(rv)
 
-  interval = setInterval(poll, 100)
+  interval = setInterval(poll, 50)
 
   return deferred.promise
 
@@ -30,7 +30,7 @@ describe 'conversation', ->
       el: $app[0]
     )
 
-    zc.waitfor(1000, -> $app.find('.conversation-compose').length or null)
+    zc.waitfor(-> $app.find('.conversation-compose').length or null)
     .then ->
       $form = $app.find('.conversation-compose form')
       $form.find('[name=message]').val('hello world')
@@ -41,7 +41,7 @@ describe 'conversation', ->
         messages = $history.find('.message-text').text()
         return messages if messages.length > 0
 
-      return zc.waitfor(2000, get_messages)
+      return zc.waitfor(get_messages, 3000)
     .then (messages) ->
       expect(messages).toEqual("hello world")
     .catch (err) ->
