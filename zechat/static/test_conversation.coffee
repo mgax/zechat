@@ -28,7 +28,7 @@ describe 'conversation', ->
       el: $app[0]
     )
 
-    other = ->
+    _.defer ->
       $form = $app.find('.conversation-compose form')
       $form.find('[name=message]').val('hello world')
       $form.submit()
@@ -49,5 +49,3 @@ describe 'conversation', ->
       .finally ->
         zc.remove_handlers(app)
         done()
-
-    setTimeout(other, 100)
