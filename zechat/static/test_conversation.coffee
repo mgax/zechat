@@ -19,6 +19,10 @@ zc.waitfor = (check, timeout=1000) ->
   return deferred.promise
 
 
+zc.some = ($qs) ->
+  return $qs if $qs.length > 0
+
+
 describe 'conversation', ->
 
   # TODO don't touch browser's localstorage
@@ -30,7 +34,7 @@ describe 'conversation', ->
       el: $app[0]
     )
 
-    zc.waitfor(-> $app.find('.conversation-compose').length or null)
+    zc.waitfor(-> zc.some($app.find('.conversation-compose')))
     .then ->
       $form = $app.find('.conversation-compose form')
       $form.find('[name=message]').val('hello world')
