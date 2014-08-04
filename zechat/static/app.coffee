@@ -3,8 +3,8 @@ zc = window.zc = {}
 zc.modules = {}
 
 
-zc.initialize = (options) ->
-  app = zc.app = new Backbone.Marionette.Application
+zc.create_app = (options) ->
+  app = new Backbone.Marionette.Application
 
   Object.keys(zc.modules).forEach (name) ->
     app.module name, zc.modules[name]
@@ -20,6 +20,8 @@ zc.initialize = (options) ->
   _.defer ->
     if setup_identity.isPending()
       $(options.el).text('generating identity ...')
+
+  return app
 
 
 zc.remove_handlers = (app) ->

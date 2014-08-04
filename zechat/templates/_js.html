@@ -12,3 +12,5 @@
 <script src="{{ url_for('static', filename='lib/simple-crypt.js') }}"></script>
 
 {% assets 'app.js' %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
+
+{% include '_jstemplates.html' with context %}

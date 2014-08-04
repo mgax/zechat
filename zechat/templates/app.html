@@ -9,7 +9,6 @@
     <link rel="stylesheet" href="{{ ASSET_URL }}">{% endassets %}
 
 {% include '_js.html' with context %}
-{% include '_jstemplates.html' with context %}
 
 <title>ZeChat</title>
 
@@ -22,7 +21,7 @@
       },
     }|tojson }};
 
-    zc.initialize(_.extend(options, {el: $('body')[0]}));
+    zc.app = zc.create_app(_.extend(options, {el: $('body')[0]}));
   });
 </script>
 
