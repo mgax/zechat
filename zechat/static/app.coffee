@@ -6,6 +6,7 @@ zc.modules = {}
 zc.create_app = (options) ->
   app_deferred = Q.defer()
 
+  Backbone.Wreqr.radio.channel('global').reset()
   app = new Backbone.Marionette.Application()
 
   app.reqres.setHandler 'urls', -> options.urls
@@ -27,7 +28,3 @@ zc.create_app = (options) ->
       $(options.el).text('generating identity ...')
 
   return app_deferred.promise
-
-
-zc.remove_handlers = (app) ->
-  Backbone.Wreqr.radio.channel('global').reset()

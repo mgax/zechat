@@ -12,7 +12,6 @@ describe 'conversation', ->
     .done (app) =>
       identity = JSON.parse(local_storage.getItem('identity'))
       expect(identity.fingerprint.length).toEqual(32)
-      zc.remove_handlers(app)
       done()
 
   it 'should send a message and receive it back', (done) ->
@@ -46,5 +45,4 @@ describe 'conversation', ->
         return
       throw(err)
     .finally =>
-      zc.remove_handlers(@app)
       done()

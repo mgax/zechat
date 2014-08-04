@@ -37,5 +37,3 @@ describe 'packet sending', ->
       {sender: 'b', text: 'two'}
       {sender: 'b', text: 'three'}
     ])
-
-    zc.remove_handlers(app)
