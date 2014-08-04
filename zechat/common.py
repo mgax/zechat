@@ -35,9 +35,13 @@ def init_app(app):
 
     app.register_blueprint(views)
 
-    if app.config.get('TESTING_SERVER'):
+    config = app.config
+    if config.get('TESTING_SERVER'):
         from werkzeug.wsgi import DispatcherMiddleware
-        testing_app = create_testing_app(app.config.get('LISTEN_WEBSOCKET'))
+        testing_app = create_testing_app(
+            LISTEN_WEBSOCKET=config.get('LISTEN_WEBSOCKET'),
+            SQLALCHEMY_DATABASE_URI=config['TESTING_SQLALCHEMY_DATABASE_URI'],
+        )
         app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
             '/testing': testing_app,
         })
@@ -52,6 +56,7 @@ def test_page():
     base_url = get_base_url() + 'testing/'
     with testing_app.test_request_context(base_url=base_url):
         url_map = get_url_map()
+        url_map['flush'] = flask.url_for('flush')
 
     return flask.render_template('_test.html', url_map=url_map)
 
@@ -73,10 +78,20 @@ def app_page():
     return flask.render_template('app.html', url_map=get_url_map())
 
 
-def create_testing_app(LISTEN_WEBSOCKET):
+def create_testing_app(**config):
     from zechat import node
+    from zechat import models
+
     app = flask.Flask(__name__)
-    app.config['LISTEN_WEBSOCKET'] = LISTEN_WEBSOCKET
+    app.config.update(config)
+    models.db.init_app(app)
     app.register_blueprint(views)
     node.init_app(app)
+
+    @app.route('/_flush', methods=['POST'])
+    def flush():
+        models.db.drop_all()
+        models.db.create_all()
+        return 'ok'
+
     return app

@@ -2,6 +2,9 @@ describe 'conversation', ->
 
   FIX = zc.fixtures
 
+  beforeEach (done) ->
+    $.post(zc.TESTING_URL_MAP.flush, -> done())
+
   it 'should generate a new identity', (done) ->
     local_storage = new zc.MockLocalStorage()
     zc.create_app(
