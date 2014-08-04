@@ -23,15 +23,23 @@ zc.some = ($qs) ->
   return $qs if $qs.length > 0
 
 
-describe 'conversation', ->
+class zc.MockLocalStorage
 
-  # TODO don't touch browser's localstorage
+  constructor: -> @_data = {}
+
+  getItem: (key) -> @_data[key]
+
+  setItem: (key, value) -> @_data[key] = value
+
+
+describe 'conversation', ->
 
   it 'should send a message and receive it back', (done) ->
     $app = $('<div>')
     app = zc.create_app(
       urls: zc.TESTING_URL_MAP
       el: $app[0]
+      local_storage: new zc.MockLocalStorage()
     )
 
     zc.waitfor(-> zc.some($app.find('.conversation-compose')))

@@ -105,13 +105,13 @@ class zc.Persist extends Backbone.Marionette.Controller
   initialize: ->
     @key = @options.key
     @model = @options.model
-    value = localStorage.getItem(@key)
+    value = @options.app.request('local_storage').getItem(@key)
     if value
       @model.set(JSON.parse(value))
     @model.on('change', _.bind(@save, @))
 
   save: ->
-    localStorage.setItem(@key, JSON.stringify(@model))
+    @options.app.request('local_storage').setItem(@key, JSON.stringify(@model))
 
 
 class zc.Receiver extends Backbone.Marionette.Controller
@@ -146,6 +146,7 @@ zc.modules.core = ->
   @message_manager = new zc.MessageManager(app: @app)
 
   @persist_identity = new zc.Persist
+    app: @app
     key: 'identity'
     model: @models.identity
 

@@ -8,6 +8,8 @@ zc.create_app = (options) ->
 
   app.reqres.setHandler 'urls', -> options.urls
   app.reqres.setHandler 'root_el', -> $(options.el)
+  app.reqres.setHandler 'local_storage', ->
+    return options.local_storage or window.localStorage
 
   Object.keys(zc.modules).forEach (name) ->
     app.module name, zc.modules[name]
