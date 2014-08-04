@@ -1,3 +1,37 @@
+zc.waitfor = (check, timeout=1000) ->
+  t0 = _.now()
+  deferred = Q.defer()
+
+  poll = ->
+    dt = _.now() - t0
+    if dt > timeout
+      clearInterval(interval)
+      deferred.reject('timeout')
+    else
+
+    rv = check()
+    if rv?
+      clearInterval(interval)
+      deferred.resolve(rv)
+
+  interval = setInterval(poll, 50)
+
+  return deferred.promise
+
+
+zc.some = ($qs) ->
+  return $qs if $qs.length > 0
+
+
+class zc.MockLocalStorage
+
+  constructor: (data) -> @_data = _.extend({}, data)
+
+  getItem: (key) -> @_data[key]
+
+  setItem: (key, value) -> @_data[key] = value
+
+
 zc.fixtures = {
 
   PRIVATE_KEY:
