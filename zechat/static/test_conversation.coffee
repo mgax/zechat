@@ -17,6 +17,27 @@ describe 'conversation', ->
       expect(identity.fingerprint.length).toEqual(32)
       done()
 
+  it 'should post identity to server', (done) ->
+    identity_json = JSON.stringify(
+      key: FIX.PRIVATE_KEY
+      fingerprint: FIX.FINGERPRINT
+    )
+
+    $app = $('<div>')
+    zc.create_app(
+      urls: zc.TESTING_URL_MAP
+      el: $app[0]
+      local_storage: new zc.MockLocalStorage(identity: identity_json)
+    )
+    .then (app) =>
+      identity = app.request('identity')
+      $app.find('.header-btn-myid').click()
+      $app.find('.myid-publish').click()
+      return zc.waitfor(-> identity.get('public_url'))
+    .then (public_url) =>
+      expect(public_url).toContain('/id/' + FIX.FINGERPRINT)
+      done()
+
   it 'should send a message and receive it back', (done) ->
     identity_json = JSON.stringify(key: FIX.PRIVATE_KEY)
 
