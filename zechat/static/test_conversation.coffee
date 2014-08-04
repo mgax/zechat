@@ -1,16 +1,20 @@
-zc.wait_for = (options) ->
+zc.waitfor = (timeout, check) ->
   t0 = _.now()
+  deferred = Q.defer()
 
   poll = ->
-    if options.check()
+    rv = check()
+    if rv?
       clearInterval(interval)
-      options.success()
+      deferred.resolve(rv)
 
-    else if _.now() - t0 > options.timeout
+    else if _.now() - t0 > timeout
       clearInterval(interval)
-      options.failure()
+      deferred.reject('timeout')
 
   interval = setInterval(poll, 100)
+
+  return deferred.promise
 
 
 describe 'conversation', ->
@@ -29,18 +33,21 @@ describe 'conversation', ->
       $form.find('[name=message]').val('hello world')
       $form.submit()
 
-      messages = ->
-        $app.find('.conversation-history').find('.message-text').text()
+      get_messages = ->
+        $history = $app.find('.conversation-history')
+        messages = $history.find('.message-text').text()
+        return messages if messages.length > 0
 
-      zc.wait_for(
-        check: -> messages() != ''
-        timeout: 2
-        success: -> expect(messages()).toEqual("hello world"); test_done()
-        failure: -> expect('timed out').toBe(false); test_done()
-      )
-
-    test_done = ->
-      zc.remove_handlers(app)
-      done()
+      zc.waitfor(2, get_messages)
+      .then (messages) ->
+        expect(messages).toEqual("hello world")
+      .catch (err) ->
+        if err == 'timeout'
+          expect('timed out').toBe(false)
+          return
+        throw(err)
+      .finally ->
+        zc.remove_handlers(app)
+        done()
 
     setTimeout(other, 100)
