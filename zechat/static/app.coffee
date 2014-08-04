@@ -27,7 +27,4 @@ zc.create_app = (options) ->
 
 
 zc.remove_handlers = (app) ->
-  app.commands.removeAllHandlers()
-  app.reqres.removeAllHandlers()
-  _.values(app.vent._events).forEach (event) ->
-    app.vent.off(event.callback)
+  Backbone.Wreqr.radio.channel('global').reset()
