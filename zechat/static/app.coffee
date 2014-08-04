@@ -13,7 +13,7 @@ zc.initialize = (options) ->
   app.reqres.setHandler 'root_el', -> $(options.el)
 
   setup_identity = zc.setup_identity(app)
-  setup_identity.then (fingerprint) ->
+  setup_identity.done (fingerprint) ->
     app.vent.trigger('start')
     app.commands.execute('open-conversation', fingerprint)
 
