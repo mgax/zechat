@@ -6,11 +6,11 @@ zc.modules = {}
 zc.create_app = (options) ->
   app = new Backbone.Marionette.Application
 
-  Object.keys(zc.modules).forEach (name) ->
-    app.module name, zc.modules[name]
-
   app.reqres.setHandler 'urls', -> options.urls
   app.reqres.setHandler 'root_el', -> $(options.el)
+
+  Object.keys(zc.modules).forEach (name) ->
+    app.module name, zc.modules[name]
 
   setup_identity = zc.setup_identity(app)
   setup_identity.done (fingerprint) ->
