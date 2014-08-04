@@ -40,17 +40,27 @@ def init_app(app):
         app.wsgi_app = DispatcherMiddleware(app.wsgi_app, {
             '/testing': testing_app,
         })
+        app.extensions['zc_testing_app'] = testing_app
 
 views = flask.Blueprint('common', __name__)
 
 
 @views.route('/_test')
 def test_page():
-    return flask.render_template('_test.html')
+    testing_app = flask.current_app.extensions['zc_testing_app']
+    base_url = get_base_url() + 'testing/'
+    with testing_app.test_request_context(base_url=base_url):
+        url_map = get_url_map()
+
+    return flask.render_template('_test.html', url_map=url_map)
+
+
+def get_base_url():
+    return flask.url_for('.app_page', _external=True)
 
 
 def get_url_map():
-    base_url = flask.url_for('.app_page', _external=True).lstrip('http://')
+    base_url = get_base_url().lstrip('http://')
     return {
         'transport': ''.join(['ws://', base_url, 'ws/transport']),
         'post_identity': flask.url_for('node.post_identity'),
@@ -66,5 +76,6 @@ def create_testing_app(LISTEN_WEBSOCKET):
     from zechat import node
     app = flask.Flask(__name__)
     app.config['LISTEN_WEBSOCKET'] = LISTEN_WEBSOCKET
+    app.register_blueprint(views)
     node.init_app(app)
     return app

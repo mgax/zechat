@@ -20,7 +20,7 @@ describe 'conversation', ->
   it 'should send a message and receive it back', (done) ->
     $app = $('<div>')
     app = zc.create_app(
-      urls: {post_identity: '/id/', transport: 'ws://zechat.devel/testing/ws/transport'}
+      urls: zc.TESTING_URL_MAP
       el: $app[0]
     )
 

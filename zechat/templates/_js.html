@@ -14,3 +14,7 @@
 {% assets 'app.js' %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
 
 {% include '_jstemplates.html' with context %}
+
+<script>
+  zc.TESTING_URL_MAP = {{ url_map|tojson }};
+</script>
