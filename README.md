@@ -106,3 +106,19 @@ Run the server:
 ```bash
 uwsgi --module zechat.uwsgi --gevent 100 --http :5000 --http-websockets
 ```
+
+## Development
+Install development dependencies:
+
+```bash
+pip install -r requirements-dev.txt
+```
+
+Run Python test suite:
+
+```bash
+py.test
+```
+
+Run browser test suite: set `TESTING_SERVER=True` in your `settings.py` file,
+then open http://localhost:5000/_test.
