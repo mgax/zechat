@@ -20,3 +20,10 @@ zc.initialize = (options) ->
   _.defer ->
     if setup_identity.isPending()
       $(options.el).text('generating identity ...')
+
+
+zc.remove_handlers = (app) ->
+  app.commands.removeAllHandlers()
+  app.reqres.removeAllHandlers()
+  _.values(app.vent._events).forEach (event) ->
+    app.vent.off(event.callback)
