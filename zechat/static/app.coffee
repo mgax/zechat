@@ -6,8 +6,9 @@ zc.modules = {}
 zc.create_app = (options) ->
   app_deferred = Q.defer()
 
-  Backbone.Wreqr.radio.channel('global').reset()
-  app = new Backbone.Marionette.Application()
+  channel = options.channel or 'global'
+  Backbone.Wreqr.radio.channel(channel).reset()
+  app = new Backbone.Marionette.Application(channelName: channel)
 
   app.reqres.setHandler 'urls', -> options.urls
   app.reqres.setHandler 'root_el', -> $(options.el)
