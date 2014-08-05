@@ -5,19 +5,21 @@ describe 'conversation', ->
   beforeEach (done) ->
     $.post(zc.TESTING_URL_MAP.flush, -> done())
 
-  it 'should generate a new identity', (done) ->
+  it 'should generate a new identity', (test_done) ->
     local_storage = new zc.MockLocalStorage()
     zc.create_app(
       urls: zc.TESTING_URL_MAP
       el: $('<div>')[0]
       local_storage: local_storage
     )
-    .done (app) =>
+    .then (app) =>
       identity = JSON.parse(local_storage.getItem('identity'))
       expect(identity.fingerprint.length).toEqual(32)
-      done()
+    .finally ->
+      test_done()
+    .done()
 
-  it 'should post identity to server', (done) ->
+  it 'should post identity to server', (test_done) ->
     identity_json = JSON.stringify(
       key: FIX.PRIVATE_KEY
       fingerprint: FIX.FINGERPRINT
@@ -36,9 +38,11 @@ describe 'conversation', ->
       return zc.waitfor(-> identity.get('public_url'))
     .then (public_url) =>
       expect(public_url).toContain('/id/' + FIX.FINGERPRINT)
-      done()
+    .finally ->
+      test_done()
+    .done()
 
-  it 'should send a message and receive it back', (done) ->
+  it 'should send a message and receive it back', (test_done) ->
     identity_json = JSON.stringify(key: FIX.PRIVATE_KEY)
 
     $app = $('<div>')
@@ -69,4 +73,5 @@ describe 'conversation', ->
         return
       throw(err)
     .finally =>
-      done()
+      test_done()
+    .done()
