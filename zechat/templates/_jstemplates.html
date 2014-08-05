@@ -10,6 +10,7 @@
 
 <script id="header-html" type="text/template">
   <a class="btn btn-default btn-xs header-btn-myid">My identity</a>
+  <a class="btn btn-default btn-xs header-btn-add-contact">Add contact</a>
 </script>
 
 <script id="myid-html" type="text/template">{% raw %}
@@ -34,6 +35,18 @@
     </button>
   </p>
 {% endraw %}</script>
+
+<script id="add-contact-html" type="text/template">
+  <div class="row">
+    <div class="col-xs-10">
+      <input class="form-control" name="url"
+             placeholder="enter identity url ...">
+    </div>
+    <div class="col-xs-2 compose-button-cell">
+      <button class="btn btn-default" type="submit">add</button>
+    </div>
+  </div>
+</script>
 
 <script id="conversation-layout-html" type="text/template">
   <div class="conversation-history"></div>

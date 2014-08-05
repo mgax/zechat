@@ -42,6 +42,57 @@ describe 'conversation', ->
       test_done()
     .done()
 
+  it 'should begin a new conversation', (test_done) ->
+    $app_a = $('<div>')
+    $app_b = $('<div>')
+
+    Q.all([
+      zc.create_app(
+        urls: zc.TESTING_URL_MAP
+        el: $app_a[0]
+        local_storage: new zc.MockLocalStorage(identity: JSON.stringify(
+          key: FIX.PRIVATE_KEY
+          fingerprint: FIX.FINGERPRINT))
+        channel: 'app_a'
+      )
+      zc.create_app(
+        urls: zc.TESTING_URL_MAP
+        el: $app_b[0]
+        local_storage: new zc.MockLocalStorage(identity: JSON.stringify(
+          key: FIX.PRIVATE_KEY_B
+          fingerprint: FIX.FINGERPRINT_B))
+        channel: 'app_b'
+      )
+    ])
+
+    .then ([@app_a, @app_b]) =>
+      (new zc.Identity(app: @app_b)).publish()
+
+    .then (url_b) =>
+      $app_a.find('.header-btn-add-contact').click()
+      $form_a = $app_a.find('.app-main > form')
+      $form_a.find('[name=url]').val(url_b)
+      $form_a.submit()
+      zc.waitfor(-> zc.some($app_a.find('.conversation-compose form')))
+
+    .then ($form) =>
+      $form.find('[name=message]').val("hello from A")
+      $form.submit()
+      messages_from_a = @app_b.request('message_collection', FIX.FINGERPRINT)
+      zc.waitfor(-> zc.some(messages_from_a))
+
+    .then (messages_from_a) =>
+      expect(messages_from_a.at(0).get('text')).toEqual("hello from A")
+
+    .catch (err) =>
+      throw(err) if err != 'timeout'
+      expect('timed out').toBe(false)
+
+    .finally ->
+      test_done()
+
+    .done()
+
   it 'should send a message and receive it back', (test_done) ->
     identity_json = JSON.stringify(key: FIX.PRIVATE_KEY)
 

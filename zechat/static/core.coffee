@@ -52,14 +52,55 @@ class zc.HeaderView extends Backbone.Marionette.ItemView
       evt.preventDefault()
       @trigger('click-myid')
 
+    'click .header-btn-add-contact': (evt) ->
+      evt.preventDefault()
+      @trigger('click-add-contact')
+
 
 class zc.Header extends Backbone.Marionette.Controller
 
   createView: ->
     view = new zc.HeaderView()
+
     view.on 'click-myid', =>
       myid = new zc.Identity(app: @options.app)
       @options.app.commands.execute('show-main', myid.createView())
+
+    view.on 'click-add-contact', =>
+      add_contact = new zc.AddContact(app: @options.app)
+      @options.app.commands.execute('show-main', add_contact.createView())
+
+    return view
+
+
+class zc.AddContactView extends Backbone.Marionette.ItemView
+
+  tagName: 'form'
+  template: '#add-contact-html'
+
+  ui:
+    url: '[name=url]'
+
+  events:
+    'submit': (evt) ->
+      evt.preventDefault()
+      url = @ui.url.val()
+      if url
+        this.trigger('add', url)
+
+  onShow: ->
+    @ui.url.focus()
+
+
+class zc.AddContact extends Backbone.Marionette.Controller
+
+  createView: ->
+    view = new zc.AddContactView()
+
+    view.on 'add', (url) =>
+      Q($.get(url)).done (resp) =>
+        @options.app.commands.execute('open-conversation', resp.fingerprint)
+
     return view
 
 
