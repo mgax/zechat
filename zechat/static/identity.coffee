@@ -31,22 +31,31 @@ class zc.IdentityView extends Backbone.Marionette.ItemView
 
 class zc.Identity extends Backbone.Marionette.Controller
 
+  initialize: ->
+    @model = @options.app.request('identity')
+
   createView: ->
-    model = @options.app.request('identity')
-    view = new zc.IdentityView(model: model)
+    view = new zc.IdentityView(model: @model)
 
     view.on 'click-publish', =>
-      url = @options.app.request('urls').post_identity
-      data = {
-        fingerprint: model.get('fingerprint')
-        public_key: zc.get_public_key(model.get('key'))
-      }
-      zc.post_json url, data, (resp) =>
-        model.set('public_url', resp.url)
+      @publish()
+      .done ->
         view.render()
 
     view.on 'click-delete', =>
-      model.clear()
+      @model.clear()
       window.location.reload()
 
     return view
+
+  publish: ->
+    url = @options.app.request('urls').post_identity
+    data = {
+      fingerprint: @model.get('fingerprint')
+      public_key: zc.get_public_key(@model.get('key'))
+    }
+
+    Q(zc.post_json url, data)
+    .then (resp) =>
+      @model.set('public_url', resp.url)
+      return resp.url
