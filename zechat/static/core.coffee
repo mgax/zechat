@@ -63,6 +63,18 @@ class zc.HeaderView extends Backbone.Marionette.ItemView
   className: 'header-container tall'
   template: 'header.html'
 
+  initialize: ->
+    @model.on('change', @render.bind(@))
+
+  serializeData: ->
+    state = @model.get('state')
+    if state == 'closed'
+      return cls: 'btn-danger header-btn-connect', text: "✘"
+    if state == 'connecting'
+      return cls: 'btn-warning', disabled: true, text: "…"
+    if state == 'open'
+      return cls: 'btn-success', disabled: true, text: "✔"
+
   events:
     'click .header-btn-myid': (evt) ->
       evt.preventDefault()
@@ -72,11 +84,15 @@ class zc.HeaderView extends Backbone.Marionette.ItemView
       evt.preventDefault()
       @trigger('click-add-contact')
 
+    'click .header-btn-connect': (evt) ->
+      evt.preventDefault()
+      @trigger('click-connect')
+
 
 class zc.Header extends zc.Controller
 
   createView: ->
-    view = new zc.HeaderView()
+    view = new zc.HeaderView(model: @app.request('transport-state'))
 
     view.on 'click-myid', =>
       myid = new zc.Identity(app: @app)
@@ -85,6 +101,9 @@ class zc.Header extends zc.Controller
     view.on 'click-add-contact', =>
       add_contact = new zc.AddContact(app: @app)
       @app.commands.execute('show-main', add_contact.createView())
+
+    view.on 'click-connect', =>
+      @app.commands.execute('reconnect')
 
     return view
 
