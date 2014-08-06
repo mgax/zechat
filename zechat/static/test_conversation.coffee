@@ -2,16 +2,20 @@ describe 'conversation', ->
 
   FIX = zc.fixtures
 
+  create_testing_app = (local_storage_data={}, options={}) ->
+    _.defaults(options, {
+      urls: zc.TESTING_URL_MAP
+      el: $('<div>')[0]
+      local_storage: new zc.MockLocalStorage(local_storage_data)
+    })
+    zc.create_app(options)
+
   beforeEach (done) ->
     $.post(zc.TESTING_URL_MAP.flush, -> done())
 
   it 'should generate a new identity', (test_done) ->
     local_storage = new zc.MockLocalStorage()
-    zc.create_app(
-      urls: zc.TESTING_URL_MAP
-      el: $('<div>')[0]
-      local_storage: local_storage
-    )
+    create_testing_app({}, {local_storage: local_storage})
     .then (app) =>
       identity = JSON.parse(local_storage.getItem('identity'))
       expect(identity.fingerprint.length).toEqual(32)
@@ -25,16 +29,11 @@ describe 'conversation', ->
       fingerprint: FIX.FINGERPRINT
     )
 
-    $app = $('<div>')
-    zc.create_app(
-      urls: zc.TESTING_URL_MAP
-      el: $app[0]
-      local_storage: new zc.MockLocalStorage(identity: identity_json)
-    )
+    create_testing_app(identity: identity_json)
     .then (app) =>
       identity = app.request('identity')
-      $app.find('.header-btn-myid').click()
-      $app.find('.myid-publish').click()
+      app.$el.find('.header-btn-myid').click()
+      app.$el.find('.myid-publish').click()
       return zc.waitfor(-> identity.get('public_url'))
     .then (public_url) =>
       expect(public_url).toContain('/id/' + FIX.FINGERPRINT)
@@ -43,37 +42,27 @@ describe 'conversation', ->
     .done()
 
   it 'should begin a new conversation', (test_done) ->
-    $app_a = $('<div>')
-    $app_b = $('<div>')
+    identity_a_json = JSON.stringify(
+        key: FIX.PRIVATE_KEY
+        fingerprint: FIX.FINGERPRINT)
+    identity_b_json = JSON.stringify(
+        key: FIX.PRIVATE_KEY_B
+        fingerprint: FIX.FINGERPRINT_B)
 
     Q.all([
-      zc.create_app(
-        urls: zc.TESTING_URL_MAP
-        el: $app_a[0]
-        local_storage: new zc.MockLocalStorage(identity: JSON.stringify(
-          key: FIX.PRIVATE_KEY
-          fingerprint: FIX.FINGERPRINT))
-        channel: 'app_a'
-      )
-      zc.create_app(
-        urls: zc.TESTING_URL_MAP
-        el: $app_b[0]
-        local_storage: new zc.MockLocalStorage(identity: JSON.stringify(
-          key: FIX.PRIVATE_KEY_B
-          fingerprint: FIX.FINGERPRINT_B))
-        channel: 'app_b'
-      )
+      create_testing_app({identity: identity_a_json}, {channel: 'app_a'})
+      create_testing_app({identity: identity_b_json}, {channel: 'app_b'})
     ])
 
     .then ([@app_a, @app_b]) =>
       (new zc.Identity(app: @app_b)).publish()
 
     .then (url_b) =>
-      $app_a.find('.header-btn-add-contact').click()
-      $form_a = $app_a.find('.app-main > form')
+      @app_a.$el.find('.header-btn-add-contact').click()
+      $form_a = @app_a.$el.find('.app-main > form')
       $form_a.find('[name=url]').val(url_b)
       $form_a.submit()
-      zc.waitfor(-> zc.some($app_a.find('.conversation-compose form')))
+      zc.waitfor(=> zc.some(@app_a.$el.find('.conversation-compose form')))
 
     .then ($form) =>
       $form.find('[name=message]').val("hello from A")
@@ -96,22 +85,16 @@ describe 'conversation', ->
   it 'should send a message and receive it back', (test_done) ->
     identity_json = JSON.stringify(key: FIX.PRIVATE_KEY)
 
-    $app = $('<div>')
-    zc.create_app(
-      urls: zc.TESTING_URL_MAP
-      el: $app[0]
-      local_storage: new zc.MockLocalStorage(identity: identity_json)
-    )
-    .then (app) =>
-      @app = app
-      zc.waitfor(-> zc.some($app.find('.conversation-compose')))
+    create_testing_app(identity: identity_json)
+    .then (@app) =>
+      zc.waitfor(=> zc.some(@app.$el.find('.conversation-compose')))
     .then =>
-      $form = $app.find('.conversation-compose form')
+      $form = @app.$el.find('.conversation-compose form')
       $form.find('[name=message]').val('hello world')
       $form.submit()
 
-      get_messages = ->
-        $history = $app.find('.conversation-history')
+      get_messages = =>
+        $history = @app.$el.find('.conversation-history')
         messages = $history.find('.message-text').text()
         return messages if messages.length > 0
 
