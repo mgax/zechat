@@ -75,10 +75,3 @@ class zc.Conversation extends zc.Controller
     @layout.render()
     @layout.history.show(@history.createView())
     @layout.compose.show(@compose.createView())
-
-
-zc.modules.conversation = ->
-  @app.commands.setHandler 'open-conversation', (peer) =>
-    conversation = new zc.Conversation(app: @app, peer: peer)
-    @app.commands.execute('show-main', conversation.layout)
-    conversation.render()

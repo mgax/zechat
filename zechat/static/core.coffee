@@ -210,6 +210,7 @@ zc.modules.core = ->
 
   @transport = new zc.Transport(app: @app)
   @receiver = new zc.Receiver(app: @app)
+  @threads = new zc.Threads(app: @app)
 
   @app.commands.setHandler 'show-main', (view) =>
     @layout.main.show(view)
