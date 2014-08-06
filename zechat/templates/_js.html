@@ -12,4 +12,6 @@
 
 {% assets 'app.js' %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
 
-{% include '_jstemplates.html' with context %}
+{% for tmpl in get_template_list() %}
+  <script id="{{ tmpl.id }}" type="text/template">{{ tmpl.src|safe }}</script>
+{% endfor %}

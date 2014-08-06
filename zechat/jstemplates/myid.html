@@ -1,0 +1,20 @@
+<p>Fingerprint: <code>{{ fingerprint }}</code></p>
+
+<p>
+  <button type="button" class="btn btn-primary myid-publish">
+    Publish
+  </button>
+</p>
+
+{{#if public_url}}
+  <p>
+    Public URL:
+    <code>{{ public_url }}</code>
+  </p>
+{{/if}}
+
+<p>
+  <button type="button" class="btn btn-danger myid-delete">
+    Delete identity
+  </button>
+</p>

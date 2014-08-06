@@ -1,5 +1,11 @@
 import os
 import flask
+from pathlib import Path
+
+DEFAULTS = {
+    'CDNJS_URL': '//cdnjs.cloudflare.com/ajax/libs',
+}
+
 
 def init_app(app):
     from flask.ext.assets import Environment, Bundle
@@ -34,6 +40,9 @@ def init_app(app):
         output='gen/app.css',
     ))
 
+    app.jinja_env.globals['cdnjs'] = app.config['CDNJS_URL']
+    app.jinja_env.globals['get_template_list'] = get_template_list
+
     app.register_blueprint(views)
 
     config = app.config
@@ -47,6 +56,13 @@ def init_app(app):
             '/testing': testing_app,
         })
         app.extensions['zc_testing_app'] = testing_app
+
+
+def get_template_list():
+    for item in (Path(__file__).parent / 'jstemplates').iterdir():
+        with item.open('r', encoding='utf-8') as f:
+            yield dict(id=item.name.replace('_', '-').replace('.', '-'), src=f.read())
+
 
 views = flask.Blueprint('common', __name__)
 
