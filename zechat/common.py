@@ -33,10 +33,10 @@ def init_app(app):
         output='gen/testsuite.js',
     ))
 
-    assets.register('app.css', Bundle(
-        'app.less',
+    assets.register('style.css', Bundle(
+        'style.less',
         filters='less',
-        output='gen/app.css',
+        output='gen/style.css',
     ))
 
     app.jinja_env.globals['cdnjs'] = app.config['CDNJS_URL']
