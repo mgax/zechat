@@ -66,7 +66,7 @@ class zc.Compose extends zc.Controller
 class zc.Thread extends zc.Controller
 
   initialize: ->
-    @collection = @app.request('message_collection', @options.peer)
+    @collection = @app.request('thread', @options.peer).message_col
     @layout = new zc.ThreadLayout
     @history = new zc.History(app: @app, collection: @collection)
     @compose = new zc.Compose(app: @app, peer: @options.peer)

@@ -71,10 +71,12 @@ describe 'conversation', ->
     .then ($form) =>
       $form.find('[name=message]').val("hello from A")
       $form.submit()
-      messages_from_a = @app_b.request('message_collection', FIX.FINGERPRINT)
-      zc.waitfor(-> zc.some(messages_from_a))
+      thread = @app_b.request('thread', FIX.FINGERPRINT)
+      zc.waitfor(-> zc.some(thread.message_col))
 
     .then (messages_from_a) =>
+      $threadlist_b = @app_b.$el.find('.threadlist')
+      expect($threadlist_b.text().trim()).toEqual(FIX.FINGERPRINT)
       expect(messages_from_a.at(0).get('text')).toEqual("hello from A")
 
     .catch (err) =>

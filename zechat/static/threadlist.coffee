@@ -14,18 +14,24 @@ class zc.ThreadModel extends Backbone.Model
 
   idAttribute: 'fingerprint'
 
+  initialize: ->
+    @message_col = new Backbone.Collection()
+
 
 class zc.Threadlist extends zc.Controller
 
   initialize: ->
     @collection = @app.request('threadlist')
     @app.commands.setHandler 'open-thread', @openThread.bind(@)
+    @app.reqres.setHandler 'thread', @getThread.bind(@)
+
+  getThread: (fingerprint) ->
+    unless @collection.get(fingerprint)?
+      @collection.add(new zc.ThreadModel(fingerprint: fingerprint))
+    return @collection.get(fingerprint)
 
   openThread: (peer) ->
-    unless @collection.get(peer)?
-      @collection.add(new zc.ThreadModel(fingerprint: peer))
-    thread_model = @collection.get(peer)
-
+    @getThread(peer)
     thread = new zc.Thread(app: @app, peer: peer)
     @app.commands.execute('show-main', thread.layout)
     thread.render()

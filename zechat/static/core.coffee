@@ -177,22 +177,8 @@ class zc.Receiver extends zc.Controller
     @app.vent.on('message', _.bind(@on_message, @))
 
   on_message: (data) ->
-    message_col = @app.request('message_collection', data.sender)
-    message_col.add(data)
-
-
-class zc.MessageManager extends zc.Controller
-
-  initialize: ->
-    @collection_map = {}
-    @app.reqres.setHandler('message_collection',
-      _.bind(@get_message_collection, @))
-
-  get_message_collection: (peer) ->
-    unless @collection_map[peer]
-      @collection_map[peer] = new Backbone.Collection
-
-    return @collection_map[peer]
+    thread = @app.request('thread', data.sender)
+    thread.message_col.add(data)
 
 
 zc.modules.core = ->
@@ -201,8 +187,6 @@ zc.modules.core = ->
       fingerprint: 'foo'
 
     threadlist: new Backbone.Collection
-
-  @message_manager = new zc.MessageManager(app: @app)
 
   @persist_identity = new zc.Persist
     app: @app
