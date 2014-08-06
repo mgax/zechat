@@ -18,6 +18,7 @@ def init_app(app):
         'core.coffee',
         'app.coffee',
         'crypto.coffee',
+        'network.coffee',
         'identity.coffee',
         'threadlist.coffee',
         'thread.coffee',
