@@ -3,6 +3,11 @@ class zc.ThreadlistItemView extends Backbone.Marionette.ItemView
   className: 'threadlist-item'
   template: 'threadlist_item.html'
 
+  events:
+    'click .threadlist-link': (evt) ->
+      evt.preventDefault()
+      @trigger('click', @model.get('fingerprint'))
+
 
 class zc.ThreadlistView extends Backbone.Marionette.CollectionView
 
@@ -37,4 +42,7 @@ class zc.Threadlist extends zc.Controller
     thread.render()
 
   createView: ->
-    new zc.ThreadlistView(collection: @collection)
+    view = new zc.ThreadlistView(collection: @collection)
+    view.on 'childview:click', (view, fingerprint) =>
+      @openThread(fingerprint)
+    return view
