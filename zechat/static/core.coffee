@@ -54,7 +54,7 @@ class zc.AppLayout extends Backbone.Marionette.LayoutView
 
   regions:
     header: '.app-header'
-    threads: '.app-threads'
+    threadlist: '.app-threadlist'
     main: '.app-main'
 
 
@@ -200,7 +200,7 @@ zc.modules.core = ->
     identity: new Backbone.Model
       fingerprint: 'foo'
 
-    threads: new Backbone.Collection
+    threadlist: new Backbone.Collection
 
   @message_manager = new zc.MessageManager(app: @app)
 
@@ -213,11 +213,11 @@ zc.modules.core = ->
     @models.identity.set('fingerprint', fingerprint)
 
   @app.reqres.setHandler 'identity', => @models.identity
-  @app.reqres.setHandler 'threads', => @models.threads
+  @app.reqres.setHandler 'threadlist', => @models.threadlist
 
   @transport = new zc.Transport(app: @app)
   @receiver = new zc.Receiver(app: @app)
-  @threads = new zc.Threads(app: @app)
+  @threadlist = new zc.Threadlist(app: @app)
 
   @app.commands.setHandler 'show-main', (view) =>
     @layout.main.show(view)
@@ -228,4 +228,4 @@ zc.modules.core = ->
 
     @header = new zc.Header(app: @app)
     @layout.header.show(@header.createView())
-    @layout.threads.show(@threads.createView())
+    @layout.threadlist.show(@threadlist.createView())

@@ -1,13 +1,13 @@
-class zc.ThreadsItemView extends Backbone.Marionette.ItemView
+class zc.ThreadlistItemView extends Backbone.Marionette.ItemView
 
-  className: 'threads-item'
-  template: 'threads_item.html'
+  className: 'threadlist-item'
+  template: 'threadlist_item.html'
 
 
-class zc.ThreadsView extends Backbone.Marionette.CollectionView
+class zc.ThreadlistView extends Backbone.Marionette.CollectionView
 
-  className: 'threads'
-  childView: zc.ThreadsItemView
+  className: 'threadlist'
+  childView: zc.ThreadlistItemView
 
 
 class zc.ThreadModel extends Backbone.Model
@@ -15,10 +15,10 @@ class zc.ThreadModel extends Backbone.Model
   idAttribute: 'fingerprint'
 
 
-class zc.Threads extends zc.Controller
+class zc.Threadlist extends zc.Controller
 
   initialize: ->
-    @collection = @app.request('threads')
+    @collection = @app.request('threadlist')
     @app.commands.setHandler 'open-conversation', @openConversation.bind(@)
 
   openConversation: (peer) ->
@@ -31,4 +31,4 @@ class zc.Threads extends zc.Controller
     conversation.render()
 
   createView: ->
-    new zc.ThreadsView(collection: @collection)
+    new zc.ThreadlistView(collection: @collection)

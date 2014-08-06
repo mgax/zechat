@@ -19,7 +19,7 @@ def init_app(app):
         'app.coffee',
         'crypto.coffee',
         'identity.coffee',
-        'threads.coffee',
+        'threadlist.coffee',
         'conversation.coffee',
         filters='coffeescript',
         output='gen/app.js',
