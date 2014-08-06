@@ -85,7 +85,7 @@ describe 'conversation', ->
   it 'should send a message and receive it back', (test_done) ->
     identity_json = JSON.stringify(key: FIX.PRIVATE_KEY)
 
-    create_testing_app(identity: identity_json)
+    create_testing_app({identity: identity_json}, {talk_to_self: true})
     .then (@app) =>
       zc.waitfor(=> zc.some(@app.$el.find('.conversation-compose')))
     .then =>
