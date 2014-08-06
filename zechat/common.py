@@ -61,7 +61,7 @@ def init_app(app):
 def get_template_list():
     for item in (Path(__file__).parent / 'jstemplates').iterdir():
         with item.open('r', encoding='utf-8') as f:
-            yield dict(id=item.name.replace('_', '-').replace('.', '-'), src=f.read())
+            yield dict(id=item.name, src=f.read())
 
 
 views = flask.Blueprint('common', __name__)

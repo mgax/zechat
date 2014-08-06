@@ -28,6 +28,10 @@ Handlebars.registerHelper 'format_time', (iso_time) ->
   return d3.time.format('%b-%-d %H:%M')(time)
 
 
+Backbone.Marionette.TemplateCache.prototype.loadTemplate = (name) ->
+  $('script[id="' + name + '"]').text()
+
+
 Backbone.Marionette.TemplateCache.prototype.compileTemplate = (src) ->
   Handlebars.compile(src)
 
@@ -46,7 +50,7 @@ class zc.BlankView extends Backbone.Marionette.ItemView
 
 class zc.AppLayout extends Backbone.Marionette.LayoutView
 
-  template: '#app-layout-html'
+  template: 'app_layout.html'
 
   regions:
     header: '.app-header'
@@ -57,7 +61,7 @@ class zc.AppLayout extends Backbone.Marionette.LayoutView
 class zc.HeaderView extends Backbone.Marionette.ItemView
 
   className: 'header-container tall'
-  template: '#header-html'
+  template: 'header.html'
 
   events:
     'click .header-btn-myid': (evt) ->
@@ -88,7 +92,7 @@ class zc.Header extends zc.Controller
 class zc.AddContactView extends Backbone.Marionette.ItemView
 
   tagName: 'form'
-  template: '#add-contact-html'
+  template: 'add_contact.html'
 
   ui:
     url: '[name=url]'

@@ -2,7 +2,7 @@ class zc.ConversationLayout extends Backbone.Marionette.LayoutView
 
   className: 'conversation-container tall'
 
-  template: '#conversation-layout-html'
+  template: 'conversation_layout.html'
 
   regions:
     history: '.conversation-history'
@@ -11,7 +11,7 @@ class zc.ConversationLayout extends Backbone.Marionette.LayoutView
 
 class zc.MessageView extends Backbone.Marionette.ItemView
 
-  template: '#message-html'
+  template: 'message.html'
 
 
 class zc.HistoryView extends Backbone.Marionette.CollectionView
@@ -30,7 +30,7 @@ class zc.ComposeView extends Backbone.Marionette.ItemView
 
   tagName: 'form'
 
-  template: '#compose-html'
+  template: 'compose.html'
 
   ui:
     message: '[name=message]'

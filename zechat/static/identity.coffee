@@ -17,7 +17,7 @@ zc.setup_identity = (app) ->
 class zc.IdentityView extends Backbone.Marionette.ItemView
 
   className: 'myid-container tall'
-  template: '#myid-html'
+  template: 'myid.html'
 
   events:
     'click .myid-publish': (evt) ->
