@@ -19,7 +19,7 @@ class zc.HistoryView extends Backbone.Marionette.CollectionView
   childView: zc.MessageView
 
 
-class zc.History extends Backbone.Marionette.Controller
+class zc.History extends zc.Controller
 
   createView: ->
     return new zc.HistoryView
@@ -44,7 +44,7 @@ class zc.ComposeView extends Backbone.Marionette.ItemView
         this.trigger('send', message)
 
 
-class zc.Compose extends Backbone.Marionette.Controller
+class zc.Compose extends zc.Controller
 
   createView: ->
     view = new zc.ComposeView
@@ -52,7 +52,7 @@ class zc.Compose extends Backbone.Marionette.Controller
     return view
 
   send: (message) ->
-    identity = @options.app.request('identity')
+    identity = @app.request('identity')
     data =
       type: 'message'
       recipient: @options.peer
@@ -60,16 +60,16 @@ class zc.Compose extends Backbone.Marionette.Controller
         text: message
         time: zc.utcnow_iso()
         sender: identity.get('fingerprint')
-    @options.app.commands.execute('send-packet', data)
+    @app.commands.execute('send-packet', data)
 
 
-class zc.Conversation extends Backbone.Marionette.Controller
+class zc.Conversation extends zc.Controller
 
   initialize: ->
-    @collection = @options.app.request('message_collection', @options.peer)
+    @collection = @app.request('message_collection', @options.peer)
     @layout = new zc.ConversationLayout
-    @history = new zc.History(app: @options.app, collection: @collection)
-    @compose = new zc.Compose(app: @options.app, peer: @options.peer)
+    @history = new zc.History(app: @app, collection: @collection)
+    @compose = new zc.Compose(app: @app, peer: @options.peer)
 
   render: ->
     @layout.render()

@@ -29,10 +29,10 @@ class zc.IdentityView extends Backbone.Marionette.ItemView
       @trigger('click-delete')
 
 
-class zc.Identity extends Backbone.Marionette.Controller
+class zc.Identity extends zc.Controller
 
   initialize: ->
-    @model = @options.app.request('identity')
+    @model = @app.request('identity')
 
   createView: ->
     view = new zc.IdentityView(model: @model)
@@ -49,7 +49,7 @@ class zc.Identity extends Backbone.Marionette.Controller
     return view
 
   publish: ->
-    url = @options.app.request('urls').post_identity
+    url = @app.request('urls').post_identity
     data = {
       fingerprint: @model.get('fingerprint')
       public_key: zc.get_public_key(@model.get('key'))

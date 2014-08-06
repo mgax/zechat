@@ -32,6 +32,13 @@ Backbone.Marionette.TemplateCache.prototype.compileTemplate = (src) ->
   Handlebars.compile(src)
 
 
+class zc.Controller extends Backbone.Marionette.Controller
+
+  constructor: (options) ->
+    @app = options.app
+    super(options)
+
+
 class zc.BlankView extends Backbone.Marionette.ItemView
 
   template: -> ''
@@ -62,18 +69,18 @@ class zc.HeaderView extends Backbone.Marionette.ItemView
       @trigger('click-add-contact')
 
 
-class zc.Header extends Backbone.Marionette.Controller
+class zc.Header extends zc.Controller
 
   createView: ->
     view = new zc.HeaderView()
 
     view.on 'click-myid', =>
-      myid = new zc.Identity(app: @options.app)
-      @options.app.commands.execute('show-main', myid.createView())
+      myid = new zc.Identity(app: @app)
+      @app.commands.execute('show-main', myid.createView())
 
     view.on 'click-add-contact', =>
-      add_contact = new zc.AddContact(app: @options.app)
-      @options.app.commands.execute('show-main', add_contact.createView())
+      add_contact = new zc.AddContact(app: @app)
+      @app.commands.execute('show-main', add_contact.createView())
 
     return view
 
@@ -97,33 +104,33 @@ class zc.AddContactView extends Backbone.Marionette.ItemView
     @ui.url.focus()
 
 
-class zc.AddContact extends Backbone.Marionette.Controller
+class zc.AddContact extends zc.Controller
 
   createView: ->
     view = new zc.AddContactView()
 
     view.on 'add', (url) =>
       Q($.get(url)).done (resp) =>
-        @options.app.commands.execute('open-conversation', resp.fingerprint)
+        @app.commands.execute('open-conversation', resp.fingerprint)
 
     return view
 
 
-class zc.Transport extends Backbone.Marionette.Controller
+class zc.Transport extends zc.Controller
 
   initialize: (options) ->
     @queue = []
-    @options.app.vent.on('start', _.bind(@connect, @))
-    @options.app.commands.setHandler 'send-packet', _.bind(@send, @)
+    @app.vent.on('start', _.bind(@connect, @))
+    @app.commands.setHandler 'send-packet', _.bind(@send, @)
 
   connect: ->
-    transport_url = @options.app.request('urls')['transport']
+    transport_url = @app.request('urls')['transport']
     @ws = new WebSocket(transport_url)
     @ws.onmessage = _.bind(@on_receive, @)
     @ws.onopen = _.bind(@on_open, @)
     @send(
       type: 'authenticate'
-      identity: @options.app.request('identity').get('fingerprint')
+      identity: @app.request('identity').get('fingerprint')
     )
 
   on_open: ->
@@ -134,10 +141,10 @@ class zc.Transport extends Backbone.Marionette.Controller
 
   on_receive: (evt) ->
     msg = JSON.parse(evt.data)
-    identity = @options.app.request('identity')
+    identity = @app.request('identity')
     my_fingerprint = identity.get('fingerprint')
     if msg.type == 'message' and msg.recipient == my_fingerprint
-      @options.app.vent.trigger('message', msg.message)
+      @app.vent.trigger('message', msg.message)
 
   send: (msg) ->
     if @ws.readyState == WebSocket.OPEN
@@ -146,35 +153,35 @@ class zc.Transport extends Backbone.Marionette.Controller
       @queue.push(msg)
 
 
-class zc.Persist extends Backbone.Marionette.Controller
+class zc.Persist extends zc.Controller
 
   initialize: ->
     @key = @options.key
     @model = @options.model
-    value = @options.app.request('local_storage').getItem(@key)
+    value = @app.request('local_storage').getItem(@key)
     if value
       @model.set(JSON.parse(value))
     @model.on('change', _.bind(@save, @))
 
   save: ->
-    @options.app.request('local_storage').setItem(@key, JSON.stringify(@model))
+    @app.request('local_storage').setItem(@key, JSON.stringify(@model))
 
 
-class zc.Receiver extends Backbone.Marionette.Controller
+class zc.Receiver extends zc.Controller
 
   initialize: ->
-    @options.app.vent.on('message', _.bind(@on_message, @))
+    @app.vent.on('message', _.bind(@on_message, @))
 
   on_message: (data) ->
-    message_col = @options.app.request('message_collection', data.sender)
+    message_col = @app.request('message_collection', data.sender)
     message_col.add(data)
 
 
-class zc.MessageManager extends Backbone.Marionette.Controller
+class zc.MessageManager extends zc.Controller
 
   initialize: ->
     @collection_map = {}
-    @options.app.reqres.setHandler('message_collection',
+    @app.reqres.setHandler('message_collection',
       _.bind(@get_message_collection, @))
 
   get_message_collection: (peer) ->
