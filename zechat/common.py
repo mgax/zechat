@@ -27,7 +27,6 @@ def init_app(app):
 
     assets.register('testsuite.js', Bundle(
         'test_utils.coffee',
-        'test_app.coffee',
         'test_crypto.coffee',
         'test_conversation.coffee',
         filters='coffeescript',
