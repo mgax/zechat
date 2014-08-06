@@ -1,8 +1,3 @@
-zc = window.zc = {}
-
-zc.modules = {}
-
-
 zc.create_app = (options) ->
   app_deferred = Q.defer()
 

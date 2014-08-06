@@ -9,8 +9,8 @@ def init_app(app):
     assets = Environment(app)
 
     assets.register('app.js', Bundle(
-        'app.coffee',
         'core.coffee',
+        'app.coffee',
         'crypto.coffee',
         'identity.coffee',
         'conversation.coffee',

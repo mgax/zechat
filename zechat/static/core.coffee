@@ -1,3 +1,8 @@
+zc = window.zc = {}
+
+zc.modules = {}
+
+
 zc.utcnow_iso = ->
   (new Date()).toJSON()
 
