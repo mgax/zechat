@@ -62,6 +62,10 @@ describe 'conversation', ->
       $form_a = @app_a.$el.find('.app-main > form')
       $form_a.find('[name=url]').val(url_b)
       $form_a.submit()
+      zc.waitfor(=> zc.some(@app_a.$el.find('.threads')))
+
+    .then ($threads) =>
+      expect($threads.text().trim()).toEqual(FIX.FINGERPRINT_B)
       zc.waitfor(=> zc.some(@app_a.$el.find('.conversation-compose form')))
 
     .then ($form) =>
