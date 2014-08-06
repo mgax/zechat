@@ -10,8 +10,11 @@ zc.create_app = (options) ->
   Backbone.Wreqr.radio.channel(channel).reset()
   app = new Backbone.Marionette.Application(channelName: channel)
 
+  app.el = options.el
+  app.$el = $(app.el)
+
   app.reqres.setHandler 'urls', -> options.urls
-  app.reqres.setHandler 'root_el', -> $(options.el)
+  app.reqres.setHandler 'root_el', -> app.$el
   app.reqres.setHandler 'local_storage', ->
     return options.local_storage or window.localStorage
 
