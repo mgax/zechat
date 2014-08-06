@@ -115,7 +115,7 @@ class zc.AddContact extends zc.Controller
 
     view.on 'add', (url) =>
       Q($.get(url)).done (resp) =>
-        @app.commands.execute('open-conversation', resp.fingerprint)
+        @app.commands.execute('open-thread', resp.fingerprint)
 
     return view
 

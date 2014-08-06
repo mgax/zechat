@@ -19,16 +19,16 @@ class zc.Threadlist extends zc.Controller
 
   initialize: ->
     @collection = @app.request('threadlist')
-    @app.commands.setHandler 'open-conversation', @openConversation.bind(@)
+    @app.commands.setHandler 'open-thread', @openThread.bind(@)
 
-  openConversation: (peer) ->
+  openThread: (peer) ->
     unless @collection.get(peer)?
       @collection.add(new zc.ThreadModel(fingerprint: peer))
-    conversation_model = @collection.get(peer)
+    thread_model = @collection.get(peer)
 
-    conversation = new zc.Conversation(app: @app, peer: peer)
-    @app.commands.execute('show-main', conversation.layout)
-    conversation.render()
+    thread = new zc.Thread(app: @app, peer: peer)
+    @app.commands.execute('show-main', thread.layout)
+    thread.render()
 
   createView: ->
     new zc.ThreadlistView(collection: @collection)

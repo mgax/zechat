@@ -20,7 +20,7 @@ zc.create_app = (options) ->
   setup_identity.done (fingerprint) ->
     app.vent.trigger('start')
     if options.talk_to_self
-      app.commands.execute('open-conversation', fingerprint)
+      app.commands.execute('open-thread', fingerprint)
     app_deferred.resolve(app)
 
   _.defer ->

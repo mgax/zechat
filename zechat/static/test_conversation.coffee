@@ -66,7 +66,7 @@ describe 'conversation', ->
 
     .then ($threadlist) =>
       expect($threadlist.text().trim()).toEqual(FIX.FINGERPRINT_B)
-      zc.waitfor(=> zc.some(@app_a.$el.find('.conversation-compose form')))
+      zc.waitfor(=> zc.some(@app_a.$el.find('.thread-compose form')))
 
     .then ($form) =>
       $form.find('[name=message]').val("hello from A")
@@ -91,14 +91,14 @@ describe 'conversation', ->
 
     create_testing_app({identity: identity_json}, {talk_to_self: true})
     .then (@app) =>
-      zc.waitfor(=> zc.some(@app.$el.find('.conversation-compose')))
+      zc.waitfor(=> zc.some(@app.$el.find('.thread-compose')))
     .then =>
-      $form = @app.$el.find('.conversation-compose form')
+      $form = @app.$el.find('.thread-compose form')
       $form.find('[name=message]').val('hello world')
       $form.submit()
 
       get_messages = =>
-        $history = @app.$el.find('.conversation-history')
+        $history = @app.$el.find('.thread-history')
         messages = $history.find('.message-text').text()
         return messages if messages.length > 0
 

@@ -1,12 +1,12 @@
-class zc.ConversationLayout extends Backbone.Marionette.LayoutView
+class zc.ThreadLayout extends Backbone.Marionette.LayoutView
 
-  className: 'conversation-container tall'
+  className: 'thread-container tall'
 
-  template: 'conversation_layout.html'
+  template: 'thread.html'
 
   regions:
-    history: '.conversation-history'
-    compose: '.conversation-compose'
+    history: '.thread-history'
+    compose: '.thread-compose'
 
 
 class zc.MessageView extends Backbone.Marionette.ItemView
@@ -63,11 +63,11 @@ class zc.Compose extends zc.Controller
     @app.commands.execute('send-packet', data)
 
 
-class zc.Conversation extends zc.Controller
+class zc.Thread extends zc.Controller
 
   initialize: ->
     @collection = @app.request('message_collection', @options.peer)
-    @layout = new zc.ConversationLayout
+    @layout = new zc.ThreadLayout
     @history = new zc.History(app: @app, collection: @collection)
     @compose = new zc.Compose(app: @app, peer: @options.peer)
 
