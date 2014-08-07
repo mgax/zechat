@@ -30,7 +30,6 @@ class zc.Transport extends zc.Controller
       @send(msg)
 
   on_close: ->
-    console.log 'CLOSED'
     @model.set(state: 'closed')
 
   on_receive: (evt) ->

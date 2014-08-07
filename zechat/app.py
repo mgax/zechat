@@ -20,7 +20,7 @@ def create_manager(app):
     from flask.ext.migrate import Migrate, MigrateCommand
     from zechat.models import db
 
-    migrate = Migrate(app, db)
+    Migrate(app, db)
 
     manager = Manager(app)
     manager.add_command('db', MigrateCommand)

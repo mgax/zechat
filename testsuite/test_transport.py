@@ -1,6 +1,6 @@
 from hashlib import sha1
 import pytest
-from mock import Mock, call
+from mock import Mock
 from flask import json
 
 
