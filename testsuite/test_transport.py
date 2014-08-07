@@ -1,3 +1,4 @@
+from hashlib import sha1
 import pytest
 from mock import Mock, call
 from flask import json
@@ -22,6 +23,18 @@ def msg(recipient, text):
 
 def auth(identity):
     return dict(type='authenticate', identity=identity)
+
+
+def list_(identity):
+    return dict(type='list', identity=identity)
+
+
+def get(identity, messages):
+    return dict(type='get', identity=identity, messages=messages)
+
+
+def msghash(text):
+    return sha1(json.dumps(dict(text=text))).hexdigest()
 
 
 def test_handle(node):
@@ -57,3 +70,18 @@ def test_messages_filtered_by_recipient(node):
 
     assert a.out == [msg('A', 'foo')]
     assert b.out == [msg('B', 'bar')]
+
+
+def test_message_history(node):
+    with node.transport(mock_ws('A')) as tr_a:
+        tr_a.packet(msg('B', 'foo'))
+        tr_a.packet(msg('B', 'bar'))
+
+    b = mock_ws('B')
+    with node.transport(b) as tr_b:
+        tr_b.packet(list_('B'))
+        assert b.out == [{'messages': [msghash('foo'), msghash('bar')]}]
+        b.out[:] = []
+
+        tr_b.packet(get('B', [msghash('foo'), msghash('bar')]))
+        assert b.out == [msg('B', 'foo'), msg('B', 'bar')]

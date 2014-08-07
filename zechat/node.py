@@ -2,6 +2,7 @@ import logging
 from contextlib import contextmanager
 from base64 import b64encode, b64decode
 import hashlib
+from collections import defaultdict
 import flask
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
@@ -45,6 +46,7 @@ class Node(object):
 
     def __init__(self):
         self.transport_map = {}
+        self.inbox = defaultdict(dict)
 
     @contextmanager
     def transport(self, ws):
@@ -56,9 +58,25 @@ class Node(object):
             del self.transport_map[ws.id]
 
     def relay(self, pkt, recipient):
+        message_data = flask.json.dumps(pkt['message'])
+        message_hash = hashlib.sha1(message_data).hexdigest()
+        self.inbox[recipient][message_hash] = message_data
+
         for client in self.transport_map.values():
             if recipient in client.identities:
                 client.send(pkt)
+
+    def send_list(self, identity, transport):
+        transport.send(dict(messages=list(self.inbox[identity])))
+
+    def send_messages(self, identity, messages, transport):
+        for message_hash in messages:
+            message = flask.json.loads(self.inbox[identity][message_hash])
+            transport.send(dict(
+                type='message',
+                recipient=identity,
+                message=message,
+            ))
 
 
 class Transport(object):
@@ -91,6 +109,12 @@ class Transport(object):
 
         elif pkt['type'] == 'message':
             self.node.relay(pkt, pkt['recipient'])
+
+        elif pkt['type'] == 'list':
+            self.node.send_list(pkt['identity'], self)
+
+        elif pkt['type'] == 'get':
+            self.node.send_messages(pkt['identity'], pkt['messages'], self)
 
         else:
             raise RuntimeError("Unknown packet type %r" % pkt['type'])
