@@ -1,13 +1,28 @@
 from hashlib import sha1
 import pytest
 from mock import Mock
+import flask
 from flask import json
 
 
-@pytest.fixture
-def node():
+@pytest.yield_fixture
+def node(request):
+    from zechat import models
     from zechat.node import Node
-    return Node()
+
+    app0 = flask.Flask(__name__)
+    app0.config.from_pyfile('../settings.py', silent=False)
+    db_uri = app0.config['TESTING_SQLALCHEMY_DATABASE_URI']
+
+    app = flask.Flask(__name__)
+    app.testing = True
+    app.config['SQLALCHEMY_DATABASE_URI'] = db_uri
+    models.db.init_app(app)
+
+    with app.app_context():
+        models.db.drop_all()
+        models.db.create_all()
+        yield Node()
 
 
 def mock_ws(client_id):

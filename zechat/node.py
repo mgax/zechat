@@ -13,6 +13,32 @@ from zechat import models
 logger = logging.getLogger(__name__)
 
 
+class Inbox(object):
+
+    def __init__(self, identity):
+        self.identity = identity
+
+    def save(self, message_data):
+        message = models.Message(
+            payload=message_data,
+            hash=hashlib.sha1(message_data).hexdigest(),
+            recipient=self.identity,
+        )
+        models.db.session.add(message)
+        models.db.session.commit()
+
+    def get(self, message_hash):
+        message = models.Message.query.filter_by(hash=message_hash).first()
+        assert message and message.recipient == self.identity
+        return message.payload
+
+    def hash_list(self):
+        return [
+            message.hash for message in
+            models.Message.query.filter_by(recipient=self.identity)
+        ]
+
+
 class Crypto(object):
 
     def __init__(self, key):
@@ -44,9 +70,9 @@ class Crypto(object):
 
 class Node(object):
 
-    def __init__(self):
+    def __init__(self, app=None):
         self.transport_map = {}
-        self.inbox = defaultdict(dict)
+        self.app = app
 
     @contextmanager
     def transport(self, ws):
@@ -59,19 +85,18 @@ class Node(object):
 
     def relay(self, pkt, recipient):
         message_data = flask.json.dumps(pkt['message'])
-        message_hash = hashlib.sha1(message_data).hexdigest()
-        self.inbox[recipient][message_hash] = message_data
+        Inbox(recipient).save(message_data)
 
         for client in self.transport_map.values():
             if recipient in client.identities:
                 client.send(pkt)
 
     def send_list(self, identity, transport):
-        transport.send(dict(messages=list(self.inbox[identity])))
+        transport.send(dict(messages=Inbox(identity).hash_list()))
 
     def send_messages(self, identity, messages, transport):
         for message_hash in messages:
-            message = flask.json.loads(self.inbox[identity][message_hash])
+            message = flask.json.loads(Inbox(identity).get(message_hash))
             transport.send(dict(
                 type='message',
                 recipient=identity,
@@ -101,7 +126,8 @@ class Transport(object):
 
     def handle(self):
         for pkt in self.iter_packets():
-            self.packet(pkt)
+            with self.node.app.app_context():
+                self.packet(pkt)
 
     def packet(self, pkt):
         if pkt['type'] == 'authenticate':
@@ -185,7 +211,7 @@ def init_app(app):
     if app.config.get('LISTEN_WEBSOCKET'):
         from flask.ext.uwsgi_websocket import GeventWebSocket
 
-        node = Node()
+        node = Node(app)
 
         websocket = GeventWebSocket(app)
 
