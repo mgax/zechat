@@ -88,35 +88,39 @@ def msghash(text):
 
 def test_loopback(node):
     with connection(node) as peer:
-        peer.send(auth('A'))
-        peer.send(msg('A', 'foo'), 1)
-        peer.send(msg('A', 'bar'), 2)
+        peer.send(auth('A'), 1)
+        peer.send(msg('A', 'foo'), 2)
+        peer.send(msg('A', 'bar'), 3)
 
-    assert peer.out == [reply(1), msg('A', 'foo'), reply(2), msg('A', 'bar')]
+    assert peer.out == [
+        reply(1),
+        reply(2), msg('A', 'foo'),
+        reply(3), msg('A', 'bar'),
+    ]
 
 
 def test_peer_receives_messages(node):
     with connection(node) as peer:
-        peer.send(auth('B'))
+        peer.send(auth('B'), 1)
 
         with connection(node) as sender:
             peer.send(msg('B', 'foo'))
             peer.send(msg('B', 'bar'))
 
-    assert peer.out == [msg('B', 'foo'), msg('B', 'bar')]
+    assert peer.out == [reply(1), msg('B', 'foo'), msg('B', 'bar')]
 
 
 def test_messages_filtered_by_recipient(node):
     with connection(node) as a, connection(node) as b:
-        a.send(auth('A'))
-        b.send(auth('B'))
+        a.send(auth('A'), 1)
+        b.send(auth('B'), 1)
 
         with connection(node) as sender:
             sender.send(msg('A', 'foo'))
             sender.send(msg('B', 'bar'))
 
-    assert a.out == [msg('A', 'foo')]
-    assert b.out == [msg('B', 'bar')]
+    assert a.out == [reply(1), msg('A', 'foo')]
+    assert b.out == [reply(1), msg('B', 'bar')]
 
 
 def test_message_history(node):
@@ -125,7 +129,9 @@ def test_message_history(node):
         a.send(msg('B', 'bar'))
 
     with connection(node) as b:
-        b.send(auth('B'))
+        b.send(auth('B'), 1)
+        b.out[:] = []
+
         b.send(list_('B'), 2)
         assert b.out == [reply(2, messages=[msghash('foo'), msghash('bar')])]
         b.out[:] = []

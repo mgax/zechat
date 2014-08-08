@@ -92,6 +92,7 @@ class Node(object):
     def packet(self, transport, pkt):
         if pkt['type'] == 'authenticate':
             transport.identities.add(pkt['identity'])
+            transport.send(dict(type='reply', _serial=pkt['_serial']))
 
         elif pkt['type'] == 'message':
             recipient = pkt['recipient']
