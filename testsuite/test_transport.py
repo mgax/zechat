@@ -1,4 +1,5 @@
 from hashlib import sha1
+from contextlib import contextmanager
 import pytest
 from mock import Mock
 import flask
@@ -32,6 +33,10 @@ def mock_ws(client_id):
     return ws
 
 
+def connection(node):
+    return Client().connection(node)
+
+
 class Client(object):
 
     _last_ws_id = 0
@@ -45,8 +50,13 @@ class Client(object):
         self.ws = mock_ws(self.next_id())
         self.out = self.ws.out
 
-    def send(self, transport, packet):
-        transport.packet(packet)
+    def send(self, packet):
+        self.transport.packet(packet)
+
+    @contextmanager
+    def connection(self, node):
+        with node.transport(self.ws) as self.transport:
+            yield self
 
 
 def msg(recipient, text):
@@ -70,57 +80,46 @@ def msghash(text):
 
 
 def test_loopback(node):
-    peer = Client()
-    with node.transport(peer.ws) as transport:
-        peer.send(transport, auth('A'))
-        peer.send(transport, msg('A', 'foo'))
-        peer.send(transport, msg('A', 'bar'))
+    with connection(node) as peer:
+        peer.send(auth('A'))
+        peer.send(msg('A', 'foo'))
+        peer.send(msg('A', 'bar'))
     assert peer.out == [msg('A', 'foo'), msg('A', 'bar')]
 
 
 def test_peer_receives_messages(node):
-    peer = Client()
-    sender = Client()
+    with connection(node) as peer:
+        peer.send(auth('B'))
 
-    with node.transport(peer.ws) as peer_transport:
-        peer.send(peer_transport, auth('B'))
-
-        with node.transport(sender.ws) as sender_transport:
-            peer.send(sender_transport, msg('B', 'foo'))
-            peer.send(sender_transport, msg('B', 'bar'))
+        with connection(node) as sender:
+            peer.send(msg('B', 'foo'))
+            peer.send(msg('B', 'bar'))
 
     assert peer.out == [msg('B', 'foo'), msg('B', 'bar')]
 
 
 def test_messages_filtered_by_recipient(node):
-    a = Client()
-    b = Client()
-    sender = Client()
+    with connection(node) as a, connection(node) as b:
+        a.send(auth('A'))
+        b.send(auth('B'))
 
-    with node.transport(a.ws) as tr_a, node.transport(b.ws) as tr_b:
-        a.send(tr_a, auth('A'))
-        b.send(tr_b, auth('B'))
-
-        with node.transport(sender.ws) as sender_transport:
-            sender.send(sender_transport, msg('A', 'foo'))
-            sender.send(sender_transport, msg('B', 'bar'))
+        with connection(node) as sender:
+            sender.send(msg('A', 'foo'))
+            sender.send(msg('B', 'bar'))
 
     assert a.out == [msg('A', 'foo')]
     assert b.out == [msg('B', 'bar')]
 
 
 def test_message_history(node):
-    a = Client()
-    b = Client()
+    with connection(node) as a:
+        a.send(msg('B', 'foo'))
+        a.send(msg('B', 'bar'))
 
-    with node.transport(a.ws) as tr_a:
-        a.send(tr_a, msg('B', 'foo'))
-        a.send(tr_a, msg('B', 'bar'))
-
-    with node.transport(b.ws) as tr_b:
-        b.send(tr_b, list_('B'))
+    with connection(node) as b:
+        b.send(list_('B'))
         assert b.out == [{'messages': [msghash('foo'), msghash('bar')]}]
         b.out[:] = []
 
-        b.send(tr_b, get('B', [msghash('foo'), msghash('bar')]))
+        b.send(get('B', [msghash('foo'), msghash('bar')]))
         assert b.out == [msg('B', 'foo'), msg('B', 'bar')]
