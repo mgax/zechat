@@ -98,6 +98,10 @@ class Node(object):
             message_data = flask.json.dumps(pkt['message'])
             Inbox(recipient).save(message_data)
 
+            serial = pkt.pop('_serial', None)
+            if serial:
+                transport.send(dict(type='reply', _serial=serial))
+
             for client in self.transport_map.values():
                 if recipient in client.identities:
                     client.send(pkt)
@@ -105,7 +109,11 @@ class Node(object):
         elif pkt['type'] == 'list':
             identity = pkt['identity']
             assert identity in transport.identities
-            transport.send(dict(messages=Inbox(identity).hash_list()))
+            transport.send(dict(
+                type='reply',
+                _serial=pkt.get('_serial'),
+                messages=Inbox(identity).hash_list(),
+            ))
 
         elif pkt['type'] == 'get':
             identity = pkt['identity']

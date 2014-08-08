@@ -50,7 +50,9 @@ class Client(object):
         self.ws = mock_ws(self.next_id())
         self.out = self.ws.out
 
-    def send(self, pkt):
+    def send(self, pkt, serial=None):
+        if serial:
+            pkt['_serial'] = serial
         self.node.packet(self.transport, pkt)
 
     @contextmanager
@@ -62,6 +64,10 @@ class Client(object):
 
 def msg(recipient, text):
     return dict(type='message', recipient=recipient, message=dict(text=text))
+
+
+def reply(serial, **data):
+    return dict(type='reply', _serial=serial, **data)
 
 
 def auth(identity):
@@ -83,9 +89,10 @@ def msghash(text):
 def test_loopback(node):
     with connection(node) as peer:
         peer.send(auth('A'))
-        peer.send(msg('A', 'foo'))
-        peer.send(msg('A', 'bar'))
-    assert peer.out == [msg('A', 'foo'), msg('A', 'bar')]
+        peer.send(msg('A', 'foo'), 1)
+        peer.send(msg('A', 'bar'), 2)
+
+    assert peer.out == [reply(1), msg('A', 'foo'), reply(2), msg('A', 'bar')]
 
 
 def test_peer_receives_messages(node):
@@ -119,8 +126,8 @@ def test_message_history(node):
 
     with connection(node) as b:
         b.send(auth('B'))
-        b.send(list_('B'))
-        assert b.out == [{'messages': [msghash('foo'), msghash('bar')]}]
+        b.send(list_('B'), 2)
+        assert b.out == [reply(2, messages=[msghash('foo'), msghash('bar')])]
         b.out[:] = []
 
         b.send(get('B', [msghash('foo'), msghash('bar')]))
