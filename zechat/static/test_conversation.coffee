@@ -115,3 +115,49 @@ describe 'conversation', ->
     .finally =>
       test_done()
     .done()
+
+  it 'should read offline messages', (test_done) ->
+    sender_app = new Backbone.Marionette.Application
+    sender_identity = new Backbone.Model(fingerprint: 'friend')
+    sender_app.reqres.setHandler('identity', -> sender_identity)
+    sender_app.reqres.setHandler('urls', -> zc.TESTING_URL_MAP)
+    sender_transport = new zc.Transport(app: sender_app)
+    sender_transport.connect()
+
+    zc.waitfor(=> sender_transport.model.get('state') == 'open')
+
+    .then =>
+      sender_transport.send(
+        recipient: FIX.FINGERPRINT
+        message: {text: "hello offline", sender: 'friend'}
+        type: 'message'
+      )
+
+    .then =>
+      identity_json = JSON.stringify(
+        key: FIX.PRIVATE_KEY
+        fingerprint: FIX.FINGERPRINT
+      )
+      create_testing_app(identity: identity_json)
+
+    .then (@app) =>
+      get_messages = =>
+        message_col = @app.request('thread', 'friend').message_col
+        if message_col.length
+          return message_col.at(0)
+
+      return zc.waitfor(get_messages, 3000)
+
+    .then (message) =>
+      expect(message.get('text')).toEqual("hello offline")
+
+    .catch (err) =>
+      if err == 'timeout'
+        expect('timed out').toBe(false)
+        return
+      throw(err)
+
+    .finally =>
+      test_done()
+
+    .done()

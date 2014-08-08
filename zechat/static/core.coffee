@@ -185,3 +185,15 @@ zc.modules.core = ->
     @header = new zc.Header(app: @app)
     @layout.header.show(@header.createView())
     @layout.threadlist.show(@threadlist.createView())
+
+  @app.vent.on 'connect', =>
+    fingerprint = @app.request('identity').get('fingerprint')
+    @app.request('send-packet', {type: 'list', identity: fingerprint})
+
+    .then (resp) =>
+      @app.request('send-packet',
+        {type: 'get', identity: fingerprint, messages: resp.messages})
+
+    .done (resp) =>
+      for msg in resp.messages
+        @app.vent.trigger('message', msg.message)
