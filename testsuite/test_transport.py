@@ -50,11 +50,12 @@ class Client(object):
         self.ws = mock_ws(self.next_id())
         self.out = self.ws.out
 
-    def send(self, packet):
-        self.transport.packet(packet)
+    def send(self, pkt):
+        self.node.packet(self.transport, pkt)
 
     @contextmanager
     def connection(self, node):
+        self.node = node
         with node.transport(self.ws) as self.transport:
             yield self
 

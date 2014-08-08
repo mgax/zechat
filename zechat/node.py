@@ -76,7 +76,7 @@ class Node(object):
 
     @contextmanager
     def transport(self, ws):
-        transport = Transport(self, ws)
+        transport = Transport(ws)
         self.transport_map[ws.id] = transport
         try:
             yield transport
@@ -87,33 +87,41 @@ class Node(object):
         with self.transport(ws) as transprot:
             for pkt in transprot.iter_packets():
                 with self.app.app_context():
-                    transprot.packet(pkt)
+                    self.packet(transprot, pkt)
 
-    def relay(self, pkt, recipient):
-        message_data = flask.json.dumps(pkt['message'])
-        Inbox(recipient).save(message_data)
+    def packet(self, transport, pkt):
+        if pkt['type'] == 'authenticate':
+            transport.identities.add(pkt['identity'])
 
-        for client in self.transport_map.values():
-            if recipient in client.identities:
-                client.send(pkt)
+        elif pkt['type'] == 'message':
+            recipient = pkt['recipient']
+            message_data = flask.json.dumps(pkt['message'])
+            Inbox(recipient).save(message_data)
 
-    def send_list(self, identity, transport):
-        transport.send(dict(messages=Inbox(identity).hash_list()))
+            for client in self.transport_map.values():
+                if recipient in client.identities:
+                    client.send(pkt)
 
-    def send_messages(self, identity, messages, transport):
-        for message_hash in messages:
-            message = flask.json.loads(Inbox(identity).get(message_hash))
-            transport.send(dict(
-                type='message',
-                recipient=identity,
-                message=message,
-            ))
+        elif pkt['type'] == 'list':
+            transport.send(dict(messages=Inbox(pkt['identity']).hash_list()))
+
+        elif pkt['type'] == 'get':
+            identity = pkt['identity']
+            for message_hash in pkt['messages']:
+                message = flask.json.loads(Inbox(identity).get(message_hash))
+                transport.send(dict(
+                    type='message',
+                    recipient=identity,
+                    message=message,
+                ))
+
+        else:
+            raise RuntimeError("Unknown packet type %r" % pkt['type'])
 
 
 class Transport(object):
 
-    def __init__(self, node, ws):
-        self.node = node
+    def __init__(self, ws):
         self.ws = ws
         self.identities = set()
 
@@ -129,22 +137,6 @@ class Transport(object):
             pkt = flask.json.loads(data)
             logger.debug("packet: %r", pkt)
             yield pkt
-
-    def packet(self, pkt):
-        if pkt['type'] == 'authenticate':
-            self.identities.add(pkt['identity'])
-
-        elif pkt['type'] == 'message':
-            self.node.relay(pkt, pkt['recipient'])
-
-        elif pkt['type'] == 'list':
-            self.node.send_list(pkt['identity'], self)
-
-        elif pkt['type'] == 'get':
-            self.node.send_messages(pkt['identity'], pkt['messages'], self)
-
-        else:
-            raise RuntimeError("Unknown packet type %r" % pkt['type'])
 
     def send(self, pkt):
         self.ws.send(flask.json.dumps(pkt))
