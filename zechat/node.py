@@ -118,13 +118,20 @@ class Node(object):
         elif pkt['type'] == 'get':
             identity = pkt['identity']
             assert identity in transport.identities
-            for message_hash in pkt['messages']:
-                message = flask.json.loads(Inbox(identity).get(message_hash))
-                transport.send(dict(
+            inbox = Inbox(identity)
+            message_list = [
+                dict(
                     type='message',
                     recipient=identity,
-                    message=message,
-                ))
+                    message=flask.json.loads(inbox.get(message_hash)),
+                )
+                for message_hash in pkt['messages']
+            ]
+            transport.send(dict(
+                type='reply',
+                _serial=pkt['_serial'],
+                messages=message_list,
+            ))
 
         else:
             raise RuntimeError("Unknown packet type %r" % pkt['type'])

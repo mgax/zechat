@@ -130,5 +130,5 @@ def test_message_history(node):
         assert b.out == [reply(2, messages=[msghash('foo'), msghash('bar')])]
         b.out[:] = []
 
-        b.send(get('B', [msghash('foo'), msghash('bar')]))
-        assert b.out == [msg('B', 'foo'), msg('B', 'bar')]
+        b.send(get('B', [msghash('foo'), msghash('bar')]), 3)
+        assert b.out == [reply(3, messages=[msg('B', 'foo'), msg('B', 'bar')])]
