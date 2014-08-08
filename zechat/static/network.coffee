@@ -45,11 +45,13 @@ class zc.Transport extends zc.Controller
 
   on_open: ->
     @model.set(state: 'open')
-    @ws_send(
-      type: 'authenticate'
-      identity: @app.request('identity').get('fingerprint')
-    )
-    @app.vent.trigger('connect')
+    fingerprint = @app.request('identity').get('fingerprint')
+
+    @send(type: 'authenticate', identity: fingerprint)
+    .then =>
+      @send(type: 'subscribe', identity: fingerprint)
+    .then =>
+      @app.vent.trigger('connect')
 
   on_close: ->
     @model.set(state: 'closed')

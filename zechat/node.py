@@ -94,6 +94,12 @@ class Node(object):
             transport.identities.add(pkt['identity'])
             transport.send(dict(type='reply', _serial=pkt['_serial']))
 
+        elif pkt['type'] == 'subscribe':
+            identity = pkt['identity']
+            assert identity in transport.identities
+            transport.subscriptions.add(identity)
+            transport.send(dict(type='reply', _serial=pkt.get('_serial')))
+
         elif pkt['type'] == 'message':
             recipient = pkt['recipient']
             message_data = flask.json.dumps(pkt['message'])
@@ -104,7 +110,7 @@ class Node(object):
                 transport.send(dict(type='reply', _serial=serial))
 
             for client in self.transport_map.values():
-                if recipient in client.identities:
+                if recipient in client.subscriptions:
                     client.send(pkt)
 
         elif pkt['type'] == 'list':
@@ -143,6 +149,7 @@ class Transport(object):
     def __init__(self, ws):
         self.ws = ws
         self.identities = set()
+        self.subscriptions = set()
 
     def iter_packets(self):
         while True:

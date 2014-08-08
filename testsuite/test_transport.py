@@ -74,6 +74,10 @@ def auth(identity):
     return dict(type='authenticate', identity=identity)
 
 
+def subscribe(identity):
+    return dict(type='subscribe', identity=identity)
+
+
 def list_(identity):
     return dict(type='list', identity=identity)
 
@@ -89,38 +93,42 @@ def msghash(text):
 def test_loopback(node):
     with connection(node) as peer:
         peer.send(auth('A'), 1)
-        peer.send(msg('A', 'foo'), 2)
-        peer.send(msg('A', 'bar'), 3)
+        peer.send(subscribe('A'), 2)
+        peer.send(msg('A', 'foo'), 3)
+        peer.send(msg('A', 'bar'), 4)
 
     assert peer.out == [
-        reply(1),
-        reply(2), msg('A', 'foo'),
-        reply(3), msg('A', 'bar'),
+        reply(1), reply(2),
+        reply(3), msg('A', 'foo'),
+        reply(4), msg('A', 'bar'),
     ]
 
 
 def test_peer_receives_messages(node):
     with connection(node) as peer:
         peer.send(auth('B'), 1)
+        peer.send(subscribe('B'), 2)
 
         with connection(node) as sender:
             peer.send(msg('B', 'foo'))
             peer.send(msg('B', 'bar'))
 
-    assert peer.out == [reply(1), msg('B', 'foo'), msg('B', 'bar')]
+    assert peer.out == [reply(1), reply(2), msg('B', 'foo'), msg('B', 'bar')]
 
 
 def test_messages_filtered_by_recipient(node):
     with connection(node) as a, connection(node) as b:
         a.send(auth('A'), 1)
+        a.send(subscribe('A'), 2)
         b.send(auth('B'), 1)
+        b.send(subscribe('B'), 2)
 
         with connection(node) as sender:
             sender.send(msg('A', 'foo'))
             sender.send(msg('B', 'bar'))
 
-    assert a.out == [reply(1), msg('A', 'foo')]
-    assert b.out == [reply(1), msg('B', 'bar')]
+    assert a.out == [reply(1), reply(2), msg('A', 'foo')]
+    assert b.out == [reply(1), reply(2), msg('B', 'bar')]
 
 
 def test_message_history(node):
