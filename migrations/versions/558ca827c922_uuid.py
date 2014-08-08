@@ -1,5 +1,5 @@
 revision = '558ca827c922'
-down_revision = '19f1a7d76d9f'
+down_revision = None
 
 from alembic import op
 import sqlalchemy as sa
@@ -7,9 +7,6 @@ from sqlalchemy.dialects import postgresql
 
 
 def upgrade():
-    op.drop_table('message')
-    op.drop_table('identity')
-
     op.create_table(
         'message',
         sa.Column('id', postgresql.UUID(), nullable=False),
@@ -47,4 +44,9 @@ def upgrade():
 
 
 def downgrade():
-    raise NotImplementedError
+    op.drop_index(op.f('ix_message_recipient'), table_name='message')
+    op.drop_index(op.f('ix_message_hash'), table_name='message')
+    op.drop_table('message')
+
+    op.drop_index(op.f('ix_identity_fingerprint'), table_name='identity')
+    op.drop_table('identity')
