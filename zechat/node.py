@@ -83,6 +83,12 @@ class Node(object):
         finally:
             del self.transport_map[ws.id]
 
+    def handle_connection(self, ws):
+        with self.transport(ws) as transprot:
+            for pkt in transprot.iter_packets():
+                with self.app.app_context():
+                    transprot.packet(pkt)
+
     def relay(self, pkt, recipient):
         message_data = flask.json.dumps(pkt['message'])
         Inbox(recipient).save(message_data)
@@ -123,11 +129,6 @@ class Transport(object):
             pkt = flask.json.loads(data)
             logger.debug("packet: %r", pkt)
             yield pkt
-
-    def handle(self):
-        for pkt in self.iter_packets():
-            with self.node.app.app_context():
-                self.packet(pkt)
 
     def packet(self, pkt):
         if pkt['type'] == 'authenticate':
@@ -215,7 +216,4 @@ def init_app(app):
 
         websocket = GeventWebSocket(app)
 
-        @websocket.route('/ws/transport')
-        def transport(ws):
-            with node.transport(ws) as transprot:
-                transprot.handle()
+        websocket.route('/ws/transport')(node.handle_connection)
