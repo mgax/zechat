@@ -17,6 +17,11 @@ class zc.InFlight extends zc.Controller
     delete @pending[msg._serial]
     deferred.resolve(msg)
 
+  flush: ->
+    _.forEach @pending, (deferred) ->
+      deferred.reject('disconnected')
+    @pending = {}
+
 
 class zc.Transport extends zc.Controller
 
@@ -48,6 +53,7 @@ class zc.Transport extends zc.Controller
 
   on_close: ->
     @model.set(state: 'closed')
+    @in_flight.flush()
 
   on_receive: (evt) ->
     msg = JSON.parse(evt.data)
