@@ -17,17 +17,18 @@ class zc.Transport extends zc.Controller
     @ws.onopen = @on_open.bind(@)
     @ws.onclose = @on_close.bind(@)
     @model.set(state: 'connecting')
-    @send(
-      type: 'authenticate'
-      identity: @app.request('identity').get('fingerprint')
-    )
 
   on_open: ->
     @model.set(state: 'open')
     current_queue = @queue
     @queue = []
-    current_queue.forEach (msg) =>
+    @ws_send(
+      type: 'authenticate'
+      identity: @app.request('identity').get('fingerprint')
+    )
+    current_queue.slice().forEach (msg) =>
       @send(msg)
+    @app.vent.trigger('connect')
 
   on_close: ->
     @model.set(state: 'closed')
@@ -39,9 +40,12 @@ class zc.Transport extends zc.Controller
     if msg.type == 'message' and msg.recipient == my_fingerprint
       @app.vent.trigger('message', msg.message)
 
+  ws_send: (msg) ->
+    @ws.send(JSON.stringify(msg))
+
   send: (msg) ->
     if @ws.readyState == WebSocket.OPEN
-      @ws.send(JSON.stringify(msg))
+      @ws_send(msg)
     else
       @queue.push(msg)
 
