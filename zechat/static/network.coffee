@@ -23,7 +23,6 @@ class zc.Transport extends zc.Controller
   initialize: (options) ->
     @in_flight = new zc.InFlight(app: @app)
     @model = new Backbone.Model(state: 'closed')
-    @queue = []
     @app.vent.on('start', _.bind(@connect, @))
     @app.reqres.setHandler 'send-packet', _.bind(@send, @)
     @app.commands.setHandler 'reconnect', =>
@@ -41,14 +40,10 @@ class zc.Transport extends zc.Controller
 
   on_open: ->
     @model.set(state: 'open')
-    current_queue = @queue
-    @queue = []
     @ws_send(
       type: 'authenticate'
       identity: @app.request('identity').get('fingerprint')
     )
-    current_queue.slice().forEach (msg) =>
-      @send(msg)
     @app.vent.trigger('connect')
 
   on_close: ->
@@ -63,15 +58,12 @@ class zc.Transport extends zc.Controller
 
     @in_flight.reply(msg)
 
-  ws_send: (msg) ->
-    @ws.send(JSON.stringify(msg))
-
   send: (msg) ->
     promise = @in_flight.wrap(msg)
     if @ws.readyState == WebSocket.OPEN
-      @ws_send(msg)
+      @ws.send(JSON.stringify(msg))
     else
-      @queue.push(msg)
+      promise.reject('disconnected')
     return promise
 
 
