@@ -103,10 +103,13 @@ class Node(object):
                     client.send(pkt)
 
         elif pkt['type'] == 'list':
-            transport.send(dict(messages=Inbox(pkt['identity']).hash_list()))
+            identity = pkt['identity']
+            assert identity in transport.identities
+            transport.send(dict(messages=Inbox(identity).hash_list()))
 
         elif pkt['type'] == 'get':
             identity = pkt['identity']
+            assert identity in transport.identities
             for message_hash in pkt['messages']:
                 message = flask.json.loads(Inbox(identity).get(message_hash))
                 transport.send(dict(

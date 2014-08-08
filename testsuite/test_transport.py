@@ -118,6 +118,7 @@ def test_message_history(node):
         a.send(msg('B', 'bar'))
 
     with connection(node) as b:
+        b.send(auth('B'))
         b.send(list_('B'))
         assert b.out == [{'messages': [msghash('foo'), msghash('bar')]}]
         b.out[:] = []
