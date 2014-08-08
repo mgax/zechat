@@ -1,6 +1,27 @@
+class zc.InFlight extends zc.Controller
+
+  initialize: ->
+    @serial = 0
+    @pending = {}
+
+  wrap: (msg) ->
+    msg._serial = (@serial += 1)
+    deferred = Q.defer()
+    @pending[msg._serial] = deferred
+    return deferred.promise
+
+  reply: (msg) ->
+    return unless msg._serial
+    deferred = @pending[msg._serial]
+    return unless deferred
+    delete @pending[msg._serial]
+    deferred.resolve(msg)
+
+
 class zc.Transport extends zc.Controller
 
   initialize: (options) ->
+    @in_flight = new zc.InFlight(app: @app)
     @model = new Backbone.Model(state: 'closed')
     @queue = []
     @app.vent.on('start', _.bind(@connect, @))
@@ -40,14 +61,18 @@ class zc.Transport extends zc.Controller
     if msg.type == 'message' and msg.recipient == my_fingerprint
       @app.vent.trigger('message', msg.message)
 
+    @in_flight.reply(msg)
+
   ws_send: (msg) ->
     @ws.send(JSON.stringify(msg))
 
   send: (msg) ->
+    promise = @in_flight.wrap(msg)
     if @ws.readyState == WebSocket.OPEN
       @ws_send(msg)
     else
       @queue.push(msg)
+    return promise
 
 
 class zc.Receiver extends zc.Controller
