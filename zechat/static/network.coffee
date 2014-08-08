@@ -4,7 +4,7 @@ class zc.Transport extends zc.Controller
     @model = new Backbone.Model(state: 'closed')
     @queue = []
     @app.vent.on('start', _.bind(@connect, @))
-    @app.commands.setHandler 'send-packet', _.bind(@send, @)
+    @app.reqres.setHandler 'send-packet', _.bind(@send, @)
     @app.commands.setHandler 'reconnect', =>
       if @model.get('state') == 'closed'
         @connect()

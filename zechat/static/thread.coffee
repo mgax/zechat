@@ -60,7 +60,7 @@ class zc.Compose extends zc.Controller
         text: message
         time: zc.utcnow_iso()
         sender: identity.get('fingerprint')
-    @app.commands.execute('send-packet', data)
+    @app.request('send-packet', data)
 
 
 class zc.Thread extends zc.Controller
