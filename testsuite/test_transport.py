@@ -34,8 +34,15 @@ def mock_ws(client_id):
 
 class Client(object):
 
-    def __init__(self, ws_id):
-        self.ws = mock_ws(ws_id)
+    _last_ws_id = 0
+
+    @classmethod
+    def next_id(cls):
+        cls._last_ws_id += 1
+        return cls._last_ws_id
+
+    def __init__(self):
+        self.ws = mock_ws(self.next_id())
         self.out = self.ws.out
 
 
@@ -60,7 +67,7 @@ def msghash(text):
 
 
 def test_loopback(node):
-    peer = Client('A')
+    peer = Client()
     with node.transport(peer.ws) as transport:
         transport.packet(auth('A'))
         transport.packet(msg('A', 'foo'))
@@ -69,10 +76,10 @@ def test_loopback(node):
 
 
 def test_peer_receives_messages(node):
-    peer = Client('B')
+    peer = Client()
     with node.transport(peer.ws) as peer_transport:
         peer_transport.packet(auth('B'))
-        with node.transport(Client('A').ws) as sender_transport:
+        with node.transport(Client().ws) as sender_transport:
             sender_transport.packet(msg('B', 'foo'))
             sender_transport.packet(msg('B', 'bar'))
 
@@ -80,13 +87,13 @@ def test_peer_receives_messages(node):
 
 
 def test_messages_filtered_by_recipient(node):
-    a = Client('A')
-    b = Client('B')
+    a = Client()
+    b = Client()
     with node.transport(a.ws) as tr_a, node.transport(b.ws) as tr_b:
         tr_a.packet(auth('A'))
         tr_b.packet(auth('B'))
 
-        with node.transport(Client('sender').ws) as sender_transport:
+        with node.transport(Client().ws) as sender_transport:
             sender_transport.packet(msg('A', 'foo'))
             sender_transport.packet(msg('B', 'bar'))
 
@@ -95,11 +102,11 @@ def test_messages_filtered_by_recipient(node):
 
 
 def test_message_history(node):
-    with node.transport(Client('A').ws) as tr_a:
+    with node.transport(Client().ws) as tr_a:
         tr_a.packet(msg('B', 'foo'))
         tr_a.packet(msg('B', 'bar'))
 
-    b = Client('B')
+    b = Client()
     with node.transport(b.ws) as tr_b:
         tr_b.packet(list_('B'))
         assert b.out == [{'messages': [msghash('foo'), msghash('bar')]}]
