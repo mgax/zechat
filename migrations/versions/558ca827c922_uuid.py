@@ -1,0 +1,50 @@
+revision = '558ca827c922'
+down_revision = '19f1a7d76d9f'
+
+from alembic import op
+import sqlalchemy as sa
+from sqlalchemy.dialects import postgresql
+
+
+def upgrade():
+    op.drop_table('message')
+    op.drop_table('identity')
+
+    op.create_table(
+        'message',
+        sa.Column('id', postgresql.UUID(), nullable=False),
+        sa.Column('recipient', sa.String(), nullable=False),
+        sa.Column('hash', sa.String(), nullable=False),
+        sa.Column('payload', sa.String(), nullable=False),
+        sa.PrimaryKeyConstraint('id'),
+    )
+    op.create_index(
+        op.f('ix_message_hash'),
+        'message',
+        ['hash'],
+        unique=False,
+    )
+    op.create_index(
+        op.f('ix_message_recipient'),
+        'message',
+        ['recipient'],
+        unique=False,
+    )
+
+    op.create_table(
+        'identity',
+        sa.Column('id', postgresql.UUID(), nullable=False),
+        sa.Column('fingerprint', sa.String(), nullable=False),
+        sa.Column('public_key', sa.String(), nullable=False),
+        sa.PrimaryKeyConstraint('id'),
+    )
+    op.create_index(
+        op.f('ix_identity_fingerprint'),
+        'identity',
+        ['fingerprint'],
+        unique=True,
+    )
+
+
+def downgrade():
+    raise NotImplementedError
