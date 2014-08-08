@@ -37,12 +37,12 @@ def msghash(text):
     return sha1(json.dumps(dict(text=text))).hexdigest()
 
 
-def test_handle(node):
+def test_loopback(node):
     ws = mock_ws('A')
-    incoming = [auth('A'), msg('A', 'foo'), msg('A', 'bar')]
-    ws.receive.side_effect = [json.dumps(i) for i in incoming] + [None]
     with node.transport(ws) as transport:
-        transport.handle()
+        transport.packet(auth('A'))
+        transport.packet(msg('A', 'foo'))
+        transport.packet(msg('A', 'bar'))
     assert ws.out == [msg('A', 'foo'), msg('A', 'bar')]
 
 
