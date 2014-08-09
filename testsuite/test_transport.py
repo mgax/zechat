@@ -78,49 +78,57 @@ def msghash(text):
     return sha1(json.dumps(dict(text=text))).hexdigest()
 
 
+def authenticate(peer, key=None):
+    if key is None:
+        key = 'A'
+    peer.send(auth(key), 1)
+    peer.out.pop()
+    return key
+
+
 def test_loopback(node):
     with connection(node) as peer:
-        peer.send(auth('A'), 1)
-        peer.send(subscribe('A'), 2)
-        peer.send(msg('A', 'foo'), 3)
-        peer.send(msg('A', 'bar'), 4)
+        fp = authenticate(peer)
+        peer.send(subscribe(fp), 2)
+        peer.send(msg(fp, 'foo'), 3)
+        peer.send(msg(fp, 'bar'), 4)
 
     assert peer.out == [
-        reply(1), reply(2),
-        msg('A', 'foo'), reply(3),
-        msg('A', 'bar'), reply(4),
+        reply(2),
+        msg(fp, 'foo'), reply(3),
+        msg(fp, 'bar'), reply(4),
     ]
 
 
 def test_peer_receives_messages(node):
     with connection(node) as peer:
-        peer.send(auth('B'), 1)
-        peer.send(subscribe('B'), 2)
+        fp = authenticate(peer, 'B')
+        peer.send(subscribe(fp), 2)
 
         with connection(node) as sender:
-            peer.send(msg('B', 'foo'), 3)
-            peer.send(msg('B', 'bar'), 4)
+            peer.send(msg(fp, 'foo'), 3)
+            peer.send(msg(fp, 'bar'), 4)
 
     assert peer.out == [
-        reply(1), reply(2),
-        msg('B', 'foo'), reply(3),
-        msg('B', 'bar'), reply(4),
+        reply(2),
+        msg(fp, 'foo'), reply(3),
+        msg(fp, 'bar'), reply(4),
     ]
 
 
 def test_messages_filtered_by_recipient(node):
     with connection(node) as a, connection(node) as b:
-        a.send(auth('A'), 1)
-        a.send(subscribe('A'), 2)
-        b.send(auth('B'), 1)
-        b.send(subscribe('B'), 2)
+        fp_a = authenticate(a)
+        a.send(subscribe(fp_a), 2)
+        fp_b = authenticate(b, 'B')
+        b.send(subscribe(fp_b), 2)
 
         with connection(node) as sender:
-            sender.send(msg('A', 'foo'))
-            sender.send(msg('B', 'bar'))
+            sender.send(msg(fp_a, 'foo'))
+            sender.send(msg(fp_b, 'bar'))
 
-    assert a.out == [reply(1), reply(2), msg('A', 'foo')]
-    assert b.out == [reply(1), reply(2), msg('B', 'bar')]
+    assert a.out == [reply(2), msg(fp_a, 'foo')]
+    assert b.out == [reply(2), msg(fp_b, 'bar')]
 
 
 def test_message_history(node):
@@ -129,8 +137,7 @@ def test_message_history(node):
         a.send(msg('B', 'bar'))
 
     with connection(node) as b:
-        b.send(auth('B'), 1)
-        b.out[:] = []
+        authenticate(b, 'B')
 
         b.send(list_('B'), 2)
         assert b.out == [reply(2, messages=[msghash('foo'), msghash('bar')])]
