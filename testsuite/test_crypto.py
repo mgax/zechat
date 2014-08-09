@@ -45,7 +45,7 @@ FINGERPRINT = 'afab363f857ad4cd8789c8bbb3941ae2'
 
 
 def crypto(key):
-    from zechat.node import Crypto
+    from zechat.cryptos import Crypto
     return Crypto(key)
 
 
