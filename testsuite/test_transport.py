@@ -41,7 +41,7 @@ class Client(object):
     def send(self, pkt, serial=None):
         if serial:
             pkt['_serial'] = serial
-        self.node.packet(self.transport, pkt)
+        self.node.handle_packet(self.transport, pkt)
 
     @contextmanager
     def connection(self, node):

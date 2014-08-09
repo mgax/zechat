@@ -26,9 +26,9 @@ class Node(object):
         with self.transport(ws) as transprot:
             for pkt in transprot.iter_packets():
                 with self.app.app_context():
-                    self.packet(transprot, pkt)
+                    self.handle_packet(transprot, pkt)
 
-    def packet(self, transport, pkt):
+    def handle_packet(self, transport, pkt):
         if pkt['type'] == 'authenticate':
             transport.identities.add(pkt['identity'])
             transport.send(dict(type='reply', _serial=pkt['_serial']))
