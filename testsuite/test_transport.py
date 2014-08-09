@@ -55,7 +55,7 @@ def msg(recipient, text):
 
 
 def reply(serial, **data):
-    return dict(type='reply', _serial=serial, **data)
+    return dict(_reply=serial, **data)
 
 
 def auth(identity):

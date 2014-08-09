@@ -11,10 +11,10 @@ class zc.InFlight extends zc.Controller
     return deferred.promise
 
   reply: (msg) ->
-    return unless msg._serial
-    deferred = @pending[msg._serial]
+    return unless msg._reply
+    deferred = @pending[msg._reply]
     return unless deferred
-    delete @pending[msg._serial]
+    delete @pending[msg._reply]
     deferred.resolve(msg)
 
   flush: ->
