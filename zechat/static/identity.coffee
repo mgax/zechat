@@ -55,7 +55,10 @@ class zc.Identity extends zc.Controller
       public_key: zc.get_public_key(@model.get('key'))
     }
 
-    Q(zc.post_json url, data)
-    .then (resp) =>
-      @model.set('public_url', resp.url)
-      return resp.url
+    return (
+      Q(zc.post_json url, data)
+
+      .then (resp) =>
+        @model.set('public_url', resp.url)
+        return resp.url
+    )

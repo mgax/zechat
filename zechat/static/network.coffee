@@ -48,9 +48,11 @@ class zc.Transport extends zc.Controller
     fingerprint = @app.request('identity').get('fingerprint')
 
     @send(type: 'authenticate', identity: fingerprint)
+
     .then =>
       @send(type: 'subscribe', identity: fingerprint)
-    .then =>
+
+    .done =>
       @app.vent.trigger('connect')
 
   on_close: ->
