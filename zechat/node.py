@@ -9,9 +9,19 @@ logger = logging.getLogger(__name__)
 
 class Node(object):
 
+    packet_handlers = {}
+
     def __init__(self, app=None):
         self.transport_map = {}
         self.app = app
+
+    @classmethod
+    def on(cls, name):
+        def decorator(func):
+            cls.packet_handlers[name] = func
+            return func
+
+        return decorator
 
     @contextmanager
     def transport(self, ws):
@@ -29,58 +39,72 @@ class Node(object):
                     self.handle_packet(transprot, pkt)
 
     def handle_packet(self, transport, pkt):
-        if pkt['type'] == 'authenticate':
-            transport.identities.add(pkt['identity'])
-            transport.send(dict(type='reply', _serial=pkt['_serial']))
+        func = self.packet_handlers.get(pkt['type'])
 
-        elif pkt['type'] == 'subscribe':
-            identity = pkt['identity']
-            assert identity in transport.identities
-            transport.subscriptions.add(identity)
-            transport.send(dict(type='reply', _serial=pkt.get('_serial')))
-
-        elif pkt['type'] == 'message':
-            recipient = pkt['recipient']
-            message_data = flask.json.dumps(pkt['message'])
-            models.Inbox(recipient).save(message_data)
-
-            serial = pkt.pop('_serial', None)
-            if serial:
-                transport.send(dict(type='reply', _serial=serial))
-
-            for client in self.transport_map.values():
-                if recipient in client.subscriptions:
-                    client.send(pkt)
-
-        elif pkt['type'] == 'list':
-            identity = pkt['identity']
-            assert identity in transport.identities
-            transport.send(dict(
-                type='reply',
-                _serial=pkt.get('_serial'),
-                messages=models.Inbox(identity).hash_list(),
-            ))
-
-        elif pkt['type'] == 'get':
-            identity = pkt['identity']
-            assert identity in transport.identities
-            inbox = models.Inbox(identity)
-            message_list = [
-                dict(
-                    type='message',
-                    recipient=identity,
-                    message=flask.json.loads(inbox.get(message_hash)),
-                )
-                for message_hash in pkt['messages']
-            ]
-            transport.send(dict(
-                type='reply',
-                _serial=pkt['_serial'],
-                messages=message_list,
-            ))
-
-        else:
+        if func is None:
             raise RuntimeError("Unknown packet type %r" % pkt['type'])
+
+        func(self, transport, pkt)
+
+
+@Node.on('authenticate')
+def authenticate(node, transport, pkt):
+    transport.identities.add(pkt['identity'])
+    transport.send(dict(type='reply', _serial=pkt['_serial']))
+
+
+@Node.on('subscribe')
+def subscribe(node, transport, pkt):
+    identity = pkt['identity']
+    assert identity in transport.identities
+    transport.subscriptions.add(identity)
+    transport.send(dict(type='reply', _serial=pkt.get('_serial')))
+
+
+@Node.on('message')
+def message(node, transport, pkt):
+    recipient = pkt['recipient']
+    message_data = flask.json.dumps(pkt['message'])
+    models.Inbox(recipient).save(message_data)
+
+    serial = pkt.pop('_serial', None)
+    if serial:
+        transport.send(dict(type='reply', _serial=serial))
+
+    for client in node.transport_map.values():
+        if recipient in client.subscriptions:
+            client.send(pkt)
+
+
+@Node.on('list')
+def list_(node, transport, pkt):
+    identity = pkt['identity']
+    assert identity in transport.identities
+    transport.send(dict(
+        type='reply',
+        _serial=pkt.get('_serial'),
+        messages=models.Inbox(identity).hash_list(),
+    ))
+
+
+@Node.on('get')
+def get(node, transport, pkt):
+    identity = pkt['identity']
+    assert identity in transport.identities
+    inbox = models.Inbox(identity)
+    message_list = [
+        dict(
+            type='message',
+            recipient=identity,
+            message=flask.json.loads(inbox.get(message_hash)),
+        )
+        for message_hash in pkt['messages']
+    ]
+    transport.send(dict(
+        type='reply',
+        _serial=pkt['_serial'],
+        messages=message_list,
+    ))
 
 
 class Transport(object):
