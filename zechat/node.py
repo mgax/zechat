@@ -44,7 +44,9 @@ class Node(object):
         if func is None:
             raise RuntimeError("Unknown packet type %r" % pkt['type'])
 
-        func(self, transport, pkt)
+        rv = func(self, transport, pkt)
+        if rv is not None:
+            transport.send(rv)
 
 
 def check_identity(func):
@@ -58,14 +60,14 @@ def check_identity(func):
 @Node.on('authenticate')
 def authenticate(node, transport, pkt):
     transport.identities.add(pkt['identity'])
-    transport.send(dict(type='reply', _serial=pkt['_serial']))
+    return dict(type='reply', _serial=pkt['_serial'])
 
 
 @Node.on('subscribe')
 @check_identity
 def subscribe(node, transport, pkt, identity):
     transport.subscriptions.add(identity)
-    transport.send(dict(type='reply', _serial=pkt.get('_serial')))
+    return dict(type='reply', _serial=pkt.get('_serial'))
 
 
 @Node.on('message')
@@ -81,17 +83,17 @@ def message(node, transport, pkt):
             client.send(pkt)
 
     if serial:
-        transport.send(dict(type='reply', _serial=serial))
+        return dict(type='reply', _serial=serial)
 
 
 @Node.on('list')
 @check_identity
 def list_(node, transport, pkt, identity):
-    transport.send(dict(
+    return dict(
         type='reply',
         _serial=pkt.get('_serial'),
         messages=models.Inbox(identity).hash_list(),
-    ))
+    )
 
 
 @Node.on('get')
@@ -106,11 +108,11 @@ def get(node, transport, pkt, identity):
         )
         for message_hash in pkt['messages']
     ]
-    transport.send(dict(
+    return dict(
         type='reply',
         _serial=pkt['_serial'],
         messages=message_list,
-    ))
+    )
 
 
 class Transport(object):
