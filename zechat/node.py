@@ -75,12 +75,13 @@ def message(node, transport, pkt):
     models.Inbox(recipient).save(message_data)
 
     serial = pkt.pop('_serial', None)
-    if serial:
-        transport.send(dict(type='reply', _serial=serial))
 
     for client in node.transport_map.values():
         if recipient in client.subscriptions:
             client.send(pkt)
+
+    if serial:
+        transport.send(dict(type='reply', _serial=serial))
 
 
 @Node.on('list')

@@ -87,8 +87,8 @@ def test_loopback(node):
 
     assert peer.out == [
         reply(1), reply(2),
-        reply(3), msg('A', 'foo'),
-        reply(4), msg('A', 'bar'),
+        msg('A', 'foo'), reply(3),
+        msg('A', 'bar'), reply(4),
     ]
 
 
