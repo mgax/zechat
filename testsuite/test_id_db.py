@@ -3,18 +3,9 @@ import flask
 
 
 @pytest.fixture
-def app():
-    from zechat import models
+def id_app(app):
     from zechat import node
-
-    app = flask.Flask(__name__)
-    app.testing = True
-    models.db.init_app(app)
     app.register_blueprint(node.views)
-
-    with app.app_context():
-        models.db.create_all()
-
     return app
 
 
@@ -36,26 +27,26 @@ def json_get(client, url):
     return flask.json.loads(resp.data)
 
 
-def test_publish_identity(app):
+def test_publish_identity(id_app):
     from test_crypto import PUBLIC_KEY, FINGERPRINT
-    client = app.test_client()
+    client = id_app.test_client()
     data = {'fingerprint': FINGERPRINT, 'public_key': PUBLIC_KEY}
     json_post(client, '/id/', data)
     resp = json_get(client, '/id/' + FINGERPRINT)
     assert resp == data
 
 
-def test_check_fingerprint(app):
-    client = app.test_client()
+def test_check_fingerprint(id_app):
+    client = id_app.test_client()
     data = {'fingerprint': 'foo', 'public_key': 'bar'}
     resp = json_post(client, '/id/', data, parse=False)
     assert resp.status_code == 400
     assert flask.json.loads(resp.data) == {'error': 'fingerprint mismatch'}
 
 
-def test_republish_with_same_fingerprint(app):
+def test_republish_with_same_fingerprint(id_app):
     from test_crypto import PUBLIC_KEY, FINGERPRINT
-    client = app.test_client()
+    client = id_app.test_client()
     data = {'fingerprint': FINGERPRINT, 'public_key': PUBLIC_KEY}
     json_post(client, '/id/', data)
     json_post(client, '/id/', data)
