@@ -89,11 +89,16 @@ describe 'conversation', ->
     .done()
 
   it 'should send a message and receive it back', (test_done) ->
-    identity_json = JSON.stringify(key: FIX.PRIVATE_KEY)
+    identity_json = JSON.stringify(
+      key: FIX.PRIVATE_KEY
+      fingerprint: FIX.FINGERPRINT
+    )
 
     create_testing_app({identity: identity_json}, {talk_to_self: true})
+
     .then (@app) =>
       zc.waitfor(=> zc.some(@app.$el.find('.thread-compose')))
+
     .then =>
       $form = @app.$el.find('.thread-compose form')
       $form.find('[name=message]').val('hello world')
@@ -105,20 +110,27 @@ describe 'conversation', ->
         return messages if messages.length > 0
 
       return zc.waitfor(get_messages, 3000)
+
     .then (messages) =>
       expect(messages).toEqual("hello world")
+
     .catch (err) =>
       if err == 'timeout'
         expect('timed out').toBe(false)
         return
       throw(err)
+
     .finally =>
       test_done()
+
     .done()
 
   it 'should read offline messages', (test_done) ->
     sender_app = new Backbone.Marionette.Application
-    sender_identity = new Backbone.Model(fingerprint: 'friend')
+    sender_identity = new Backbone.Model(
+      key: FIX.PRIVATE_KEY_B
+      fingerprint: FIX.FINGERPRINT_B
+    )
     sender_app.reqres.setHandler('identity', -> sender_identity)
     sender_app.reqres.setHandler('urls', -> zc.TESTING_URL_MAP)
     sender_transport = new zc.Transport(app: sender_app)
@@ -129,7 +141,7 @@ describe 'conversation', ->
     .then =>
       sender_transport.send(
         recipient: FIX.FINGERPRINT
-        message: {text: "hello offline", sender: 'friend'}
+        message: {text: "hello offline", sender: FIX.FINGERPRINT_B}
         type: 'message'
       )
 
@@ -142,7 +154,7 @@ describe 'conversation', ->
 
     .then (@app) =>
       get_messages = =>
-        message_col = @app.request('thread', 'friend').message_col
+        message_col = @app.request('thread', FIX.FINGERPRINT_B).message_col
         if message_col.length
           return message_col.at(0)
 

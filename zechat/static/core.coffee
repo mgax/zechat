@@ -156,8 +156,6 @@ class zc.Persist extends zc.Controller
 zc.modules.core = ->
   @models =
     identity: new Backbone.Model
-      fingerprint: 'foo'
-
     threadlist: new Backbone.Collection
 
   @persist_identity = new zc.Persist
