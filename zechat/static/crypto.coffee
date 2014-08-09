@@ -1,7 +1,10 @@
+zc.pad_base64 = (text) ->
+  while text.length % 4 != 0
+    text = text + '='
+  return text
+
 zc.format_pem = (key, title) ->
   rv = "-----BEGIN " + title + "-----\n"
-  while key.length % 4 != 0
-    key = key + '='
   while key
     rv += key.slice(0, 64) + "\n"
     key = key.slice(64)
@@ -17,14 +20,14 @@ zc.generate_key = (size, callback) ->
   k = new RSAKey()
   k.generate(size, '10001')
   key = k.privateKeyToPkcs1PemString()
-  _.defer(callback, zc.format_pem(key, "RSA PRIVATE KEY"))
+  _.defer(callback, zc.format_pem(zc.pad_base64(key), "RSA PRIVATE KEY"))
 
 
 zc.get_public_key = (private_key) ->
   key = new RSAKey()
   key.readPrivateKeyFromPEMString(private_key)
   public_key = key.publicKeyToX509PemString()
-  return zc.format_pem(public_key, "PUBLIC KEY")
+  return zc.format_pem(zc.pad_base64(public_key), "PUBLIC KEY")
 
 
 class zc.Crypto
@@ -47,7 +50,7 @@ class zc.Crypto
   sign: (data, callback) ->
     @create_crypt (crypt) ->
       crypt.sign data, (_, signed) ->
-        callback(signed.signature)
+        callback(zc.pad_base64(signed.signature))
 
   verify: (data, signature, callback) ->
     @create_crypt (crypt) ->
