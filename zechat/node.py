@@ -47,6 +47,14 @@ class Node(object):
         func(self, transport, pkt)
 
 
+def check_identity(func):
+    def wrapper(node, transport, pkt):
+        identity = pkt['identity']
+        assert identity in transport.identities
+        return func(node, transport, pkt, identity)
+    return wrapper
+
+
 @Node.on('authenticate')
 def authenticate(node, transport, pkt):
     transport.identities.add(pkt['identity'])
@@ -54,9 +62,8 @@ def authenticate(node, transport, pkt):
 
 
 @Node.on('subscribe')
-def subscribe(node, transport, pkt):
-    identity = pkt['identity']
-    assert identity in transport.identities
+@check_identity
+def subscribe(node, transport, pkt, identity):
     transport.subscriptions.add(identity)
     transport.send(dict(type='reply', _serial=pkt.get('_serial')))
 
@@ -77,9 +84,8 @@ def message(node, transport, pkt):
 
 
 @Node.on('list')
-def list_(node, transport, pkt):
-    identity = pkt['identity']
-    assert identity in transport.identities
+@check_identity
+def list_(node, transport, pkt, identity):
     transport.send(dict(
         type='reply',
         _serial=pkt.get('_serial'),
@@ -88,9 +94,8 @@ def list_(node, transport, pkt):
 
 
 @Node.on('get')
-def get(node, transport, pkt):
-    identity = pkt['identity']
-    assert identity in transport.identities
+@check_identity
+def get(node, transport, pkt, identity):
     inbox = models.Inbox(identity)
     message_list = [
         dict(
