@@ -14,6 +14,8 @@ class Node(object):
     def __init__(self, app=None):
         self.transport_map = {}
         self.app = app
+        if app is not None:
+            app.extensions['zechat_node'] = self
 
     @classmethod
     def on(cls, name):
@@ -187,8 +189,11 @@ def init_app(app):
     if app.config.get('LISTEN_WEBSOCKET'):
         from flask.ext.uwsgi_websocket import GeventWebSocket
 
-        node = Node(app)
+        Node(app)
 
         websocket = GeventWebSocket(app)
 
-        websocket.route('/ws/transport')(node.handle_connection)
+        @websocket.route('/ws/transport')
+        def ws_transport(ws):
+            node = app.extensions['zechat_node']
+            node.handle_connection(ws)

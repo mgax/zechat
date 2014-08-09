@@ -109,6 +109,7 @@ def create_testing_app(**config):
     def flush():
         models.db.drop_all()
         models.db.create_all()
+        node.Node(app)  # create new websocket handler
         return 'ok'
 
     return app
