@@ -73,6 +73,5 @@ class zc.Crypto
 
   fingerprint: (callback) ->
     key_base64 = @create_rsa().publicKeyToX509PemString()
-    hash = rstrtohex(rstr_sha1(hextorstr(b64tohex(key_base64))))
-    fingerprint = hash.slice(0, 32)
+    fingerprint = rstrtohex(rstr_sha1(hextorstr(b64tohex(key_base64))))
     callback(fingerprint)

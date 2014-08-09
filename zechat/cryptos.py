@@ -32,4 +32,4 @@ class Crypto(object):
 
     def fingerprint(self):
         data = self.key.publickey().exportKey('DER')
-        return hashlib.sha1(data).hexdigest()[:32]
+        return hashlib.sha1(data).hexdigest()

@@ -18,7 +18,7 @@ describe 'conversation', ->
     create_testing_app({}, {local_storage: local_storage})
     .then (app) =>
       identity = JSON.parse(local_storage.getItem('identity'))
-      expect(identity.fingerprint.length).toEqual(32)
+      expect(identity.fingerprint.length).toEqual(40)
     .finally ->
       test_done()
     .done()

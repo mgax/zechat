@@ -77,7 +77,7 @@ zc.fixtures = {
     lhvY8830XYlCQ7ocH0xeWunlh6tbdBKF50M5/ZgZ1q4=
     """
 
-  FINGERPRINT: "afab363f857ad4cd8789c8bbb3941ae2"
+  FINGERPRINT: "afab363f857ad4cd8789c8bbb3941ae23975d6fd"
 
   PRIVATE_KEY_B:
     """
@@ -98,6 +98,6 @@ zc.fixtures = {
     -----END RSA PRIVATE KEY-----
     """
 
-  FINGERPRINT_B: "f9df70f799f933fe997312012a7ed369"
+  FINGERPRINT_B: "f9df70f799f933fe997312012a7ed369333631a6"
 
 }

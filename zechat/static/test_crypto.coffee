@@ -62,8 +62,8 @@ describe 'crypto', ->
               done()
 
   it 'should calculate the fingerprint', (done) ->
-    new zc.Crypto(FIX.PRIVATE_KEY).fingerprint (private_fingerprint) ->
-      expect(private_fingerprint).toEqual(FIX.FINGERPRINT)
+    new zc.Crypto(FIX.PRIVATE_KEY_B).fingerprint (private_fingerprint) ->
+      expect(private_fingerprint).toEqual(FIX.FINGERPRINT_B)
 
       new zc.Crypto(FIX.PUBLIC_KEY).fingerprint (public_fingerprint) ->
         expect(public_fingerprint).toEqual(FIX.FINGERPRINT)
