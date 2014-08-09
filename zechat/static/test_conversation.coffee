@@ -8,7 +8,16 @@ describe 'conversation', ->
       el: $('<div>')[0]
       local_storage: new zc.MockLocalStorage(local_storage_data)
     })
-    zc.create_app(options)
+
+    return (
+      zc.create_app(options)
+
+      .then (app) ->
+        connected = Q.defer()
+        app.vent.once 'connect', ->
+          connected.resolve(app)
+        return connected.promise
+    )
 
   beforeEach (done) ->
     $.post(zc.TESTING_URL_MAP.flush, -> done())
@@ -29,13 +38,16 @@ describe 'conversation', ->
     )
 
     create_testing_app(identity: identity_json)
+
     .then (app) =>
       identity = app.request('identity')
       app.$el.find('.header-btn-myid').click()
       app.$el.find('.myid-publish').click()
       return zc.waitfor(-> identity.get('public_url'))
+
     .then (public_url) =>
       expect(public_url).toContain('/id/' + FIX.FINGERPRINT)
+
     .done ->
       test_done()
 
