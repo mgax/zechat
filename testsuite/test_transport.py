@@ -98,10 +98,14 @@ def test_peer_receives_messages(node):
         peer.send(subscribe('B'), 2)
 
         with connection(node) as sender:
-            peer.send(msg('B', 'foo'))
-            peer.send(msg('B', 'bar'))
+            peer.send(msg('B', 'foo'), 3)
+            peer.send(msg('B', 'bar'), 4)
 
-    assert peer.out == [reply(1), reply(2), msg('B', 'foo'), msg('B', 'bar')]
+    assert peer.out == [
+        reply(1), reply(2),
+        msg('B', 'foo'), reply(3),
+        msg('B', 'bar'), reply(4),
+    ]
 
 
 def test_messages_filtered_by_recipient(node):
