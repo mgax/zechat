@@ -60,9 +60,22 @@ def check_identity(func):
     return wrapper
 
 
+@Node.on('challenge')
+def challenge(node, transport, pkt):
+    from time import time
+    transport.challenge = str(time())
+    return dict(challenge=transport.challenge)
+
+
 @Node.on('authenticate')
 def authenticate(node, transport, pkt):
-    transport.identities.add(pkt['identity'])
+    response = flask.json.loads(pkt['response'])
+    identity = Crypto(response['public_key'])
+    assert identity.verify(pkt['response'], pkt['signature'])
+    assert response['challenge'] == transport.challenge
+    del transport.challenge
+    transport.identities.add(identity.fingerprint())
+    return dict(success=True)
 
 
 @Node.on('subscribe')

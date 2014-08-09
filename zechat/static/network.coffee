@@ -45,12 +45,27 @@ class zc.Transport extends zc.Controller
 
   on_open: ->
     @model.set(state: 'open')
-    fingerprint = @app.request('identity').get('fingerprint')
+    identity = @app.request('identity')
 
-    @send(type: 'authenticate', identity: fingerprint)
+    @send(type: 'challenge')
 
-    .then =>
-      @send(type: 'subscribe', identity: fingerprint)
+    .then (resp) =>
+      signed = Q.defer()
+      public_key = zc.get_public_key(identity.get('key'))
+      response = JSON.stringify(
+        public_key: public_key
+        challenge: resp.challenge
+      )
+      new zc.Crypto(identity.get('key')).sign response, (signature) ->
+        signed.resolve([response, signature])
+      return signed.promise
+
+    .then ([response, signature]) =>
+      @send(type: 'authenticate', response: response, signature: signature)
+
+    .then (resp) =>
+      throw "authentication failure" unless resp.success
+      @send(type: 'subscribe', identity: identity.get('fingerprint'))
 
     .done =>
       @app.vent.trigger('connect')

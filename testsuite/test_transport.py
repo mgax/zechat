@@ -58,8 +58,8 @@ def reply(serial, **data):
     return dict(_reply=serial, **data)
 
 
-def auth(identity):
-    return dict(type='authenticate', identity=identity)
+def auth(response, signature):
+    return dict(type='authenticate', response=response, signature=signature)
 
 
 def subscribe(identity):
@@ -79,11 +79,20 @@ def msghash(text):
 
 
 def authenticate(peer, key=None):
+    from zechat.cryptos import Crypto
+
     if key is None:
-        key = 'A'
-    peer.send(auth(key), 1)
-    peer.out.pop()
-    return key
+        from test_crypto import PRIVATE_KEY
+        key = PRIVATE_KEY
+
+    peer.send(dict(type='challenge'), 1)
+    challenge = peer.out.pop()['challenge']
+    crypto = Crypto(key)
+    public_key = crypto.public_key()
+    response = json.dumps(dict(challenge=challenge, public_key=public_key))
+    peer.send(auth(response, crypto.sign(response)), 2)
+    assert peer.out.pop()['success'] == True
+    return crypto.fingerprint()
 
 
 def test_loopback(node):
@@ -102,7 +111,7 @@ def test_loopback(node):
 
 def test_peer_receives_messages(node):
     with connection(node) as peer:
-        fp = authenticate(peer, 'B')
+        fp = authenticate(peer)
         peer.send(subscribe(fp), 2)
 
         with connection(node) as sender:
@@ -117,10 +126,11 @@ def test_peer_receives_messages(node):
 
 
 def test_messages_filtered_by_recipient(node):
+    from test_crypto import PRIVATE_KEY_B, FINGERPRINT_B as fp_b
     with connection(node) as a, connection(node) as b:
         fp_a = authenticate(a)
         a.send(subscribe(fp_a), 2)
-        fp_b = authenticate(b, 'B')
+        assert authenticate(b, PRIVATE_KEY_B) == fp_b
         b.send(subscribe(fp_b), 2)
 
         with connection(node) as sender:
@@ -132,16 +142,18 @@ def test_messages_filtered_by_recipient(node):
 
 
 def test_message_history(node):
+    from test_crypto import PRIVATE_KEY_B, FINGERPRINT_B as fp_b
+
     with connection(node) as a:
-        a.send(msg('B', 'foo'))
-        a.send(msg('B', 'bar'))
+        a.send(msg(fp_b, 'foo'))
+        a.send(msg(fp_b, 'bar'))
 
     with connection(node) as b:
-        authenticate(b, 'B')
+        assert authenticate(b, PRIVATE_KEY_B) == fp_b
 
-        b.send(list_('B'), 2)
+        b.send(list_(fp_b), 2)
         assert b.out == [reply(2, messages=[msghash('foo'), msghash('bar')])]
         b.out[:] = []
 
-        b.send(get('B', [msghash('foo'), msghash('bar')]), 3)
-        assert b.out == [reply(3, messages=[msg('B', 'foo'), msg('B', 'bar')])]
+        b.send(get(fp_b, [msghash('foo'), msghash('bar')]), 3)
+        assert b.out == [reply(3, messages=[msg(fp_b, 'foo'), msg(fp_b, 'bar')])]
