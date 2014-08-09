@@ -67,12 +67,12 @@ class zc.Transport extends zc.Controller
     @in_flight.reply(msg)
 
   send: (msg) ->
-    promise = @in_flight.wrap(msg)
-    if @ws.readyState == WebSocket.OPEN
+    if @ws and @ws.readyState == WebSocket.OPEN
+      promise = @in_flight.wrap(msg)
       @ws.send(JSON.stringify(msg))
+      return promise
     else
-      promise.reject('disconnected')
-    return promise
+      return Q.reject('disconnected')
 
 
 class zc.Receiver extends zc.Controller
