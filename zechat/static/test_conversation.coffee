@@ -19,9 +19,8 @@ describe 'conversation', ->
     .then (app) =>
       identity = JSON.parse(local_storage.getItem('identity'))
       expect(identity.fingerprint.length).toEqual(40)
-    .finally ->
+    .done ->
       test_done()
-    .done()
 
   it 'should post identity to server', (test_done) ->
     identity_json = JSON.stringify(
@@ -37,9 +36,8 @@ describe 'conversation', ->
       return zc.waitfor(-> identity.get('public_url'))
     .then (public_url) =>
       expect(public_url).toContain('/id/' + FIX.FINGERPRINT)
-    .finally ->
+    .done ->
       test_done()
-    .done()
 
   it 'should begin a new conversation', (test_done) ->
     identity_a_json = JSON.stringify(
@@ -83,10 +81,8 @@ describe 'conversation', ->
       throw(err) if err != 'timeout'
       expect('timed out').toBe(false)
 
-    .finally ->
+    .done ->
       test_done()
-
-    .done()
 
   it 'should send a message and receive it back', (test_done) ->
     identity_json = JSON.stringify(
@@ -120,10 +116,8 @@ describe 'conversation', ->
         return
       throw(err)
 
-    .finally =>
+    .done =>
       test_done()
-
-    .done()
 
   it 'should read offline messages', (test_done) ->
     sender_app = new Backbone.Marionette.Application
@@ -169,7 +163,5 @@ describe 'conversation', ->
         return
       throw(err)
 
-    .finally =>
+    .done =>
       test_done()
-
-    .done()
