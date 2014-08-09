@@ -2,7 +2,6 @@ import logging
 from contextlib import contextmanager
 from base64 import b64encode, b64decode
 import hashlib
-from collections import defaultdict
 import flask
 from Crypto.PublicKey import RSA
 from Crypto.Cipher import PKCS1_OAEP
@@ -11,32 +10,6 @@ from Crypto.Signature import PKCS1_PSS
 from zechat import models
 
 logger = logging.getLogger(__name__)
-
-
-class Inbox(object):
-
-    def __init__(self, identity):
-        self.identity = identity
-
-    def save(self, message_data):
-        message = models.Message(
-            payload=message_data,
-            hash=hashlib.sha1(message_data).hexdigest(),
-            recipient=self.identity,
-        )
-        models.db.session.add(message)
-        models.db.session.commit()
-
-    def get(self, message_hash):
-        message = models.Message.query.filter_by(hash=message_hash).first()
-        assert message and message.recipient == self.identity
-        return message.payload
-
-    def hash_list(self):
-        return [
-            message.hash for message in
-            models.Message.query.filter_by(recipient=self.identity)
-        ]
 
 
 class Crypto(object):
@@ -103,7 +76,7 @@ class Node(object):
         elif pkt['type'] == 'message':
             recipient = pkt['recipient']
             message_data = flask.json.dumps(pkt['message'])
-            Inbox(recipient).save(message_data)
+            models.Inbox(recipient).save(message_data)
 
             serial = pkt.pop('_serial', None)
             if serial:
@@ -119,13 +92,13 @@ class Node(object):
             transport.send(dict(
                 type='reply',
                 _serial=pkt.get('_serial'),
-                messages=Inbox(identity).hash_list(),
+                messages=models.Inbox(identity).hash_list(),
             ))
 
         elif pkt['type'] == 'get':
             identity = pkt['identity']
             assert identity in transport.identities
-            inbox = Inbox(identity)
+            inbox = models.Inbox(identity)
             message_list = [
                 dict(
                     type='message',
