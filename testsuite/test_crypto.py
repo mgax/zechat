@@ -76,3 +76,7 @@ def test_verify_invalid_signature():
 def test_fingerprint():
     assert crypto(PUBLIC_KEY).fingerprint() == FINGERPRINT
     assert crypto(PRIVATE_KEY).fingerprint() == FINGERPRINT
+
+
+def test_public_key():
+    assert crypto(PRIVATE_KEY).public_key() == PUBLIC_KEY
