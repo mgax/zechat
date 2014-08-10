@@ -64,15 +64,15 @@ class zc.Client extends zc.Controller
       if packet.recipient == @identity.fingerprint()
         @on_message(packet.data)
 
-  on_message: (packed_data) ->
-    data = JSON.parse(zc.b64decode(packed_data))
-    message = null
-    sender = new zc.Crypto(data.sender_key)
+  on_message: (encrypted_data) ->
+    data = null
+    sender = null
 
-    @identity.crypto().decrypt_message(data.message)
+    @identity.crypto().decrypt_message(encrypted_data)
 
     .then (packed_data) =>
-      message = JSON.parse(zc.b64decode(packed_data))
+      data = JSON.parse(zc.b64decode(packed_data))
+      sender = new zc.Crypto(data.sender_key)
       sender.verify(data.message, data.signature)
 
     .then (ok) =>
@@ -84,7 +84,7 @@ class zc.Client extends zc.Controller
 
       .then (sender_fingerprint) =>
         peer = @app.request('peer', sender_fingerprint, sender.key)
-        peer.message_col.add(message)
+        peer.message_col.add(JSON.parse(zc.b64decode(data.message)))
 
     .done()
 
