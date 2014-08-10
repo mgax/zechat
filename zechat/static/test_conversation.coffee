@@ -9,14 +9,17 @@ describe 'conversation', ->
       local_storage: new zc.MockLocalStorage(local_storage_data)
     })
 
+    app = null
+
     return (
       zc.create_app(options)
 
-      .then (app) ->
-        connected = Q.defer()
-        app.vent.once 'connect', ->
-          connected.resolve(app)
-        return connected.promise
+      .then (new_app) ->
+        app = new_app
+        zc.waitevent(app.request('client'), 'ready')
+
+      .then ->
+        return app
     )
 
   beforeEach (done) ->

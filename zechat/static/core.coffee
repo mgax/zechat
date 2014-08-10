@@ -127,7 +127,6 @@ class zc.Client extends zc.Controller
     @identity.authenticate(@transport)
 
     .then =>
-      @app.vent.trigger('connect')
       @transport.send(type: 'list', identity: @identity.fingerprint())
 
     .then (resp) =>
@@ -140,6 +139,8 @@ class zc.Client extends zc.Controller
     .done (resp) =>
       for msg in resp.messages
         @on_message(msg.message)
+
+      @trigger('ready')
 
   on_packet: (packet) =>
     if packet.type == 'message'

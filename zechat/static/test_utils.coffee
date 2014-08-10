@@ -19,6 +19,12 @@ zc.waitfor = (check, timeout=1000) ->
   return deferred.promise
 
 
+zc.waitevent = (obj, name) ->
+  deferred = Q.defer()
+  obj.once('ready', -> deferred.resolve(arguments))
+  return deferred.promise
+
+
 zc.some = ($qs) ->
   return $qs if $qs.length > 0
 
