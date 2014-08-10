@@ -129,14 +129,12 @@ def test_peer_receives_messages(node):
         bar = id.message(id.fp, 'bar')
 
         with connection(node) as sender:
-            peer.send(foo, 3)
-            peer.send(bar, 4)
+            sender.send(foo, 3)
+            sender.send(bar, 4)
 
-    assert peer.out == [
-        reply(2),
-        foo, reply(3),
-        bar, reply(4),
-    ]
+        assert sender.out == [reply(3), reply(4)]
+
+    assert peer.out == [reply(2), foo, bar]
 
 
 def test_messages_filtered_by_recipient(node):
