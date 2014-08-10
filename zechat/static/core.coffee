@@ -57,7 +57,7 @@ class zc.Header extends zc.Controller
     view = new zc.HeaderView(model: @app.request('transport-state'))
 
     view.on 'click-myid', =>
-      myid = new zc.Identity(app: @app)
+      myid = @app.request('identity-controller')
       @app.commands.execute('show-main', myid.createView())
 
     view.on 'click-add-contact', =>
@@ -132,8 +132,10 @@ zc.modules.core = ->
   @app.reqres.setHandler 'threadlist', => @models.threadlist
 
   @transport = new zc.Transport(app: @app)
-  @receiver = new zc.Receiver(app: @app)
   @threadlist = new zc.Threadlist(app: @app)
+  @identity = new zc.Identity(app: @app)
+
+  @app.reqres.setHandler 'identity-controller', => @identity
 
   @app.commands.setHandler 'show-main', (view) =>
     @layout.main.show(view)

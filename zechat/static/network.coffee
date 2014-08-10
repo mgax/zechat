@@ -88,13 +88,3 @@ class zc.Transport extends zc.Controller
       return promise
     else
       return Q.reject('disconnected')
-
-
-class zc.Receiver extends zc.Controller
-
-  initialize: ->
-    @app.vent.on('message', _.bind(@on_message, @))
-
-  on_message: (data) ->
-    thread = @app.request('thread', data.sender)
-    thread.message_col.add(data)
