@@ -54,7 +54,6 @@ class zc.Thread extends zc.Controller
     message = {
       text: text
       time: zc.utcnow_iso()
-      sender: @app.request('identity').get('fingerprint')
     }
     @app.request('client').send(@peer, message)
 

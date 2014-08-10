@@ -64,13 +64,20 @@ class zc.Client extends zc.Controller
   on_message: (data) ->
     unpacked_data = JSON.parse(zc.b64decode(data))
     message = JSON.parse(zc.b64decode(unpacked_data.message))
-    peer = @app.request('peer', message.sender)
-    peer.message_col.add(message)
+    sender = new zc.Crypto(unpacked_data.sender_key)
+
+    sender.fingerprint()
+
+    .done (sender_fingerprint) =>
+      peer = @app.request('peer', sender_fingerprint)
+      peer.set('public_key', sender.key)
+      peer.message_col.add(message)
 
   send: (peer, contents) ->
     message = zc.b64encode(JSON.stringify(contents))
     data = zc.b64encode(JSON.stringify(
       message: message
+      sender_key: @identity.public_key()
     ))
     @transport.send(
       type: 'message'

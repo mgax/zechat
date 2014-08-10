@@ -43,6 +43,9 @@ class zc.Identity extends zc.Controller
   fingerprint: ->
     return @model.get('fingerprint')
 
+  public_key: ->
+    return zc.get_public_key(@model.get('key'))
+
   createView: ->
     view = new zc.IdentityView(model: @model)
 
