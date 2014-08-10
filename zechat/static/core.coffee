@@ -26,7 +26,7 @@ class zc.HeaderView extends Backbone.Marionette.ItemView
   template: 'header.html'
 
   initialize: ->
-    @model.on('change', @render.bind(@))
+    @model.on('change', => @render())
 
   serializeData: ->
     state = @model.get('state')
@@ -109,9 +109,9 @@ class zc.Persist extends zc.Controller
     value = @app.request('local_storage').getItem(@key)
     if value
       @model.set(JSON.parse(value))
-    @model.on('change', _.bind(@save, @))
+    @model.on('change', @save)
 
-  save: ->
+  save: =>
     @app.request('local_storage').setItem(@key, JSON.stringify(@model))
 
 
@@ -120,10 +120,10 @@ class zc.Client extends zc.Controller
   initialize: ->
     @identity = @options.identity
     @transport = @options.transport
-    @transport.on('open', @on_open.bind(@))
-    @transport.on('packet', @on_packet.bind(@))
+    @transport.on('open', @on_open)
+    @transport.on('packet', @on_packet)
 
-  on_open: (open) ->
+  on_open: (open) =>
     @identity.authenticate(@transport)
 
     .then =>
@@ -141,7 +141,7 @@ class zc.Client extends zc.Controller
       for msg in resp.messages
         @on_message(msg.message)
 
-  on_packet: (packet) ->
+  on_packet: (packet) =>
     if packet.type == 'message'
       if packet.recipient == @identity.fingerprint()
         @on_message(packet.message)

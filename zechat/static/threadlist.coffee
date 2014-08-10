@@ -27,15 +27,15 @@ class zc.Threadlist extends zc.Controller
 
   initialize: ->
     @collection = @app.request('threadlist')
-    @app.commands.setHandler 'open-thread', @openThread.bind(@)
-    @app.reqres.setHandler 'thread', @getThread.bind(@)
+    @app.commands.setHandler 'open-thread', @openThread
+    @app.reqres.setHandler 'thread', @getThread
 
-  getThread: (fingerprint) ->
+  getThread: (fingerprint) =>
     unless @collection.get(fingerprint)?
       @collection.add(new zc.ThreadModel(fingerprint: fingerprint))
     return @collection.get(fingerprint)
 
-  openThread: (peer) ->
+  openThread: (peer) =>
     @getThread(peer)
     thread = new zc.Thread(app: @app, peer: peer)
     @app.commands.execute('show-main', thread.layout)

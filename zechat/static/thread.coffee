@@ -48,10 +48,10 @@ class zc.Compose extends zc.Controller
 
   createView: ->
     view = new zc.ComposeView
-    view.on('send', _.bind(@send, @))
+    view.on('send', @send)
     return view
 
-  send: (text) ->
+  send: (text) =>
     message = {
       text: text
       time: zc.utcnow_iso()
