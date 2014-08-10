@@ -148,13 +148,22 @@ zc.modules.core = ->
     @layout.header.show(@header.createView())
     @layout.threadlist.show(@threadlist.createView())
 
-  @app.vent.on 'connect', =>
+  @transport.on 'open', =>
     fingerprint = @app.request('identity').get('fingerprint')
-    @app.request('send-packet', {type: 'list', identity: fingerprint})
+
+    @identity.authenticate(@transport)
+
+    .then =>
+      @app.vent.trigger('connect')
+
+      @transport.send(type: 'list', identity: fingerprint)
 
     .then (resp) =>
-      @app.request('send-packet',
-        {type: 'get', identity: fingerprint, messages: resp.messages})
+      @transport.send(
+        type: 'get'
+        identity: fingerprint
+        messages: resp.messages
+      )
 
     .done (resp) =>
       for msg in resp.messages

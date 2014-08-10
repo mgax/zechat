@@ -73,3 +73,32 @@ class zc.Identity extends zc.Controller
   on_message: (message) ->
     thread = @app.request('thread', message.sender)
     thread.message_col.add(message)
+
+  authenticate: (transport) ->
+    response = null
+
+    rv = transport.send(type: 'challenge')
+
+    .then (resp) =>
+      public_key = zc.get_public_key(@model.get('key'))
+      response = JSON.stringify(
+        public_key: public_key
+        challenge: resp.challenge
+      )
+      return new zc.Crypto(@model.get('key')).sign(response)
+
+    .then (signature) =>
+      transport.send(
+        type: 'authenticate'
+        response: response
+        signature: signature
+      )
+
+    .then (resp) =>
+      throw "authentication failure" unless resp.success
+      transport.send(
+        type: 'subscribe'
+        identity: @model.get('fingerprint')
+      )
+
+    return rv
