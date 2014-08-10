@@ -37,8 +37,7 @@ class zc.Threadlist extends zc.Controller
 
   openThread: (fingerprint) =>
     thread = new zc.Thread(app: @app, peer: @get_peer(fingerprint))
-    @app.commands.execute('show-main', thread.layout)
-    thread.render()
+    thread.show()
 
   createView: ->
     view = new zc.ThreadlistView(collection: @peer_col)

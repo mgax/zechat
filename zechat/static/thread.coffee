@@ -19,13 +19,6 @@ class zc.HistoryView extends Backbone.Marionette.CollectionView
   childView: zc.MessageView
 
 
-class zc.History extends zc.Controller
-
-  createView: ->
-    return new zc.HistoryView
-      collection: @options.collection
-
-
 class zc.ComposeView extends Backbone.Marionette.ItemView
 
   tagName: 'form'
@@ -44,10 +37,16 @@ class zc.ComposeView extends Backbone.Marionette.ItemView
         this.trigger('send', message)
 
 
-class zc.Compose extends zc.Controller
+class zc.Thread extends zc.Controller
 
-  createView: ->
-    view = new zc.ComposeView
+  initialize: ->
+    @peer = @options.peer
+
+  createHistoryView: ->
+    return new zc.HistoryView(collection: @peer.message_col)
+
+  createComposeView: ->
+    view = new zc.ComposeView()
     view.on('send', @send)
     return view
 
@@ -57,18 +56,11 @@ class zc.Compose extends zc.Controller
       time: zc.utcnow_iso()
       sender: @app.request('identity').get('fingerprint')
     }
-    @app.request('client').send(@options.peer.get('fingerprint'), message)
+    @app.request('client').send(@peer.get('fingerprint'), message)
 
-
-class zc.Thread extends zc.Controller
-
-  initialize: ->
-    @peer = @options.peer
-    @layout = new zc.ThreadLayout
-    @history = new zc.History(app: @app, collection: @peer.message_col)
-    @compose = new zc.Compose(app: @app, peer: @peer)
-
-  render: ->
-    @layout.render()
-    @layout.history.show(@history.createView())
-    @layout.compose.show(@compose.createView())
+  show: ->
+    layout = new zc.ThreadLayout()
+    @app.commands.execute('show-main', layout)
+    layout.render()
+    layout.history.show(@createHistoryView())
+    layout.compose.show(@createComposeView())
