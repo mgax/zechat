@@ -79,7 +79,7 @@ class Identity(object):
 
     def message(self, recipient, text):
         payload = b64encode(json.dumps(dict(text=text)))
-        return dict(type='message', recipient=recipient, message=payload)
+        return dict(type='message', recipient=recipient, data=payload)
 
 
 def reply(serial, **data):
@@ -162,8 +162,8 @@ def test_message_history(node):
     id = Identity()
     foo = id.message(id.fp, 'foo')
     bar = id.message(id.fp, 'bar')
-    foo_hash = hash(foo['message'])
-    bar_hash = hash(bar['message'])
+    foo_hash = hash(foo['data'])
+    bar_hash = hash(bar['data'])
 
     with connection(node) as a:
         a.send(foo)

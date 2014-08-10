@@ -87,7 +87,7 @@ def subscribe(node, transport, pkt, identity):
 @Node.on('message')
 def message(node, transport, pkt):
     recipient = pkt['recipient']
-    models.Inbox(recipient).save(pkt['message'])
+    models.Inbox(recipient).save(pkt['data'])
 
     for client in node.transport_map.values():
         if recipient in client.subscriptions:
@@ -108,7 +108,7 @@ def get(node, transport, pkt, identity):
         dict(
             type='message',
             recipient=identity,
-            message=inbox.get(message_hash),
+            data=inbox.get(message_hash),
         )
         for message_hash in pkt['messages']
     ]

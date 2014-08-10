@@ -52,25 +52,30 @@ class zc.Client extends zc.Controller
 
     .done (resp) =>
       for msg in resp.messages
-        @on_message(msg.message)
+        @on_message(msg.data)
 
       @trigger('ready')
 
   on_packet: (packet) =>
     if packet.type == 'message'
       if packet.recipient == @identity.fingerprint()
-        @on_message(packet.message)
+        @on_message(packet.data)
 
   on_message: (data) ->
-    message = JSON.parse(zc.b64decode(data))
+    unpacked_data = JSON.parse(zc.b64decode(data))
+    message = JSON.parse(zc.b64decode(unpacked_data.message))
     peer = @app.request('peer', message.sender)
     peer.message_col.add(message)
 
-  send: (recipient, message) ->
+  send: (recipient, contents) ->
+    message = zc.b64encode(JSON.stringify(contents))
+    data = zc.b64encode(JSON.stringify(
+      message: message
+    ))
     @transport.send(
       type: 'message'
       recipient: recipient
-      message: zc.b64encode(JSON.stringify(message))
+      data: data
     )
 
 
