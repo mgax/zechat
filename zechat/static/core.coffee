@@ -150,6 +150,13 @@ class zc.Client extends zc.Controller
     thread = @app.request('thread', message.sender)
     thread.message_col.add(message)
 
+  send: (recipient, message) ->
+    @transport.send(
+      type: 'message'
+      recipient: recipient
+      message: message
+    )
+
 
 zc.modules.core = ->
   @models =
@@ -177,6 +184,7 @@ zc.modules.core = ->
   )
 
   @app.reqres.setHandler 'identity-controller', => @identity
+  @app.reqres.setHandler 'client', => @client
 
   @app.commands.setHandler 'show-main', (view) =>
     @layout.main.show(view)

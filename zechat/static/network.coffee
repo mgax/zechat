@@ -30,7 +30,6 @@ class zc.Transport extends zc.Controller
     @in_flight = new zc.InFlight(app: @app)
     @model = new Backbone.Model(state: 'closed')
     @app.vent.on('start', _.bind(@connect, @))
-    @app.reqres.setHandler 'send-packet', _.bind(@send, @)
     @app.commands.setHandler 'reconnect', =>
       if @model.get('state') == 'closed'
         @connect()

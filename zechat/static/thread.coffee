@@ -51,16 +51,13 @@ class zc.Compose extends zc.Controller
     view.on('send', _.bind(@send, @))
     return view
 
-  send: (message) ->
-    identity = @app.request('identity')
-    data =
-      type: 'message'
-      recipient: @options.peer
-      message:
-        text: message
-        time: zc.utcnow_iso()
-        sender: identity.get('fingerprint')
-    @app.request('send-packet', data)
+  send: (text) ->
+    message = {
+      text: text
+      time: zc.utcnow_iso()
+      sender: @app.request('identity').get('fingerprint')
+    }
+    @app.request('client').send(@options.peer, message)
 
 
 class zc.Thread extends zc.Controller
