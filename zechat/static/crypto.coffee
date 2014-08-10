@@ -66,8 +66,8 @@ class zc.Crypto
     return deferred.promise
 
   encrypt: (data) ->
-    decrypted = @create_rsa().encryptOAEP(data)
-    return Q(hex2b64(decrypted))
+    encrypted = @create_rsa().encryptOAEP(data)
+    return Q(hex2b64(encrypted))
 
   decrypt: (data) ->
     try
