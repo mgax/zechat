@@ -146,11 +146,13 @@ describe 'conversation', ->
     new zc.Transport(app: sender_app).connect()
 
     .then (sender_transport) =>
-      sender_transport.send(
-        recipient: FIX.FINGERPRINT
-        message: {text: "hello offline", sender: FIX.FINGERPRINT_B}
-        type: 'message'
+      client = new zc.Client(
+        app: sender_app
+        transport: sender_transport
+        identity: new zc.Identity(app: sender_app)
       )
+      message = {text: "hello offline", sender: FIX.FINGERPRINT_B}
+      client.send(FIX.FINGERPRINT, message)
 
     .then =>
       identity_json = JSON.stringify(

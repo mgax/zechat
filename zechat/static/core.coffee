@@ -147,7 +147,8 @@ class zc.Client extends zc.Controller
       if packet.recipient == @identity.fingerprint()
         @on_message(packet.message)
 
-  on_message: (message) ->
+  on_message: (data) ->
+    message = JSON.parse(zc.b64decode(data))
     thread = @app.request('thread', message.sender)
     thread.message_col.add(message)
 
@@ -155,7 +156,7 @@ class zc.Client extends zc.Controller
     @transport.send(
       type: 'message'
       recipient: recipient
-      message: message
+      message: zc.b64encode(JSON.stringify(message))
     )
 
 

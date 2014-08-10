@@ -1,4 +1,5 @@
 from hashlib import sha1
+from base64 import b64encode
 from contextlib import contextmanager
 import pytest
 from mock import Mock
@@ -78,7 +79,7 @@ class Identity(object):
         assert peer.out.pop()['success'] == True
 
     def message(self, recipient, text):
-        payload = dict(text=text)
+        payload = b64encode(json.dumps(dict(text=text)))
         return dict(type='message', recipient=recipient, message=payload)
 
 
@@ -98,8 +99,8 @@ def get(identity, messages):
     return dict(type='get', identity=identity, messages=messages)
 
 
-def msghash(text):
-    return sha1(json.dumps(dict(text=text))).hexdigest()
+def hash(data):
+    return sha1(data).hexdigest()
 
 
 def test_loopback(node):
@@ -164,6 +165,8 @@ def test_message_history(node):
     id = Identity()
     foo = id.message(id.fp, 'foo')
     bar = id.message(id.fp, 'bar')
+    foo_hash = hash(foo['message'])
+    bar_hash = hash(bar['message'])
 
     with connection(node) as a:
         a.send(foo)
@@ -173,8 +176,8 @@ def test_message_history(node):
         id.authenticate(b)
 
         b.send(list_(id.fp), 2)
-        assert b.out == [reply(2, messages=[msghash('foo'), msghash('bar')])]
+        assert b.out == [reply(2, messages=[foo_hash, bar_hash])]
         b.out[:] = []
 
-        b.send(get(id.fp, [msghash('foo'), msghash('bar')]), 3)
+        b.send(get(id.fp, [foo_hash, bar_hash]), 3)
         assert b.out == [reply(3, messages=[foo, bar])]
