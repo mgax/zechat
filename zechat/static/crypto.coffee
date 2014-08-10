@@ -78,6 +78,10 @@ class zc.Crypto
         return Q(null)
       return Q.reject(e)
 
+  encrypt_message: (message) -> Q(message)
+
+  decrypt_message: (message) -> Q(message)
+
   fingerprint: ->
     key_base64 = @create_rsa().publicKeyToX509PemString()
     fingerprint = rstrtohex(rstr_sha1(hextorstr(b64tohex(key_base64))))
