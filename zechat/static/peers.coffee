@@ -24,7 +24,10 @@ class zc.AddContact extends zc.Controller
 
     view.on 'add', (url) =>
       Q($.get(url)).done (resp) =>
-        @app.commands.execute('open-thread', resp.fingerprint)
+        @app.request('peerlist').register(resp.public_key)
+
+        .then (peer) =>
+          @app.commands.execute('open-thread', peer.get('fingerprint'))
 
     return view
 
@@ -80,8 +83,7 @@ class zc.Client extends zc.Controller
       sender.fingerprint()
 
       .then (sender_fingerprint) =>
-        peer = @app.request('peer', sender_fingerprint)
-        peer.set('public_key', sender.key)
+        peer = @app.request('peer', sender_fingerprint, sender.key)
         peer.message_col.add(message)
 
     .done()
@@ -142,9 +144,24 @@ class zc.PeerList extends zc.Controller
     @app.commands.setHandler 'open-thread', @openThread
     @app.reqres.setHandler 'peer', @get_peer
 
-  get_peer: (fingerprint) =>
+  register: (public_key) =>
+    rv = new zc.Crypto(public_key).fingerprint()
+
+    .then (fingerprint) =>
+      return @get_peer(fingerprint, public_key)
+
+    return rv
+
+  get_peer: (fingerprint, public_key) =>
     unless @peer_col.get(fingerprint)?
-      @peer_col.add(new zc.PeerModel(fingerprint: fingerprint))
+      unless public_key?
+        throw("Can't create peer without a public key")
+
+      @peer_col.add(new zc.PeerModel(
+        fingerprint: fingerprint
+        public_key: public_key
+      ))
+
     return @peer_col.get(fingerprint)
 
   openThread: (fingerprint) =>

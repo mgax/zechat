@@ -17,14 +17,22 @@ zc.create_app = (options) ->
     app.module name, zc.modules[name]
 
   setup_identity = zc.setup_identity(app)
-  setup_identity.done (fingerprint) ->
+
+  .then (fingerprint) ->
     app.vent.trigger('start')
+
     if options.talk_to_self
-      app.commands.execute('open-thread', fingerprint)
-    app_deferred.resolve(app)
+      public_key = zc.get_public_key(app.request('identity').get('key'))
+      app.request('peerlist').register(public_key)
+
+      .then (peer) ->
+        app.commands.execute('open-thread', peer)
 
   _.defer ->
     if setup_identity.isPending()
       $(options.el).text('generating identity ...')
+
+  setup_identity.done ->
+    app_deferred.resolve(app)
 
   return app_deferred.promise

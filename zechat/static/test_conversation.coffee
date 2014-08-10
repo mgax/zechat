@@ -84,7 +84,7 @@ describe 'conversation', ->
     .then ($form) =>
       $form.find('[name=message]').val("hello from A")
       $form.submit()
-      peer = @app_b.request('peer', FIX.FINGERPRINT)
+      peer = @app_b.request('peer', FIX.FINGERPRINT, FIX.PUBLIC_KEY)
       zc.waitfor(-> zc.some(peer.message_col))
 
     .then (messages_from_a) =>

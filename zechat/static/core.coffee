@@ -110,6 +110,7 @@ zc.modules.core = ->
 
   @app.reqres.setHandler 'identity-controller', => @identity
   @app.reqres.setHandler 'client', => @client
+  @app.reqres.setHandler 'peerlist', => @peerlist
 
   @app.commands.setHandler 'show-main', (view) =>
     @layout.main.show(view)
