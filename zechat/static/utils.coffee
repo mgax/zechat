@@ -24,6 +24,14 @@ zc.pad_base64 = (text) ->
   return text
 
 
+zc.b64encode = (text) ->
+  return zc.pad_base64(utf8tob64(text))
+
+
+zc.b64decode = (data) ->
+  return b64toutf8(data)
+
+
 Handlebars.registerHelper 'format_time', (iso_time) ->
   time = d3.time.format.iso.parse(iso_time)
   return d3.time.format('%b-%-d %H:%M')(time)
