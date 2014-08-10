@@ -84,8 +84,8 @@ describe 'conversation', ->
     .then ($form) =>
       $form.find('[name=message]').val("hello from A")
       $form.submit()
-      thread = @app_b.request('thread', FIX.FINGERPRINT)
-      zc.waitfor(-> zc.some(thread.message_col))
+      peer = @app_b.request('peer', FIX.FINGERPRINT)
+      zc.waitfor(-> zc.some(peer.message_col))
 
     .then (messages_from_a) =>
       $threadlist_b = @app_b.$el.find('.threadlist')
@@ -163,7 +163,7 @@ describe 'conversation', ->
 
     .then (@app) =>
       get_messages = =>
-        message_col = @app.request('thread', FIX.FINGERPRINT_B).message_col
+        message_col = @app.request('peer', FIX.FINGERPRINT_B).message_col
         if message_col.length
           return message_col.at(0)
 

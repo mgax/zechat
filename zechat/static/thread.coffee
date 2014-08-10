@@ -57,16 +57,16 @@ class zc.Compose extends zc.Controller
       time: zc.utcnow_iso()
       sender: @app.request('identity').get('fingerprint')
     }
-    @app.request('client').send(@options.peer, message)
+    @app.request('client').send(@options.peer.get('fingerprint'), message)
 
 
 class zc.Thread extends zc.Controller
 
   initialize: ->
-    @collection = @app.request('thread', @options.peer).message_col
+    @peer = @options.peer
     @layout = new zc.ThreadLayout
-    @history = new zc.History(app: @app, collection: @collection)
-    @compose = new zc.Compose(app: @app, peer: @options.peer)
+    @history = new zc.History(app: @app, collection: @peer.message_col)
+    @compose = new zc.Compose(app: @app, peer: @peer)
 
   render: ->
     @layout.render()

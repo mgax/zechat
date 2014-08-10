@@ -149,8 +149,8 @@ class zc.Client extends zc.Controller
 
   on_message: (data) ->
     message = JSON.parse(zc.b64decode(data))
-    thread = @app.request('thread', message.sender)
-    thread.message_col.add(message)
+    peer = @app.request('peer', message.sender)
+    peer.message_col.add(message)
 
   send: (recipient, message) ->
     @transport.send(
@@ -163,7 +163,7 @@ class zc.Client extends zc.Controller
 zc.modules.core = ->
   @models =
     identity: new Backbone.Model
-    threadlist: new Backbone.Collection
+    peer_col: new Backbone.Collection
 
   @persist_identity = new zc.Persist
     app: @app
@@ -174,10 +174,9 @@ zc.modules.core = ->
     @models.identity.set('fingerprint', fingerprint)
 
   @app.reqres.setHandler 'identity', => @models.identity
-  @app.reqres.setHandler 'threadlist', => @models.threadlist
 
   @transport = new zc.Transport(app: @app)
-  @threadlist = new zc.Threadlist(app: @app)
+  @threadlist = new zc.Threadlist(app: @app, peer_col: @models.peer_col)
   @identity = new zc.Identity(app: @app)
   @client = new zc.Client(
     app: @app

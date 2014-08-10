@@ -26,23 +26,22 @@ class zc.ThreadModel extends Backbone.Model
 class zc.Threadlist extends zc.Controller
 
   initialize: ->
-    @collection = @app.request('threadlist')
+    @peer_col = @options.peer_col
     @app.commands.setHandler 'open-thread', @openThread
-    @app.reqres.setHandler 'thread', @getThread
+    @app.reqres.setHandler 'peer', @get_peer
 
-  getThread: (fingerprint) =>
-    unless @collection.get(fingerprint)?
-      @collection.add(new zc.ThreadModel(fingerprint: fingerprint))
-    return @collection.get(fingerprint)
+  get_peer: (fingerprint) =>
+    unless @peer_col.get(fingerprint)?
+      @peer_col.add(new zc.ThreadModel(fingerprint: fingerprint))
+    return @peer_col.get(fingerprint)
 
-  openThread: (peer) =>
-    @getThread(peer)
-    thread = new zc.Thread(app: @app, peer: peer)
+  openThread: (fingerprint) =>
+    thread = new zc.Thread(app: @app, peer: @get_peer(fingerprint))
     @app.commands.execute('show-main', thread.layout)
     thread.render()
 
   createView: ->
-    view = new zc.ThreadlistView(collection: @collection)
+    view = new zc.ThreadlistView(collection: @peer_col)
     view.on 'childview:click', (view, fingerprint) =>
       @openThread(fingerprint)
     return view
