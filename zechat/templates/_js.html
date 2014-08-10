@@ -10,6 +10,10 @@
 <script src="{{ url_for('static', filename='lib/simple-crypt-deps.js') }}"></script>
 <script src="{{ url_for('static', filename='lib/simple-crypt.js') }}"></script>
 
+<script>
+  window.zc = {modules: {}};
+</script>
+
 {% assets 'app.js' %}<script src="{{ ASSET_URL }}"></script>{% endassets %}
 
 {% for tmpl in get_template_list() %}

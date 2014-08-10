@@ -1,8 +1,3 @@
-zc.pad_base64 = (text) ->
-  while text.length % 4 != 0
-    text = text + '='
-  return text
-
 zc.format_pem = (key, title) ->
   rv = "-----BEGIN " + title + "-----\n"
   while key
