@@ -46,21 +46,19 @@ class zc.Transport extends zc.Controller
   on_open: ->
     @model.set(state: 'open')
     identity = @app.request('identity')
+    response = null
 
     @send(type: 'challenge')
 
     .then (resp) =>
-      signed = Q.defer()
       public_key = zc.get_public_key(identity.get('key'))
       response = JSON.stringify(
         public_key: public_key
         challenge: resp.challenge
       )
-      new zc.Crypto(identity.get('key')).sign response, (signature) ->
-        signed.resolve([response, signature])
-      return signed.promise
+      return new zc.Crypto(identity.get('key')).sign(response)
 
-    .then ([response, signature]) =>
+    .then (signature) =>
       @send(type: 'authenticate', response: response, signature: signature)
 
     .then (resp) =>

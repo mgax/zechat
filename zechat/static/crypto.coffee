@@ -8,14 +8,14 @@ zc.format_pem = (key, title) ->
   return rv
 
 
-zc.generate_key = (size, callback) ->
+zc.generate_key = (size) ->
   unless size >= 1024
     throw "key size must be at least 1024 bits"
 
   k = new RSAKey()
   k.generate(size, '10001')
   key = k.privateKeyToPkcs1PemString()
-  _.defer(callback, zc.format_pem(zc.pad_base64(key), "RSA PRIVATE KEY"))
+  return Q(zc.format_pem(zc.pad_base64(key), "RSA PRIVATE KEY"))
 
 
 zc.get_public_key = (private_key) ->
@@ -30,9 +30,11 @@ class zc.Crypto
   constructor: (key) ->
     @key = key
 
-  create_crypt: (callback) ->
+  create_crypt: ->
+    deferred = Q.defer()
     Crypt.make @key, json: false, (_, crypt) ->
-      callback(crypt)
+      deferred.resolve(crypt)
+    return deferred.promise
 
   create_rsa: ->
     rv = new RSAKey()
@@ -42,34 +44,41 @@ class zc.Crypto
       rv.readPublicKeyFromPEMString(@key)
     return rv
 
-  sign: (data, callback) ->
-    @create_crypt (crypt) ->
+  sign: (data) ->
+    deferred = Q.defer()
+    @create_crypt()
+    .then (crypt) ->
       crypt.sign data, (_, signed) ->
-        callback(zc.pad_base64(signed.signature))
+        deferred.resolve(zc.pad_base64(signed.signature))
+    return deferred.promise
 
-  verify: (data, signature, callback) ->
-    @create_crypt (crypt) ->
+  verify: (data, signature) ->
+    deferred = Q.defer()
+    @create_crypt()
+    .then (crypt) ->
       options =
         data: window.btoa(data)
         signature: signature
         version: 1
       crypt.verify options, (_, verified) ->
-        callback(verified == data)
+        is_ok = (verified == data)
+        deferred.resolve(is_ok)
+    return deferred.promise
 
-  encrypt: (data, callback) ->
+  encrypt: (data) ->
     decrypted = @create_rsa().encryptOAEP(data)
-    callback(hex2b64(decrypted))
+    return Q(hex2b64(decrypted))
 
-  decrypt: (data, callback) ->
+  decrypt: (data) ->
     try
       decrypted = @create_rsa().decryptOAEP(b64tohex(data))
+      return Q(decrypted)
     catch e
       if e == "Hash mismatch"
-        return callback(null)
-      throw e
-    callback(decrypted)
+        return Q(null)
+      return Q.reject(e)
 
-  fingerprint: (callback) ->
+  fingerprint: ->
     key_base64 = @create_rsa().publicKeyToX509PemString()
     fingerprint = rstrtohex(rstr_sha1(hextorstr(b64tohex(key_base64))))
-    callback(fingerprint)
+    return Q(fingerprint)
