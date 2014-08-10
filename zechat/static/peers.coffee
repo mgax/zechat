@@ -61,15 +61,15 @@ class zc.Client extends zc.Controller
       if packet.recipient == @identity.fingerprint()
         @on_message(packet.data)
 
-  on_message: (data) ->
-    unpacked_data = JSON.parse(zc.b64decode(data))
-    message = JSON.parse(zc.b64decode(unpacked_data.message))
-    sender = new zc.Crypto(unpacked_data.sender_key)
+  on_message: (packed_data) ->
+    data = JSON.parse(zc.b64decode(packed_data))
+    message = JSON.parse(zc.b64decode(data.message))
+    sender = new zc.Crypto(data.sender_key)
 
-    sender.verify(unpacked_data.message, unpacked_data.signature)
+    sender.verify(data.message, data.signature)
     .then (ok) =>
       unless ok
-        @trigger('verification-failed', data)
+        @trigger('verification-failed', packed_data)
         return
 
       sender.fingerprint()
@@ -81,20 +81,20 @@ class zc.Client extends zc.Controller
     .done()
 
   send: (peer, contents) ->
-    message = zc.b64encode(JSON.stringify(contents))
+    packed_message = zc.b64encode(JSON.stringify(contents))
 
-    @identity.crypto().sign(message)
+    @identity.crypto().sign(packed_message)
 
     .then (signature) =>
-      data = zc.b64encode(JSON.stringify(
-        message: message
+      data = {
+        message: packed_message
         sender_key: @identity.public_key()
         signature: signature
-      ))
+      }
       @transport.send(
         type: 'message'
         recipient: peer.get('fingerprint')
-        data: data
+        data: zc.b64encode(JSON.stringify(data))
       )
 
     .done()
