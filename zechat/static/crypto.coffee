@@ -78,9 +78,47 @@ class zc.Crypto
         return Q(null)
       return Q.reject(e)
 
-  encrypt_message: (message) -> Q(message)
+  encrypt_message: (data) ->
+    key = null
+    enc_key = null
+    iv = null
+    cbc_mode = slowAES.modeOfOperation.CBC
 
-  decrypt_message: (message) -> Q(message)
+    zc.random_bytes(AES_128_KEY_SIZE)
+
+    .then (r) =>
+      key = r
+      zc.random_bytes(AES_BLOCK_SIZE)
+
+    .then (r) =>
+      iv = r
+      @encrypt(zc.b64frombytes(key))
+
+    .then (r) =>
+      enc_key = r
+
+      enc_bytes = slowAES.encrypt(get_char_codes(data), cbc_mode, key, iv)
+      payload = {
+        enc_key: enc_key
+        iv: zc.b64frombytes(iv)
+        enc_data: zc.b64frombytes(enc_bytes)
+      }
+      return zc.b64encode(JSON.stringify(payload))
+
+  decrypt_message: (data) ->
+    payload = JSON.parse(zc.b64decode(data))
+    iv = zc.b64tobytes(payload.iv)
+    enc_bytes = zc.b64tobytes(payload.enc_data)
+    cbc_mode = slowAES.modeOfOperation.CBC
+
+    @decrypt(payload.enc_key)
+
+    .then (r) =>
+      key = zc.b64tobytes(r)
+
+      bytes = slowAES.decrypt(enc_bytes, cbc_mode, key, iv)
+      data = String.fromCharCode.apply(String, bytes)
+      return data
 
   fingerprint: ->
     key_base64 = @create_rsa().publicKeyToX509PemString()

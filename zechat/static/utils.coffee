@@ -24,12 +24,26 @@ zc.pad_base64 = (text) ->
   return text
 
 
+zc.random_bytes = (size) ->
+  data = new Uint8Array(size)
+  window.crypto.getRandomValues(data)
+  return Q(data)
+
+
 zc.b64encode = (text) ->
   return zc.pad_base64(utf8tob64(text))
 
 
 zc.b64decode = (data) ->
   return b64toutf8(data)
+
+
+zc.b64frombytes = (bytes) ->
+  return window.btoa(String.fromCharCode.apply(String, bytes))
+
+
+zc.b64tobytes = (data) ->
+  return get_char_codes(window.atob(data))
 
 
 Handlebars.registerHelper 'format_time', (iso_time) ->

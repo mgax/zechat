@@ -74,6 +74,20 @@ describe 'crypto', ->
       expect(out).toEqual(null)
       test_done()
 
+  it 'should encrypt and decrypt using symmetric key', (test_done) ->
+    message = ('[tenbytes]' for _ in [1..100]).join('')
+
+    new zc.Crypto(FIX.PUBLIC_KEY).encrypt_message(message)
+
+    .then (encrypted) ->
+      new zc.Crypto(FIX.PRIVATE_KEY).decrypt_message(encrypted)
+
+    .then (decrypted) ->
+      expect(decrypted).toEqual(message)
+
+    .done ->
+      test_done()
+
   it 'should generate a usable key', (test_done) ->
     zc.generate_key(1024)
 
