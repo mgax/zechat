@@ -70,37 +70,6 @@ class zc.Header extends zc.Controller
     return view
 
 
-class zc.AddContactView extends Backbone.Marionette.ItemView
-
-  tagName: 'form'
-  template: 'add_contact.html'
-
-  ui:
-    url: '[name=url]'
-
-  events:
-    'submit': (evt) ->
-      evt.preventDefault()
-      url = @ui.url.val()
-      if url
-        this.trigger('add', url)
-
-  onShow: ->
-    @ui.url.focus()
-
-
-class zc.AddContact extends zc.Controller
-
-  createView: ->
-    view = new zc.AddContactView()
-
-    view.on 'add', (url) =>
-      Q($.get(url)).done (resp) =>
-        @app.commands.execute('open-thread', resp.fingerprint)
-
-    return view
-
-
 class zc.Persist extends zc.Controller
 
   initialize: ->
@@ -113,51 +82,6 @@ class zc.Persist extends zc.Controller
 
   save: =>
     @app.request('local_storage').setItem(@key, JSON.stringify(@model))
-
-
-class zc.Client extends zc.Controller
-
-  initialize: ->
-    @identity = @options.identity
-    @transport = @options.transport
-    @transport.on('open', @on_open)
-    @transport.on('packet', @on_packet)
-
-  on_open: (open) =>
-    @identity.authenticate(@transport)
-
-    .then =>
-      @transport.send(type: 'list', identity: @identity.fingerprint())
-
-    .then (resp) =>
-      @transport.send(
-        type: 'get'
-        identity: @identity.fingerprint()
-        messages: resp.messages
-      )
-
-    .done (resp) =>
-      for msg in resp.messages
-        @on_message(msg.message)
-
-      @trigger('ready')
-
-  on_packet: (packet) =>
-    if packet.type == 'message'
-      if packet.recipient == @identity.fingerprint()
-        @on_message(packet.message)
-
-  on_message: (data) ->
-    message = JSON.parse(zc.b64decode(data))
-    peer = @app.request('peer', message.sender)
-    peer.message_col.add(message)
-
-  send: (recipient, message) ->
-    @transport.send(
-      type: 'message'
-      recipient: recipient
-      message: zc.b64encode(JSON.stringify(message))
-    )
 
 
 zc.modules.core = ->
