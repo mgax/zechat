@@ -39,7 +39,6 @@ class zc.Identity extends zc.Controller
 
   initialize: ->
     @model = @app.request('identity')
-    @app.vent.on('message', _.bind(@on_message, @))
 
   createView: ->
     view = new zc.IdentityView(model: @model)

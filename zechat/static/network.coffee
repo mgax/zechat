@@ -4,18 +4,19 @@ class zc.InFlight extends zc.Controller
     @serial = 0
     @pending = {}
 
-  wrap: (msg) ->
-    msg._serial = (@serial += 1)
+  wrap: (packet) ->
+    packet._serial = (@serial += 1)
     deferred = Q.defer()
-    @pending[msg._serial] = deferred
+    @pending[packet._serial] = deferred
     return deferred.promise
 
-  reply: (msg) ->
-    return unless msg._reply
-    deferred = @pending[msg._reply]
-    return unless deferred
-    delete @pending[msg._reply]
-    deferred.resolve(msg)
+  reply: (packet) ->
+    return false unless packet._reply
+    deferred = @pending[packet._reply]
+    return false unless deferred
+    delete @pending[packet._reply]
+    deferred.resolve(packet)
+    return true
 
   flush: ->
     _.forEach @pending, (deferred) ->
@@ -52,13 +53,9 @@ class zc.Transport extends zc.Controller
     @in_flight.flush()
 
   on_receive: (evt) ->
-    msg = JSON.parse(evt.data)
-    identity = @app.request('identity')
-    my_fingerprint = identity.get('fingerprint')
-    if msg.type == 'message' and msg.recipient == my_fingerprint
-      @app.vent.trigger('message', msg.message)
-
-    @in_flight.reply(msg)
+    packet = JSON.parse(evt.data)
+    unless @in_flight.reply(packet)
+      @trigger('packet', packet)
 
   send: (msg) ->
     if @ws and @ws.readyState == WebSocket.OPEN

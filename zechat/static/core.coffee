@@ -148,6 +148,13 @@ zc.modules.core = ->
     @layout.header.show(@header.createView())
     @layout.threadlist.show(@threadlist.createView())
 
+  @transport.on 'packet', (packet) =>
+    if packet.type == 'message'
+      my_fingerprint = @app.request('identity').get('fingerprint')
+      if packet.recipient == my_fingerprint
+        @identity.on_message(packet.message)
+
+
   @transport.on 'open', =>
     fingerprint = @app.request('identity').get('fingerprint')
 
@@ -167,4 +174,4 @@ zc.modules.core = ->
 
     .done (resp) =>
       for msg in resp.messages
-        @app.vent.trigger('message', msg.message)
+        @identity.on_message(msg.message)
