@@ -94,9 +94,6 @@ zc.modules.core = ->
     key: 'identity'
     model: @models.identity
 
-  zc.set_identity = (fingerprint) =>
-    @models.identity.set('fingerprint', fingerprint)
-
   @app.reqres.setHandler 'identity', => @models.identity
 
   @transport = new zc.Transport(app: @app)
