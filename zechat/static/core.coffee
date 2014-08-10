@@ -124,18 +124,16 @@ class zc.Client extends zc.Controller
     @transport.on('packet', @on_packet.bind(@))
 
   on_open: (open) ->
-    fingerprint = @app.request('identity').get('fingerprint')
-
     @identity.authenticate(@transport)
 
     .then =>
       @app.vent.trigger('connect')
-      @transport.send(type: 'list', identity: fingerprint)
+      @transport.send(type: 'list', identity: @identity.fingerprint())
 
     .then (resp) =>
       @transport.send(
         type: 'get'
-        identity: fingerprint
+        identity: @identity.fingerprint()
         messages: resp.messages
       )
 
@@ -145,8 +143,7 @@ class zc.Client extends zc.Controller
 
   on_packet: (packet) ->
     if packet.type == 'message'
-      my_fingerprint = @app.request('identity').get('fingerprint')
-      if packet.recipient == my_fingerprint
+      if packet.recipient == @identity.fingerprint()
         @on_message(packet.message)
 
   on_message: (message) ->

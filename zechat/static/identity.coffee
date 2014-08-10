@@ -40,6 +40,9 @@ class zc.Identity extends zc.Controller
   initialize: ->
     @model = @app.request('identity')
 
+  fingerprint: ->
+    return @model.get('fingerprint')
+
   createView: ->
     view = new zc.IdentityView(model: @model)
 
@@ -57,7 +60,7 @@ class zc.Identity extends zc.Controller
   publish: ->
     url = @app.request('urls').post_identity
     data = {
-      fingerprint: @model.get('fingerprint')
+      fingerprint: @fingerprint()
       public_key: zc.get_public_key(@model.get('key'))
     }
 
@@ -93,7 +96,7 @@ class zc.Identity extends zc.Controller
       throw "authentication failure" unless resp.success
       transport.send(
         type: 'subscribe'
-        identity: @model.get('fingerprint')
+        identity: @fingerprint()
       )
 
     return rv
