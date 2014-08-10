@@ -3,7 +3,6 @@ from base64 import b64encode
 from contextlib import contextmanager
 import pytest
 from mock import Mock
-import flask
 from flask import json
 
 
@@ -76,7 +75,7 @@ class Identity(object):
             signature=self.crypto.sign(response),
         )
         peer.send(auth_packet, 2)
-        assert peer.out.pop()['success'] == True
+        assert peer.out.pop()['success']
 
     def message(self, recipient, text):
         payload = b64encode(json.dumps(dict(text=text)))
