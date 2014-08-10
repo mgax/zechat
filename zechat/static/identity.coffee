@@ -69,10 +69,6 @@ class zc.Identity extends zc.Controller
         return resp.url
     )
 
-  on_message: (message) ->
-    thread = @app.request('thread', message.sender)
-    thread.message_col.add(message)
-
   authenticate: (transport) ->
     response = null
 

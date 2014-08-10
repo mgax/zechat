@@ -115,6 +115,45 @@ class zc.Persist extends zc.Controller
     @app.request('local_storage').setItem(@key, JSON.stringify(@model))
 
 
+class zc.Client extends zc.Controller
+
+  initialize: ->
+    @identity = @options.identity
+    @transport = @options.transport
+    @transport.on('open', @on_open.bind(@))
+    @transport.on('packet', @on_packet.bind(@))
+
+  on_open: (open) ->
+    fingerprint = @app.request('identity').get('fingerprint')
+
+    @identity.authenticate(@transport)
+
+    .then =>
+      @app.vent.trigger('connect')
+      @transport.send(type: 'list', identity: fingerprint)
+
+    .then (resp) =>
+      @transport.send(
+        type: 'get'
+        identity: fingerprint
+        messages: resp.messages
+      )
+
+    .done (resp) =>
+      for msg in resp.messages
+        @on_message(msg.message)
+
+  on_packet: (packet) ->
+    if packet.type == 'message'
+      my_fingerprint = @app.request('identity').get('fingerprint')
+      if packet.recipient == my_fingerprint
+        @on_message(packet.message)
+
+  on_message: (message) ->
+    thread = @app.request('thread', message.sender)
+    thread.message_col.add(message)
+
+
 zc.modules.core = ->
   @models =
     identity: new Backbone.Model
@@ -134,6 +173,11 @@ zc.modules.core = ->
   @transport = new zc.Transport(app: @app)
   @threadlist = new zc.Threadlist(app: @app)
   @identity = new zc.Identity(app: @app)
+  @client = new zc.Client(
+    app: @app
+    transport: @transport
+    identity: @identity
+  )
 
   @app.reqres.setHandler 'identity-controller', => @identity
 
@@ -147,31 +191,3 @@ zc.modules.core = ->
     @header = new zc.Header(app: @app)
     @layout.header.show(@header.createView())
     @layout.threadlist.show(@threadlist.createView())
-
-  @transport.on 'packet', (packet) =>
-    if packet.type == 'message'
-      my_fingerprint = @app.request('identity').get('fingerprint')
-      if packet.recipient == my_fingerprint
-        @identity.on_message(packet.message)
-
-
-  @transport.on 'open', =>
-    fingerprint = @app.request('identity').get('fingerprint')
-
-    @identity.authenticate(@transport)
-
-    .then =>
-      @app.vent.trigger('connect')
-
-      @transport.send(type: 'list', identity: fingerprint)
-
-    .then (resp) =>
-      @transport.send(
-        type: 'get'
-        identity: fingerprint
-        messages: resp.messages
-      )
-
-    .done (resp) =>
-      for msg in resp.messages
-        @identity.on_message(msg.message)
