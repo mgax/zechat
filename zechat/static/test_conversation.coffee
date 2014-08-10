@@ -75,10 +75,10 @@ describe 'conversation', ->
       $form_a = @app_a.$el.find('.app-main > form')
       $form_a.find('[name=url]').val(url_b)
       $form_a.submit()
-      zc.waitfor(=> zc.some(@app_a.$el.find('.threadlist')))
+      zc.waitfor(=> zc.some(@app_a.$el.find('.peerlist')))
 
-    .then ($threadlist) =>
-      expect($threadlist.text().trim()).toEqual(FIX.FINGERPRINT_B)
+    .then ($peerlist) =>
+      expect($peerlist.text().trim()).toEqual(FIX.FINGERPRINT_B)
       zc.waitfor(=> zc.some(@app_a.$el.find('.thread-compose form')))
 
     .then ($form) =>
@@ -88,8 +88,8 @@ describe 'conversation', ->
       zc.waitfor(-> zc.some(peer.message_col))
 
     .then (messages_from_a) =>
-      $threadlist_b = @app_b.$el.find('.threadlist')
-      expect($threadlist_b.text().trim()).toEqual(FIX.FINGERPRINT)
+      $peerlist_b = @app_b.$el.find('.peerlist')
+      expect($peerlist_b.text().trim()).toEqual(FIX.FINGERPRINT)
       expect(messages_from_a.at(0).get('text')).toEqual("hello from A")
 
     .catch (err) =>

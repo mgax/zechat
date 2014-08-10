@@ -16,7 +16,7 @@ class zc.AppLayout extends Backbone.Marionette.LayoutView
 
   regions:
     header: '.app-header'
-    threadlist: '.app-threadlist'
+    peerlist: '.app-peerlist'
     main: '.app-main'
 
 
@@ -176,7 +176,7 @@ zc.modules.core = ->
   @app.reqres.setHandler 'identity', => @models.identity
 
   @transport = new zc.Transport(app: @app)
-  @threadlist = new zc.Threadlist(app: @app, peer_col: @models.peer_col)
+  @peerlist = new zc.PeerList(app: @app, peer_col: @models.peer_col)
   @identity = new zc.Identity(app: @app)
   @client = new zc.Client(
     app: @app
@@ -196,4 +196,4 @@ zc.modules.core = ->
 
     @header = new zc.Header(app: @app)
     @layout.header.show(@header.createView())
-    @layout.threadlist.show(@threadlist.createView())
+    @layout.peerlist.show(@peerlist.createView())
