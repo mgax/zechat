@@ -36,12 +36,16 @@ class zc.Transport extends zc.Controller
     @app.reqres.setHandler 'transport-state', => @model
 
   connect: ->
+    deferred = Q.defer()
     transport_url = @app.request('urls')['transport']
     @ws = new WebSocket(transport_url)
     @ws.onmessage = @on_receive.bind(@)
-    @ws.onopen = @on_open.bind(@)
+    @ws.onopen = () =>
+      @on_open()
+      deferred.resolve(@)
     @ws.onclose = @on_close.bind(@)
     @model.set(state: 'connecting')
+    return deferred.promise
 
   on_open: ->
     @model.set(state: 'open')

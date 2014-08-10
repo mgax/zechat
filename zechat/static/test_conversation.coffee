@@ -139,12 +139,10 @@ describe 'conversation', ->
     )
     sender_app.reqres.setHandler('identity', -> sender_identity)
     sender_app.reqres.setHandler('urls', -> zc.TESTING_URL_MAP)
-    sender_transport = new zc.Transport(app: sender_app)
-    sender_transport.connect()
 
-    zc.waitfor(=> sender_transport.model.get('state') == 'open')
+    new zc.Transport(app: sender_app).connect()
 
-    .then =>
+    .then (sender_transport) =>
       sender_transport.send(
         recipient: FIX.FINGERPRINT
         message: {text: "hello offline", sender: FIX.FINGERPRINT_B}
