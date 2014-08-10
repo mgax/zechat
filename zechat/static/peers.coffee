@@ -67,14 +67,14 @@ class zc.Client extends zc.Controller
     peer = @app.request('peer', message.sender)
     peer.message_col.add(message)
 
-  send: (recipient, contents) ->
+  send: (peer, contents) ->
     message = zc.b64encode(JSON.stringify(contents))
     data = zc.b64encode(JSON.stringify(
       message: message
     ))
     @transport.send(
       type: 'message'
-      recipient: recipient
+      recipient: peer.get('fingerprint')
       data: data
     )
 

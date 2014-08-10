@@ -152,7 +152,11 @@ describe 'conversation', ->
         identity: new zc.Identity(app: sender_app)
       )
       message = {text: "hello offline", sender: FIX.FINGERPRINT_B}
-      client.send(FIX.FINGERPRINT, message)
+      peer = new Backbone.Model(
+        public_key: FIX.PUBLIC_KEY
+        fingerprint: FIX.FINGERPRINT
+      )
+      client.send(peer, message)
 
     .then =>
       identity_json = JSON.stringify(

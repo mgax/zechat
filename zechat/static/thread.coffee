@@ -56,7 +56,7 @@ class zc.Thread extends zc.Controller
       time: zc.utcnow_iso()
       sender: @app.request('identity').get('fingerprint')
     }
-    @app.request('client').send(@peer.get('fingerprint'), message)
+    @app.request('client').send(@peer, message)
 
   show: ->
     layout = new zc.ThreadLayout()
