@@ -66,24 +66,38 @@ class zc.Client extends zc.Controller
     message = JSON.parse(zc.b64decode(unpacked_data.message))
     sender = new zc.Crypto(unpacked_data.sender_key)
 
-    sender.fingerprint()
+    sender.verify(unpacked_data.message, unpacked_data.signature)
+    .then (ok) =>
+      unless ok
+        @trigger('verification-failed', data)
+        return
 
-    .done (sender_fingerprint) =>
-      peer = @app.request('peer', sender_fingerprint)
-      peer.set('public_key', sender.key)
-      peer.message_col.add(message)
+      sender.fingerprint()
+      .then (sender_fingerprint) =>
+        peer = @app.request('peer', sender_fingerprint)
+        peer.set('public_key', sender.key)
+        peer.message_col.add(message)
+
+    .done()
 
   send: (peer, contents) ->
     message = zc.b64encode(JSON.stringify(contents))
-    data = zc.b64encode(JSON.stringify(
-      message: message
-      sender_key: @identity.public_key()
-    ))
-    @transport.send(
-      type: 'message'
-      recipient: peer.get('fingerprint')
-      data: data
-    )
+
+    @identity.crypto().sign(message)
+
+    .then (signature) =>
+      data = zc.b64encode(JSON.stringify(
+        message: message
+        sender_key: @identity.public_key()
+        signature: signature
+      ))
+      @transport.send(
+        type: 'message'
+        recipient: peer.get('fingerprint')
+        data: data
+      )
+
+    .done()
 
 
 class zc.PeerListItemView extends Backbone.Marionette.ItemView

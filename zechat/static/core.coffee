@@ -105,6 +105,9 @@ zc.modules.core = ->
     identity: @identity
   )
 
+  @client.on 'verification-failed', (data) =>
+    console.log("message verification failed", data)
+
   @app.reqres.setHandler 'identity-controller', => @identity
   @app.reqres.setHandler 'client', => @client
 

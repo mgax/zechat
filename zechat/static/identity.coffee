@@ -46,6 +46,9 @@ class zc.Identity extends zc.Controller
   public_key: ->
     return zc.get_public_key(@model.get('key'))
 
+  crypto: ->
+    return new zc.Crypto(@model.get('key'))
+
   createView: ->
     view = new zc.IdentityView(model: @model)
 
