@@ -106,4 +106,12 @@ zc.fixtures = {
 
   FINGERPRINT_B: "f9df70f799f933fe997312012a7ed369333631a6"
 
+  A_KEY: 'VrIuRMeVZkmqlS9Sa9VRritZ1eVmnyJcZZFKJUkdnvk='
+  A_PUBKEY: 'B8dnDDjozeRUBsMFlPiWL4HR6kLEa9WyVRga4Q/CoXY='
+
+  B_KEY: 'NuwWzeSWynTxvBfNxi1z5UwG7AtKwwQYpW0GlDde4Fs='
+  B_PUBKEY: 'YCBnGbI2GbfWjmJl22o4IH3sIACU8Sv58fcxfDQojhI='
+
+  A_B_ENCRYPTED: 'zc+OgEhoQm3Yu8vqsFcuvzc0FJuQ2au4+wrxt8hGkss1jDAFXEMRoRU6+g=='
+
 }

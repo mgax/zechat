@@ -46,6 +46,17 @@ zc.b64tobytes = (data) ->
   return get_char_codes(window.atob(data))
 
 
+zc.b64tou8array = (data) ->
+  return new Uint8Array(zc.b64tobytes(data))
+
+
+zc.u8cat = (a, b) ->
+  rv = new Uint8Array(a.byteLength + b.byteLength)
+  rv.set(a, 0)
+  rv.set(b, a.byteLength)
+  return rv
+
+
 Handlebars.registerHelper 'format_time', (iso_time) ->
   time = d3.time.format.iso.parse(iso_time)
   return d3.time.format('%b-%-d %H:%M')(time)

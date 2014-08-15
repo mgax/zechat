@@ -124,3 +124,46 @@ class zc.Crypto
     key_base64 = @create_rsa().publicKeyToX509PemString()
     fingerprint = rstrtohex(rstr_sha1(hextorstr(b64tohex(key_base64))))
     return Q(fingerprint)
+
+
+zc.nacl = nacl_factory.instantiate()
+
+
+class zc.CurveCrypto
+
+  constructor: ->
+    @last_nonce = zc.nacl.crypto_box_random_nonce()
+    @NONCE_SIZE = @last_nonce.byteLength
+
+  nonce: ->
+    now = zc.nacl.encode_latin1(""+Date.now())
+    hash = zc.nacl.crypto_hash(zc.u8cat(@last_nonce, now))
+    new_nonce = hash.subarray(0, @NONCE_SIZE)
+    @last_nonce = new_nonce
+    return new_nonce
+
+  encrypt: (message, sender_b64, recipient_pub_b64) ->
+    sender = zc.b64tou8array(sender_b64)
+    recipient_pub = zc.b64tou8array(recipient_pub_b64)
+    nonce = @nonce()
+    plain = zc.nacl.encode_utf8(message)
+    ciphertext = zc.nacl.crypto_box(plain, nonce, recipient_pub, sender)
+    encrypted = new Uint8Array(nonce.byteLength + ciphertext.byteLength)
+    encrypted.set(nonce, 0)
+    encrypted.set(ciphertext, nonce.byteLength)
+    return btoa(zc.nacl.decode_latin1(encrypted))
+
+  decrypt: (encrypted_b64, sender_pub_b64, recipient_b64) ->
+    encrypted = zc.b64tou8array(encrypted_b64)
+    nonce = encrypted.subarray(0, @NONCE_SIZE)
+    ciphertext = encrypted.subarray(@NONCE_SIZE)
+    sender_pub = zc.b64tou8array(sender_pub_b64)
+    recipient = zc.b64tou8array(recipient_b64)
+    try
+      plain = zc.nacl.crypto_box_open(ciphertext, nonce, sender_pub, recipient)
+    catch e
+      return null
+    return zc.nacl.decode_utf8(plain)
+
+
+zc.curve = new zc.CurveCrypto()
