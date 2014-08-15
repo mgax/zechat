@@ -46,6 +46,10 @@ zc.b64tobytes = (data) ->
   return get_char_codes(window.atob(data))
 
 
+zc.b64fromu8array = (arr) ->
+  return btoa(zc.nacl.decode_latin1(arr))
+
+
 zc.b64tou8array = (data) ->
   return new Uint8Array(zc.b64tobytes(data))
 
