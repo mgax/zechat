@@ -19,6 +19,10 @@ class Message(db.Model):
     payload = db.Column(db.String, nullable=False)
 
 
+def hash(data):
+    return 'mh:' + hashlib.sha512(data).hexdigest()[:32]
+
+
 class Inbox(object):
 
     def __init__(self, identity):
@@ -29,7 +33,7 @@ class Inbox(object):
             sender=sender,
             recipient=self.identity,
             payload=payload,
-            hash=hashlib.sha1(payload).hexdigest(),
+            hash=hash(payload),
         )
         db.session.add(message)
         db.session.commit()

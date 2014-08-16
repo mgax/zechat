@@ -1,4 +1,3 @@
-from hashlib import sha1
 from base64 import b64encode
 from contextlib import contextmanager
 import pytest
@@ -108,7 +107,8 @@ def get(identity, messages):
 
 
 def hash(data):
-    return sha1(data).hexdigest()
+    from zechat.models import hash
+    return hash(data)
 
 
 def test_loopback(node):
