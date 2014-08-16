@@ -1,7 +1,7 @@
 import logging
 from contextlib import contextmanager
 import flask
-from zechat.cryptos import Crypto
+from zechat.cryptos import Crypto, CurveCrypto
 from zechat import models
 
 logger = logging.getLogger(__name__)
@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 class Node(object):
 
+    key = '0J/xVDsOp6vWBsvmM8pIpfHBIAcXGl/S9ix0HZyiTWk='  # TODO random key
     packet_handlers = {}
 
     def __init__(self, app=None):
@@ -16,6 +17,8 @@ class Node(object):
         self.app = app
         if app is not None:
             app.extensions['zechat_node'] = self
+        self.curve = CurveCrypto()
+        self.pubkey = self.curve.pubkey(self.key)
 
     @classmethod
     def on(cls, name):
@@ -64,17 +67,15 @@ def check_identity(func):
 def challenge(node, transport, pkt):
     from time import time
     transport.challenge = str(time())
-    return dict(challenge=transport.challenge)
+    return dict(challenge=transport.challenge, pubkey=node.pubkey)
 
 
 @Node.on('authenticate')
 def authenticate(node, transport, pkt):
-    response = flask.json.loads(pkt['response'])
-    identity = Crypto(response['public_key'])
-    assert identity.verify(pkt['response'], pkt['signature'])
-    assert response['challenge'] == transport.challenge
+    response = node.curve.decrypt(pkt['response'], pkt['pubkey'], node.key)
+    assert response == transport.challenge
     del transport.challenge
-    transport.identities.add(identity.fingerprint())
+    transport.identities.add(pkt['pubkey'])
     return dict(success=True)
 
 

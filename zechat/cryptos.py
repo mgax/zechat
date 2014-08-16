@@ -74,3 +74,7 @@ class CurveCrypto(object):
             return box.decrypt(encrypted, encoder=Base64Encoder)
         except CryptoError:
             raise DecryptionError
+
+    def pubkey(self, private):
+        private_key = PrivateKey(private, Base64Encoder)
+        return private_key.public_key.encode(Base64Encoder)

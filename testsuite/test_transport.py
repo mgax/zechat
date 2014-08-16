@@ -53,26 +53,30 @@ class Client(object):
 class Identity(object):
 
     def __init__(self, key=None):
-        if key is None:
-            from test_crypto import PRIVATE_KEY
-            key = PRIVATE_KEY
+        from zechat.cryptos import CurveCrypto
 
-        from zechat.cryptos import Crypto
-        self.crypto = Crypto(key)
+        if key is None:
+            from test_crypto import A_KEY
+            key = A_KEY
+
+        self.curve = CurveCrypto()
+        self.key = key
+        self.pubkey = self.curve.pubkey(self.key)
 
     @property
     def fp(self):
-        return self.crypto.fingerprint()
+        return self.pubkey
 
     def authenticate(self, peer):
         peer.send(dict(type='challenge'), 1)
-        challenge = peer.out.pop()['challenge']
-        public_key = self.crypto.public_key()
-        response = json.dumps(dict(challenge=challenge, public_key=public_key))
+        resp = peer.out.pop()
+        challenge = resp['challenge'].encode('ascii')
+        server_pubkey = resp['pubkey'].encode('ascii')
+        response = self.curve.encrypt(challenge, self.key, server_pubkey)
         auth_packet = dict(
             type='authenticate',
             response=response,
-            signature=self.crypto.sign(response),
+            pubkey=self.pubkey,
         )
         peer.send(auth_packet, 2)
         assert peer.out.pop()['success']
@@ -138,10 +142,10 @@ def test_peer_receives_messages(node):
 
 
 def test_messages_filtered_by_recipient(node):
-    from test_crypto import PRIVATE_KEY_B
+    from test_crypto import B_KEY
     id = Identity()  # sender
     id_a = Identity()  # recipient A
-    id_b = Identity(PRIVATE_KEY_B)  # recipient B
+    id_b = Identity(B_KEY)  # recipient B
     with connection(node) as a, connection(node) as b:
         id_a.authenticate(a)
         a.send(subscribe(id_a.fp), 2)
