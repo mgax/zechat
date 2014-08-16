@@ -1,3 +1,4 @@
+import flask.ext.uwsgi_websocket  # must be loaded early
 import logging
 import os
 from zechat.app import create_app
