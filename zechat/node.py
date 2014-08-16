@@ -142,59 +142,6 @@ class Transport(object):
 views = flask.Blueprint('node', __name__)
 
 
-def _check_fingerprint(public_key, fingerprint):
-    try:
-        crypto = Crypto(public_key)
-    except ValueError:
-        return False
-    else:
-        return crypto.fingerprint() == fingerprint
-
-
-@views.route('/id/', methods=['POST'])
-def post_identity():
-    data = flask.request.get_json()
-    public_key = data['public_key']
-    fingerprint = data['fingerprint']
-
-    if not _check_fingerprint(public_key, fingerprint):
-        return (flask.jsonify(error='fingerprint mismatch'), 400)
-
-    identity = (
-        models.Identity.query
-        .filter_by(fingerprint=fingerprint)
-        .first()
-    )
-
-    if identity is None:
-        identity = models.Identity(fingerprint=fingerprint)
-        models.db.session.add(identity)
-
-    identity.public_key = public_key
-    models.db.session.commit()
-    return flask.jsonify(
-        ok=True,
-        url=flask.url_for(
-            '.get_identity',
-            fingerprint=fingerprint,
-            _external=True,
-        ),
-    )
-
-
-@views.route('/id/<fingerprint>')
-def get_identity(fingerprint):
-    identity = (
-        models.Identity.query
-        .filter_by(fingerprint=fingerprint)
-        .first_or_404()
-    )
-    return flask.jsonify(
-        fingerprint=identity.fingerprint,
-        public_key=identity.public_key,
-    )
-
-
 def init_app(app):
     app.register_blueprint(views)
 

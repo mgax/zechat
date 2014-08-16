@@ -87,7 +87,6 @@ def get_url_map():
     base_url = get_base_url().lstrip('http://')
     return {
         'transport': ''.join(['ws://', base_url, 'ws/transport']),
-        'post_identity': flask.url_for('node.post_identity'),
     }
 
 
