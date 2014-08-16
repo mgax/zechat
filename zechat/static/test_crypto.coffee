@@ -12,7 +12,7 @@ describe 'curve25519 crypto', ->
 
   it 'should return null for invalid messages', ->
     expect(zc.curve.decrypt(FIX.A_B_ENCRYPTED, FIX.A_PUBKEY, FIX.A_KEY)).toBe(null)
-    expect(zc.curve.decrypt('asdf'*20, FIX.A_PUBKEY, FIX.B_KEY)).toBe(null)
+    expect(zc.curve.decrypt('msg:asdf', FIX.A_PUBKEY, FIX.B_KEY)).toBe(null)
 
   it 'should generate unique nonces', ->
     nonce_set = (zc.nacl.to_hex(zc.curve.nonce()) for n in [1..100])

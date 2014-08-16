@@ -10,6 +10,21 @@ class DecryptionError(Exception):
     """ Failed to decypt message. """
 
 
+def secret_key(key):
+    assert key[:3] == 'sk:'
+    return PrivateKey(key[3:], Base64Encoder)
+
+
+def public_key(key):
+    assert key[:3] == 'pk:'
+    return PublicKey(key[3:], Base64Encoder)
+
+
+def message(msg):
+    assert msg[:4] == 'msg:'
+    return Base64Encoder.decode(msg[4:])
+
+
 class CurveCrypto(object):
 
     def __init__(self):
@@ -22,22 +37,16 @@ class CurveCrypto(object):
         return new_nonce
 
     def encrypt(self, message, sender, recipient_pub):
-        box = Box(
-            PrivateKey(sender, Base64Encoder),
-            PublicKey(recipient_pub, Base64Encoder),
-        )
-        return box.encrypt(message, self.nonce(), encoder=Base64Encoder)
+        box = Box(secret_key(sender), public_key(recipient_pub))
+        encrypted = box.encrypt(message, self.nonce(), encoder=Base64Encoder)
+        return 'msg:' + encrypted
 
     def decrypt(self, encrypted, sender_pub, recipient):
-        box = Box(
-            PrivateKey(recipient, Base64Encoder),
-            PublicKey(sender_pub, Base64Encoder),
-        )
+        box = Box(secret_key(recipient), public_key(sender_pub))
         try:
-            return box.decrypt(encrypted, encoder=Base64Encoder)
+            return box.decrypt(message(encrypted))
         except CryptoError:
             raise DecryptionError
 
     def pubkey(self, private):
-        private_key = PrivateKey(private, Base64Encoder)
-        return private_key.public_key.encode(Base64Encoder)
+        return 'pk:' + secret_key(private).public_key.encode(Base64Encoder)

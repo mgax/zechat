@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 class Node(object):
 
-    key = '0J/xVDsOp6vWBsvmM8pIpfHBIAcXGl/S9ix0HZyiTWk='  # TODO random key
+    key = 'sk:0J/xVDsOp6vWBsvmM8pIpfHBIAcXGl/S9ix0HZyiTWk='  # TODO random key
     packet_handlers = {}
 
     def __init__(self, app=None):

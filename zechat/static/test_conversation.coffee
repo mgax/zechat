@@ -30,7 +30,7 @@ describe 'conversation', ->
     create_testing_app({}, {local_storage: local_storage})
     .then (app) =>
       pubkey = app.request('identity-controller').pubkey()
-      expect(pubkey.length).toEqual(44)
+      expect(pubkey.length).toEqual(47)
     .done ->
       test_done()
 

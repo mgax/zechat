@@ -40,18 +40,18 @@ class zc.MockLocalStorage
 
 zc.fixtures = {
 
-  A_KEY: 'VrIuRMeVZkmqlS9Sa9VRritZ1eVmnyJcZZFKJUkdnvk='
-  A_PUBKEY: 'B8dnDDjozeRUBsMFlPiWL4HR6kLEa9WyVRga4Q/CoXY='
+  A_KEY: 'sk:VrIuRMeVZkmqlS9Sa9VRritZ1eVmnyJcZZFKJUkdnvk='
+  A_PUBKEY: 'pk:B8dnDDjozeRUBsMFlPiWL4HR6kLEa9WyVRga4Q/CoXY='
 
-  B_KEY: 'NuwWzeSWynTxvBfNxi1z5UwG7AtKwwQYpW0GlDde4Fs='
-  B_PUBKEY: 'YCBnGbI2GbfWjmJl22o4IH3sIACU8Sv58fcxfDQojhI='
+  B_KEY: 'sk:NuwWzeSWynTxvBfNxi1z5UwG7AtKwwQYpW0GlDde4Fs='
+  B_PUBKEY: 'pk:YCBnGbI2GbfWjmJl22o4IH3sIACU8Sv58fcxfDQojhI='
 
-  A_B_ENCRYPTED: 'zc+OgEhoQm3Yu8vqsFcuvzc0FJuQ2au4+wrxt8hGkss1jDAFXEMRoRU6+g=='
+  A_B_ENCRYPTED: 'msg:zc+OgEhoQm3Yu8vqsFcuvzc0FJuQ2au4+wrxt8hGkss1jDAFXEMRoRU6+g=='
 
   SECRET_A: 'IVK8lSlJXSE8FyY1J70bI3Yt+2y39MGCYaazfltvSMY='
-  PUBKEY_A: 'hz2rYWLS+YoRWT67qi4E3/A8gBrhyj7JbnqEkCcDPFw='
+  PUBKEY_A: 'pk:hz2rYWLS+YoRWT67qi4E3/A8gBrhyj7JbnqEkCcDPFw='
 
   SECRET_B: 'RyHxg2NfwAjreuV6KLz4K2hQAY21flFNEScRobnaFaQ='
-  PUBKEY_B: 'G9YiDu/vITvomNltZmG9ooZIU2kONviSmwljThqR2Hc='
+  PUBKEY_B: 'pk:G9YiDu/vITvomNltZmG9ooZIU2kONviSmwljThqR2Hc='
 
 }
