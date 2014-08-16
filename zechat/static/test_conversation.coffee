@@ -121,7 +121,7 @@ describe 'conversation', ->
         identity: new zc.Identity(app: sender_app)
       )
       message = {text: "hello offline", sender: FIX.PUBKEY_B}
-      peer = new Backbone.Model(fingerprint: FIX.PUBKEY_A)
+      peer = new Backbone.Model(pubkey: FIX.PUBKEY_A)
       client.send(peer, message)
 
     .then =>

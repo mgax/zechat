@@ -24,7 +24,7 @@ class zc.AddContact extends zc.Controller
 
     view.on 'add', (peer_key) =>
       peer = @app.request('peerlist').register(peer_key)
-      @app.commands.execute('open-thread', peer.get('fingerprint'))
+      @app.commands.execute('open-thread', peer.get('pubkey'))
 
     return view
 
@@ -75,7 +75,7 @@ class zc.Client extends zc.Controller
 
   send: (peer, message) ->
     packed_message = zc.b64encode(JSON.stringify(message))
-    peer_pubkey = peer.get('fingerprint')
+    peer_pubkey = peer.get('pubkey')
     encrypted = zc.curve.encrypt(packed_message, @identity.key(), peer_pubkey)
 
     @transport.send(
@@ -94,7 +94,7 @@ class zc.PeerListItemView extends Backbone.Marionette.ItemView
   events:
     'click .peerlist-link': (evt) ->
       evt.preventDefault()
-      @trigger('click', @model.get('fingerprint'))
+      @trigger('click', @model.get('pubkey'))
 
 
 class zc.PeerListView extends Backbone.Marionette.CollectionView
@@ -105,7 +105,7 @@ class zc.PeerListView extends Backbone.Marionette.CollectionView
 
 class zc.PeerModel extends Backbone.Model
 
-  idAttribute: 'fingerprint'
+  idAttribute: 'pubkey'
 
   initialize: ->
     @message_col = new Backbone.Collection()
@@ -118,24 +118,22 @@ class zc.PeerList extends zc.Controller
     @app.commands.setHandler 'open-thread', @openThread
     @app.reqres.setHandler 'peer', @get_peer
 
-  register: (fingerprint) =>
-    return @get_peer(fingerprint)
+  register: (pubkey) =>
+    return @get_peer(pubkey)
 
-  get_peer: (fingerprint) =>
-    unless @peer_col.get(fingerprint)?
+  get_peer: (pubkey) =>
+    unless @peer_col.get(pubkey)?
 
-      @peer_col.add(new zc.PeerModel(
-        fingerprint: fingerprint
-      ))
+      @peer_col.add(new zc.PeerModel(pubkey: pubkey))
 
-    return @peer_col.get(fingerprint)
+    return @peer_col.get(pubkey)
 
-  openThread: (fingerprint) =>
-    thread = new zc.Thread(app: @app, peer: @get_peer(fingerprint))
+  openThread: (pubkey) =>
+    thread = new zc.Thread(app: @app, peer: @get_peer(pubkey))
     thread.show()
 
   createView: ->
     view = new zc.PeerListView(collection: @peer_col)
-    view.on 'childview:click', (view, fingerprint) =>
-      @openThread(fingerprint)
+    view.on 'childview:click', (view, pubkey) =>
+      @openThread(pubkey)
     return view

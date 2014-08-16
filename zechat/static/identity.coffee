@@ -23,9 +23,6 @@ class zc.Identity extends zc.Controller
   initialize: ->
     @model = @app.request('identity')
 
-  fingerprint: ->
-    return @model.get('fingerprint')
-
   key: ->
     return zc.curve.derive_key(@model.get('secret'))
 
@@ -33,7 +30,7 @@ class zc.Identity extends zc.Controller
     return zc.curve.derive_pubkey(@model.get('secret'))
 
   createView: ->
-    view = new zc.IdentityView(model: @model)
+    view = new zc.IdentityView(model: new Backbone.Model(pubkey: @pubkey()))
 
     view.on 'click-delete', =>
       @model.clear()
@@ -49,7 +46,6 @@ class zc.Identity extends zc.Controller
     .then (resp) =>
       transport.send(
         type: 'authenticate'
-        fingerprint: @fingerprint()
         pubkey: @pubkey()
         response: zc.curve.encrypt(resp.challenge, @key(), resp.pubkey)
       )
