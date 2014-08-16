@@ -37,6 +37,7 @@ describe 'conversation', ->
   it 'should post identity to server', (test_done) ->
     identity_json = JSON.stringify(
       key: FIX.PRIVATE_KEY
+      secret: FIX.SECRET_A
       fingerprint: FIX.FINGERPRINT
     )
 
@@ -57,9 +58,11 @@ describe 'conversation', ->
   it 'should begin a new conversation', (test_done) ->
     identity_a_json = JSON.stringify(
         key: FIX.PRIVATE_KEY
+        secret: FIX.SECRET_A
         fingerprint: FIX.FINGERPRINT)
     identity_b_json = JSON.stringify(
         key: FIX.PRIVATE_KEY_B
+        secret: FIX.SECRET_B
         fingerprint: FIX.FINGERPRINT_B)
 
     Q.all([
@@ -102,6 +105,7 @@ describe 'conversation', ->
   it 'should send a message and receive it back', (test_done) ->
     identity_json = JSON.stringify(
       key: FIX.PRIVATE_KEY
+      secret: FIX.SECRET_A
       fingerprint: FIX.FINGERPRINT
     )
 
@@ -138,6 +142,7 @@ describe 'conversation', ->
     sender_app = new Backbone.Marionette.Application
     sender_identity = new Backbone.Model(
       key: FIX.PRIVATE_KEY_B
+      secret: FIX.SECRET_B
       fingerprint: FIX.FINGERPRINT_B
     )
     sender_app.reqres.setHandler('identity', -> sender_identity)
@@ -161,6 +166,7 @@ describe 'conversation', ->
     .then =>
       identity_json = JSON.stringify(
         key: FIX.PRIVATE_KEY
+        secret: FIX.SECRET_A
         fingerprint: FIX.FINGERPRINT
       )
       create_testing_app(identity: identity_json)

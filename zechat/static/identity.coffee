@@ -1,8 +1,8 @@
 zc.setup_identity = (app) ->
   model = app.request('identity')
 
-  if model.get('key')
-    return Q(model.get('fingerprint'))
+  if model.get('secret')
+    return Q()
 
   else
     key = null
@@ -15,8 +15,9 @@ zc.setup_identity = (app) ->
         new zc.Crypto(key).fingerprint()
 
       .then (fingerprint) ->
-        model.set(key: key, fingerprint: fingerprint)
-        return fingerprint
+        secret = zc.curve.random_secret()
+        model.set(key: key, fingerprint: fingerprint, secret: secret)
+        return
     )
 
 
