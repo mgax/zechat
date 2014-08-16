@@ -38,6 +38,12 @@ class zc.Identity extends zc.Controller
   fingerprint: ->
     return @model.get('fingerprint')
 
+  key: ->
+    return zc.curve.derive_key(@model.get('secret'))
+
+  pubkey: ->
+    return zc.curve.derive_pubkey(@model.get('secret'))
+
   public_key: ->
     return zc.get_public_key(@model.get('key'))
 
@@ -59,18 +65,11 @@ class zc.Identity extends zc.Controller
     rv = transport.send(type: 'challenge')
 
     .then (resp) =>
-      public_key = zc.get_public_key(@model.get('key'))
-      response = JSON.stringify(
-        public_key: public_key
-        challenge: resp.challenge
-      )
-      return new zc.Crypto(@model.get('key')).sign(response)
-
-    .then (signature) =>
       transport.send(
         type: 'authenticate'
-        response: response
-        signature: signature
+        fingerprint: @fingerprint()
+        pubkey: @pubkey()
+        response: zc.curve.encrypt(resp.challenge, @key(), resp.pubkey)
       )
 
     .then (resp) =>
