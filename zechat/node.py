@@ -134,10 +134,11 @@ class Transport(object):
                 continue
 
             pkt = flask.json.loads(data)
-            logger.debug("packet: %r", pkt)
+            logger.debug("pkt in %r", pkt)
             yield pkt
 
     def send(self, pkt):
+        logger.debug("pkt out %r", pkt)
         self.ws.send(flask.json.dumps(pkt))
 
 
