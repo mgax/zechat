@@ -70,29 +70,10 @@ class zc.Header extends zc.Controller
     return view
 
 
-class zc.Persist extends zc.Controller
-
-  initialize: ->
-    @key = @options.key
-    @model = @options.model
-    value = @app.request('local_storage').getItem(@key)
-    if value
-      @model.set(JSON.parse(value))
-    @model.on('change', @save)
-
-  save: =>
-    @app.request('local_storage').setItem(@key, JSON.stringify(@model))
-
-
 zc.core_module = ->
   @models =
     identity: new Backbone.Model
     peer_col: new Backbone.Collection
-
-  @persist_identity = new zc.Persist
-    app: @app
-    key: 'identity'
-    model: @models.identity
 
   @app.reqres.setHandler 'identity', => @models.identity
 
@@ -136,8 +117,6 @@ zc.create_app = (options) ->
 
   app.reqres.setHandler 'urls', -> options.urls
   app.reqres.setHandler 'root_el', -> app.$el
-  app.reqres.setHandler 'local_storage', ->
-    return options.local_storage or window.localStorage
 
   app.module('core', zc.core_module)
 

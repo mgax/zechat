@@ -6,7 +6,6 @@ describe 'conversation', ->
     _.defaults(options, {
       urls: zc.TESTING_URL_MAP
       el: $('<div>')[0]
-      local_storage: new zc.MockLocalStorage()
     })
 
     app = null
