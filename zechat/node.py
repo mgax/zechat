@@ -1,7 +1,7 @@
 import logging
 from contextlib import contextmanager
 import flask
-from zechat.cryptos import Crypto, CurveCrypto
+from zechat.cryptos import CurveCrypto
 from zechat import models
 
 logger = logging.getLogger(__name__)

@@ -15,7 +15,6 @@ Mako==1.0.0
 MarkupSafe==0.23
 pathlib==1.0
 pycparser==2.10
-pycrypto==2.6.1
 PyNaCl==0.2.3
 six==1.7.3
 SQLAlchemy==0.9.7
