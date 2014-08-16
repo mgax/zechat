@@ -2,11 +2,11 @@ describe 'conversation', ->
 
   FIX = zc.fixtures
 
-  create_testing_app = (local_storage_data={}, options={}) ->
+  create_testing_app = (options={}) ->
     _.defaults(options, {
       urls: zc.TESTING_URL_MAP
       el: $('<div>')[0]
-      local_storage: new zc.MockLocalStorage(local_storage_data)
+      local_storage: new zc.MockLocalStorage()
     })
 
     app = null
@@ -26,8 +26,7 @@ describe 'conversation', ->
     $.post(zc.TESTING_URL_MAP.flush, -> done())
 
   it 'should generate a new identity', (test_done) ->
-    local_storage = new zc.MockLocalStorage()
-    create_testing_app({}, {local_storage: local_storage})
+    create_testing_app()
     .then (app) =>
       pubkey = app.request('identity-controller').pubkey()
       expect(pubkey.length).toEqual(47)
@@ -35,12 +34,9 @@ describe 'conversation', ->
       test_done()
 
   it 'should begin a new conversation', (test_done) ->
-    identity_a_json = JSON.stringify(secret: FIX.SECRET_A)
-    identity_b_json = JSON.stringify(secret: FIX.SECRET_B)
-
     Q.all([
-      create_testing_app({identity: identity_a_json}, {channel: 'app_a'})
-      create_testing_app({identity: identity_b_json}, {channel: 'app_b'})
+      create_testing_app({channel: 'app_a', secret: FIX.SECRET_A})
+      create_testing_app({channel: 'app_b', secret: FIX.SECRET_B})
     ])
 
     .then ([@app_a, @app_b]) =>
@@ -73,9 +69,7 @@ describe 'conversation', ->
       test_done()
 
   it 'should send a message and receive it back', (test_done) ->
-    identity_json = JSON.stringify(secret: FIX.SECRET_A)
-
-    create_testing_app({identity: identity_json}, {talk_to_self: true})
+    create_testing_app({talk_to_self: true, secret: FIX.SECRET_A})
 
     .then (@app) =>
       zc.waitfor(=> zc.some(@app.$el.find('.thread-compose')))
@@ -125,8 +119,7 @@ describe 'conversation', ->
       client.send(peer, message)
 
     .then =>
-      identity_json = JSON.stringify(secret: FIX.SECRET_A)
-      create_testing_app(identity: identity_json)
+      create_testing_app(secret: FIX.SECRET_A)
 
     .then (@app) =>
       get_messages = =>

@@ -141,7 +141,12 @@ zc.create_app = (options) ->
 
   app.module('core', zc.core_module)
 
-  zc.setup_identity(app)
+  Q().then ->
+    if options.secret?
+      app.request('identity').set('secret', options.secret)
+
+    else
+      zc.setup_identity(app)
 
   .then ->
     app.vent.trigger('start')
