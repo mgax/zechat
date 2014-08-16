@@ -10,13 +10,6 @@ def random_uuid():
     return str(uuid.uuid4())
 
 
-class Identity(db.Model):
-
-    id = db.Column(UUID, primary_key=True, default=random_uuid)
-    fingerprint = db.Column(db.String, nullable=False, unique=True, index=True)
-    public_key = db.Column(db.String, nullable=False)
-
-
 class Message(db.Model):
 
     id = db.Column(UUID, primary_key=True, default=random_uuid)
