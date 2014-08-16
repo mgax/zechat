@@ -18,12 +18,6 @@ zc.post_json = (url, data, callback) ->
   )
 
 
-zc.pad_base64 = (text) ->
-  while text.length % 4 != 0
-    text = text + '='
-  return text
-
-
 zc.random_bytes = (size) ->
   data = new Uint8Array(size)
   window.crypto.getRandomValues(data)
@@ -31,27 +25,19 @@ zc.random_bytes = (size) ->
 
 
 zc.b64encode = (text) ->
-  return zc.pad_base64(utf8tob64(text))
+  return btoa(text)
 
 
 zc.b64decode = (data) ->
-  return b64toutf8(data)
-
-
-zc.b64frombytes = (bytes) ->
-  return window.btoa(String.fromCharCode.apply(String, bytes))
-
-
-zc.b64tobytes = (data) ->
-  return get_char_codes(window.atob(data))
+  return atob(data)
 
 
 zc.b64fromu8array = (arr) ->
-  return btoa(zc.nacl.decode_latin1(arr))
+  return zc.b64encode(zc.nacl.decode_latin1(arr))
 
 
 zc.b64tou8array = (data) ->
-  return new Uint8Array(zc.b64tobytes(data))
+  return zc.nacl.encode_latin1(zc.b64decode(data))
 
 
 zc.u8cat = (a, b) ->

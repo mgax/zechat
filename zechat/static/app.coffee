@@ -18,7 +18,7 @@ zc.create_app = (options) ->
 
   setup_identity = zc.setup_identity(app)
 
-  .then (fingerprint) ->
+  .then ->
     app.vent.trigger('start')
 
     if options.talk_to_self

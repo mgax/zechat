@@ -29,8 +29,8 @@ describe 'conversation', ->
     local_storage = new zc.MockLocalStorage()
     create_testing_app({}, {local_storage: local_storage})
     .then (app) =>
-      identity = JSON.parse(local_storage.getItem('identity'))
-      expect(identity.fingerprint.length).toEqual(40)
+      pubkey = app.request('identity-controller').pubkey()
+      expect(pubkey.length).toEqual(44)
     .done ->
       test_done()
 
