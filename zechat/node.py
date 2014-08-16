@@ -76,7 +76,6 @@ def authenticate(node, transport, pkt):
     assert response == transport.challenge
     del transport.challenge
     transport.identities.add(pkt['pubkey'])
-    transport.identities.add(pkt.get('fingerprint'))  # TODO temporary
     return dict(success=True)
 
 

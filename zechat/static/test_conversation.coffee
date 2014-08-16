@@ -35,14 +35,8 @@ describe 'conversation', ->
       test_done()
 
   it 'should begin a new conversation', (test_done) ->
-    identity_a_json = JSON.stringify(
-        key: FIX.PRIVATE_KEY
-        secret: FIX.SECRET_A
-        fingerprint: FIX.FINGERPRINT)
-    identity_b_json = JSON.stringify(
-        key: FIX.PRIVATE_KEY_B
-        secret: FIX.SECRET_B
-        fingerprint: FIX.FINGERPRINT_B)
+    identity_a_json = JSON.stringify(secret: FIX.SECRET_A)
+    identity_b_json = JSON.stringify(secret: FIX.SECRET_B)
 
     Q.all([
       create_testing_app({identity: identity_a_json}, {channel: 'app_a'})
@@ -52,23 +46,23 @@ describe 'conversation', ->
     .then ([@app_a, @app_b]) =>
       @app_a.$el.find('.header-btn-add-contact').click()
       $form_a = @app_a.$el.find('.app-main > form')
-      $form_a.find('[name=peer]').val(FIX.PUBLIC_KEY_B)
+      $form_a.find('[name=peer]').val(FIX.PUBKEY_B)
       $form_a.submit()
       zc.waitfor(=> zc.some(@app_a.$el.find('.peerlist')))
 
     .then ($peerlist) =>
-      expect($peerlist.text().trim()).toEqual(FIX.FINGERPRINT_B)
+      expect($peerlist.text().trim()).toEqual(FIX.PUBKEY_B)
       zc.waitfor(=> zc.some(@app_a.$el.find('.thread-compose form')))
 
     .then ($form) =>
       $form.find('[name=message]').val("hello from A")
       $form.submit()
-      peer = @app_b.request('peer', FIX.FINGERPRINT, FIX.PUBLIC_KEY)
+      peer = @app_b.request('peer', FIX.PUBKEY_A)
       zc.waitfor(-> zc.some(peer.message_col))
 
     .then (messages_from_a) =>
       $peerlist_b = @app_b.$el.find('.peerlist')
-      expect($peerlist_b.text().trim()).toEqual(FIX.FINGERPRINT)
+      expect($peerlist_b.text().trim()).toEqual(FIX.PUBKEY_A)
       expect(messages_from_a.at(0).get('text')).toEqual("hello from A")
 
     .catch (err) =>
@@ -79,11 +73,7 @@ describe 'conversation', ->
       test_done()
 
   it 'should send a message and receive it back', (test_done) ->
-    identity_json = JSON.stringify(
-      key: FIX.PRIVATE_KEY
-      secret: FIX.SECRET_A
-      fingerprint: FIX.FINGERPRINT
-    )
+    identity_json = JSON.stringify(secret: FIX.SECRET_A)
 
     create_testing_app({identity: identity_json}, {talk_to_self: true})
 
@@ -117,9 +107,7 @@ describe 'conversation', ->
   it 'should read offline messages', (test_done) ->
     sender_app = new Backbone.Marionette.Application
     sender_identity = new Backbone.Model(
-      key: FIX.PRIVATE_KEY_B
       secret: FIX.SECRET_B
-      fingerprint: FIX.FINGERPRINT_B
     )
     sender_app.reqres.setHandler('identity', -> sender_identity)
     sender_app.reqres.setHandler('urls', -> zc.TESTING_URL_MAP)
@@ -132,24 +120,17 @@ describe 'conversation', ->
         transport: sender_transport
         identity: new zc.Identity(app: sender_app)
       )
-      message = {text: "hello offline", sender: FIX.FINGERPRINT_B}
-      peer = new Backbone.Model(
-        public_key: FIX.PUBLIC_KEY
-        fingerprint: FIX.FINGERPRINT
-      )
+      message = {text: "hello offline", sender: FIX.PUBKEY_B}
+      peer = new Backbone.Model(fingerprint: FIX.PUBKEY_A)
       client.send(peer, message)
 
     .then =>
-      identity_json = JSON.stringify(
-        key: FIX.PRIVATE_KEY
-        secret: FIX.SECRET_A
-        fingerprint: FIX.FINGERPRINT
-      )
+      identity_json = JSON.stringify(secret: FIX.SECRET_A)
       create_testing_app(identity: identity_json)
 
     .then (@app) =>
       get_messages = =>
-        message_col = @app.request('peer', FIX.FINGERPRINT_B).message_col
+        message_col = @app.request('peer', FIX.PUBKEY_B).message_col
         if message_col.length
           return message_col.at(0)
 

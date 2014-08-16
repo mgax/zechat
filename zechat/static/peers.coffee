@@ -41,71 +41,49 @@ class zc.Client extends zc.Controller
     @identity.authenticate(@transport)
 
     .then =>
-      @transport.send(type: 'list', identity: @identity.fingerprint())
+      @transport.send(type: 'list', identity: @identity.pubkey())
 
     .then (resp) =>
       @transport.send(
         type: 'get'
-        identity: @identity.fingerprint()
+        identity: @identity.pubkey()
         messages: resp.messages
       )
 
     .done (resp) =>
       for msg in resp.messages
-        @on_message(msg.data)
+        @on_message(msg)
 
       @trigger('ready')
 
   on_packet: (packet) =>
     if packet.type == 'message'
-      if packet.recipient == @identity.fingerprint()
-        @on_message(packet.data)
+      if packet.recipient == @identity.pubkey()
+        @on_message(packet)
 
-  on_message: (encrypted_data) ->
-    data = null
-    sender = null
+  on_message: (packet) ->
+    sender = packet.sender
+    packed_message = zc.curve.decrypt(packet.data, sender, @identity.key())
 
-    @identity.crypto().decrypt_message(encrypted_data)
+    unless packed_message?
+      @trigger('verification-failed', packed_data)
+      return
 
-    .then (packed_data) =>
-      data = JSON.parse(zc.b64decode(packed_data))
-      sender = new zc.Crypto(data.sender_key)
-      sender.verify(data.message, data.signature)
+    message = JSON.parse(zc.b64decode(packed_message))
+    peer = @app.request('peer', sender)
+    peer.message_col.add(message)
 
-    .then (ok) =>
-      unless ok
-        @trigger('verification-failed', packed_data)
-        return
+  send: (peer, message) ->
+    packed_message = zc.b64encode(JSON.stringify(message))
+    peer_pubkey = peer.get('fingerprint')
+    encrypted = zc.curve.encrypt(packed_message, @identity.key(), peer_pubkey)
 
-      sender_fingerprint = sender.fingerprint()
-      peer = @app.request('peer', sender_fingerprint, sender.key)
-      peer.message_col.add(JSON.parse(zc.b64decode(data.message)))
-
-    .done()
-
-  send: (peer, contents) ->
-    packed_message = zc.b64encode(JSON.stringify(contents))
-
-    @identity.crypto().sign(packed_message)
-
-    .then (signature) =>
-      data = {
-        message: packed_message
-        sender_key: @identity.public_key()
-        signature: signature
-      }
-      packed_data = zc.b64encode(JSON.stringify(data))
-      new zc.Crypto(peer.get('public_key')).encrypt_message(packed_data)
-
-    .then (encrypted_data) =>
-      @transport.send(
-        type: 'message'
-        sender: @identity.fingerprint()
-        recipient: peer.get('fingerprint')
-        data: encrypted_data
-      )
-
-    .done()
+    @transport.send(
+      type: 'message'
+      sender: @identity.pubkey()
+      recipient: peer_pubkey
+      data: encrypted
+    )
 
 
 class zc.PeerListItemView extends Backbone.Marionette.ItemView
@@ -140,18 +118,14 @@ class zc.PeerList extends zc.Controller
     @app.commands.setHandler 'open-thread', @openThread
     @app.reqres.setHandler 'peer', @get_peer
 
-  register: (public_key) =>
-    fingerprint = new zc.Crypto(public_key).fingerprint()
-    return @get_peer(fingerprint, public_key)
+  register: (fingerprint) =>
+    return @get_peer(fingerprint)
 
-  get_peer: (fingerprint, public_key) =>
+  get_peer: (fingerprint) =>
     unless @peer_col.get(fingerprint)?
-      unless public_key?
-        throw("Can't create peer without a public key")
 
       @peer_col.add(new zc.PeerModel(
         fingerprint: fingerprint
-        public_key: public_key
       ))
 
     return @peer_col.get(fingerprint)

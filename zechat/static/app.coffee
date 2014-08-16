@@ -22,8 +22,8 @@ zc.create_app = (options) ->
     app.vent.trigger('start')
 
     if options.talk_to_self
-      public_key = zc.get_public_key(app.request('identity').get('key'))
-      peer = app.request('peerlist').register(public_key)
+      pubkey = app.request('identity-controller').pubkey()
+      peer = app.request('peerlist').register(pubkey)
       app.commands.execute('open-thread', peer)
 
   _.defer ->

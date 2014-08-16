@@ -76,7 +76,7 @@ class zc.Identity extends zc.Controller
       throw "authentication failure" unless resp.success
       transport.send(
         type: 'subscribe'
-        identity: @fingerprint()
+        identity: @pubkey()
       )
 
     return rv
