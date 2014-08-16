@@ -1,7 +1,7 @@
 import logging
 from contextlib import contextmanager
 import flask
-from zechat.cryptos import CurveCrypto
+from zechat.cryptos import CurveCrypto, random_key
 from zechat import models
 
 logger = logging.getLogger(__name__)
@@ -9,7 +9,6 @@ logger = logging.getLogger(__name__)
 
 class Node(object):
 
-    key = 'sk:0J/xVDsOp6vWBsvmM8pIpfHBIAcXGl/S9ix0HZyiTWk='  # TODO random key
     packet_handlers = {}
 
     def __init__(self, app=None):
@@ -18,6 +17,7 @@ class Node(object):
         if app is not None:
             app.extensions['zechat_node'] = self
         self.curve = CurveCrypto()
+        self.key = random_key()
         self.pubkey = self.curve.pubkey(self.key)
 
     @classmethod

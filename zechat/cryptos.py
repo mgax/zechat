@@ -25,6 +25,10 @@ def message(msg):
     return Base64Encoder.decode(msg[4:])
 
 
+def random_key():
+    return 'sk:' + PrivateKey.generate().encode(Base64Encoder)
+
+
 class CurveCrypto(object):
 
     def __init__(self):
@@ -32,9 +36,9 @@ class CurveCrypto(object):
 
     def nonce(self):
         hash = hashlib.sha512(self.last_nonce + str(time.time()))
-        new_nonce = hash.digest()[:Box.NONCE_SIZE]
+        new_nonce = hash.digest()
         self.last_nonce = new_nonce
-        return new_nonce
+        return new_nonce[:Box.NONCE_SIZE]
 
     def encrypt(self, message, sender, recipient_pub):
         box = Box(secret_key(sender), public_key(recipient_pub))
