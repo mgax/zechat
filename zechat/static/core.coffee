@@ -84,7 +84,7 @@ class zc.Persist extends zc.Controller
     @app.request('local_storage').setItem(@key, JSON.stringify(@model))
 
 
-zc.modules.core = ->
+zc.core_module = ->
   @models =
     identity: new Backbone.Model
     peer_col: new Backbone.Collection
@@ -122,3 +122,36 @@ zc.modules.core = ->
     @header = new zc.Header(app: @app)
     @layout.header.show(@header.createView())
     @layout.peerlist.show(@peerlist.createView())
+
+
+zc.create_app = (options) ->
+  app_deferred = Q.defer()
+
+  channel = options.channel or 'global'
+  Backbone.Wreqr.radio.channel(channel).reset()
+  app = new Backbone.Marionette.Application(channelName: channel)
+
+  app.el = options.el
+  app.$el = $(app.el)
+
+  app.reqres.setHandler 'urls', -> options.urls
+  app.reqres.setHandler 'root_el', -> app.$el
+  app.reqres.setHandler 'local_storage', ->
+    return options.local_storage or window.localStorage
+
+  app.module('core', zc.core_module)
+
+  zc.setup_identity(app)
+
+  .then ->
+    app.vent.trigger('start')
+
+    if options.talk_to_self
+      pubkey = app.request('identity-controller').pubkey()
+      peer = app.request('peerlist').register(pubkey)
+      app.commands.execute('open-thread', peer)
+
+  .done ->
+    app_deferred.resolve(app)
+
+  return app_deferred.promise

@@ -17,7 +17,6 @@ def init_app(app):
     assets.register('app.js', Bundle(
         'utils.coffee',
         'core.coffee',
-        'app.coffee',
         'crypto.coffee',
         'network.coffee',
         'identity.coffee',
