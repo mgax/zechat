@@ -4,17 +4,17 @@ class zc.AddContactView extends Backbone.Marionette.ItemView
   template: 'add_contact.html'
 
   ui:
-    url: '[name=url]'
+    peer: '[name=peer]'
 
   events:
     'submit': (evt) ->
       evt.preventDefault()
-      url = @ui.url.val()
-      if url
-        this.trigger('add', url)
+      peer = @ui.peer.val()
+      if peer
+        this.trigger('add', peer)
 
   onShow: ->
-    @ui.url.focus()
+    @ui.peer.focus()
 
 
 class zc.AddContact extends zc.Controller
@@ -22,12 +22,11 @@ class zc.AddContact extends zc.Controller
   createView: ->
     view = new zc.AddContactView()
 
-    view.on 'add', (url) =>
-      Q($.get(url)).done (resp) =>
-        @app.request('peerlist').register(resp.public_key)
+    view.on 'add', (peer_key) =>
+      @app.request('peerlist').register(peer_key)
 
-        .then (peer) =>
-          @app.commands.execute('open-thread', peer.get('fingerprint'))
+      .then (peer) =>
+        @app.commands.execute('open-thread', peer.get('fingerprint'))
 
     return view
 

@@ -34,27 +34,6 @@ describe 'conversation', ->
     .done ->
       test_done()
 
-  it 'should post identity to server', (test_done) ->
-    identity_json = JSON.stringify(
-      key: FIX.PRIVATE_KEY
-      secret: FIX.SECRET_A
-      fingerprint: FIX.FINGERPRINT
-    )
-
-    create_testing_app(identity: identity_json)
-
-    .then (app) =>
-      identity = app.request('identity')
-      app.$el.find('.header-btn-myid').click()
-      app.$el.find('.myid-publish').click()
-      return zc.waitfor(-> identity.get('public_url'))
-
-    .then (public_url) =>
-      expect(public_url).toContain('/id/' + FIX.FINGERPRINT)
-
-    .done ->
-      test_done()
-
   it 'should begin a new conversation', (test_done) ->
     identity_a_json = JSON.stringify(
         key: FIX.PRIVATE_KEY
@@ -71,12 +50,9 @@ describe 'conversation', ->
     ])
 
     .then ([@app_a, @app_b]) =>
-      (new zc.Identity(app: @app_b)).publish()
-
-    .then (url_b) =>
       @app_a.$el.find('.header-btn-add-contact').click()
       $form_a = @app_a.$el.find('.app-main > form')
-      $form_a.find('[name=url]').val(url_b)
+      $form_a.find('[name=peer]').val(FIX.PUBLIC_KEY_B)
       $form_a.submit()
       zc.waitfor(=> zc.some(@app_a.$el.find('.peerlist')))
 

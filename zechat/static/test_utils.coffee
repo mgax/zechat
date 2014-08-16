@@ -104,6 +104,16 @@ zc.fixtures = {
     -----END RSA PRIVATE KEY-----
     """
 
+  PUBLIC_KEY_B:
+    """
+    -----BEGIN PUBLIC KEY-----
+    MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDF+c2DSG3RtghIvsUoqIaEsrmV
+    KAnOrQaJLHU5RQBvwNMxJXwZssuSDDmI1GhVlMaAcQIXFuVxTyGMLbzQLC4nSMFH
+    6Pc6RLYoN/2E/RIJelCHO28eTarDxJweTLFshy+zcXm8xFtkHDkUc87ZkeXmjX1q
+    ndMxg7YlQcMMBPzJiwIDAQAB
+    -----END PUBLIC KEY-----
+    """
+
   FINGERPRINT_B: "f9df70f799f933fe997312012a7ed369333631a6"
 
   A_KEY: 'VrIuRMeVZkmqlS9Sa9VRritZ1eVmnyJcZZFKJUkdnvk='

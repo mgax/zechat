@@ -27,10 +27,6 @@ class zc.IdentityView extends Backbone.Marionette.ItemView
   template: 'myid.html'
 
   events:
-    'click .myid-publish': (evt) ->
-      evt.preventDefault()
-      @trigger('click-publish')
-
     'click .myid-delete': (evt) ->
       evt.preventDefault()
       @trigger('click-delete')
@@ -53,31 +49,11 @@ class zc.Identity extends zc.Controller
   createView: ->
     view = new zc.IdentityView(model: @model)
 
-    view.on 'click-publish', =>
-      @publish()
-      .done ->
-        view.render()
-
     view.on 'click-delete', =>
       @model.clear()
       window.location.reload()
 
     return view
-
-  publish: ->
-    url = @app.request('urls').post_identity
-    data = {
-      fingerprint: @fingerprint()
-      public_key: zc.get_public_key(@model.get('key'))
-    }
-
-    return (
-      Q(zc.post_json url, data)
-
-      .then (resp) =>
-        @model.set('public_url', resp.url)
-        return resp.url
-    )
 
   authenticate: (transport) ->
     response = null
