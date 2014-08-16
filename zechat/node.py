@@ -89,7 +89,7 @@ def subscribe(node, transport, pkt, identity):
 @Node.on('message')
 def message(node, transport, pkt):
     recipient = pkt['recipient']
-    models.Inbox(recipient).save(pkt['data'])
+    models.Inbox(recipient).save(pkt['sender'], pkt['data'])
 
     for client in node.transport_map.values():
         if recipient in client.subscriptions:
@@ -106,12 +106,18 @@ def list_(node, transport, pkt, identity):
 @check_identity
 def get(node, transport, pkt, identity):
     inbox = models.Inbox(identity)
-    message_list = [
-        dict(
+
+    def retrieve(message_hash):
+        (sender, data) = inbox.get(message_hash)
+        return dict(
             type='message',
+            sender=sender,
             recipient=identity,
-            data=inbox.get(message_hash),
+            data=data,
         )
+
+    message_list = [
+        retrieve(message_hash)
         for message_hash in pkt['messages']
     ]
     return dict(messages=message_list)

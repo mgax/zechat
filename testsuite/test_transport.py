@@ -83,7 +83,12 @@ class Identity(object):
 
     def message(self, recipient, text):
         payload = b64encode(json.dumps(dict(text=text)))
-        return dict(type='message', recipient=recipient, data=payload)
+        return dict(
+            type='message',
+            sender=self.pubkey,
+            recipient=recipient,
+            data=payload,
+        )
 
 
 def reply(serial, **data):

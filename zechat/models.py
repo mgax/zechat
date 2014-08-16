@@ -13,6 +13,7 @@ def random_uuid():
 class Message(db.Model):
 
     id = db.Column(UUID, primary_key=True, default=random_uuid)
+    sender = db.Column(db.String, nullable=False, index=True)
     recipient = db.Column(db.String, nullable=False, index=True)
     hash = db.Column(db.String, nullable=False, index=True)
     payload = db.Column(db.String, nullable=False)
@@ -23,19 +24,20 @@ class Inbox(object):
     def __init__(self, identity):
         self.identity = identity
 
-    def save(self, message_data):
+    def save(self, sender, payload):
         message = Message(
-            payload=message_data,
-            hash=hashlib.sha1(message_data).hexdigest(),
+            sender=sender,
             recipient=self.identity,
+            payload=payload,
+            hash=hashlib.sha1(payload).hexdigest(),
         )
         db.session.add(message)
         db.session.commit()
 
-    def get(self, message_hash):
-        message = Message.query.filter_by(hash=message_hash).first()
+    def get(self, hash):
+        message = Message.query.filter_by(hash=hash).first()
         assert message and message.recipient == self.identity
-        return message.payload
+        return (message.sender, message.payload)
 
     def hash_list(self):
         return [

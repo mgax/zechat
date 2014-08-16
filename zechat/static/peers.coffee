@@ -100,6 +100,7 @@ class zc.Client extends zc.Controller
     .then (encrypted_data) =>
       @transport.send(
         type: 'message'
+        sender: @identity.fingerprint()
         recipient: peer.get('fingerprint')
         data: encrypted_data
       )
