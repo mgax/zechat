@@ -65,8 +65,7 @@ def check_identity(func):
 
 @Node.on('challenge')
 def challenge(node, transport, pkt):
-    from time import time
-    transport.challenge = str(time())
+    transport.challenge = node.curve.challenge()
     return dict(challenge=transport.challenge, pubkey=node.pubkey)
 
 

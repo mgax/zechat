@@ -52,5 +52,8 @@ class CurveCrypto(object):
         except CryptoError:
             raise DecryptionError
 
+    def challenge(self):
+        return Base64Encoder.encode(self.nonce())
+
     def pubkey(self, private):
         return 'pk:' + secret_key(private).public_key.encode(Base64Encoder)
