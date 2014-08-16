@@ -122,8 +122,7 @@ class zc.Crypto
 
   fingerprint: ->
     key_base64 = @create_rsa().publicKeyToX509PemString()
-    fingerprint = rstrtohex(rstr_sha1(hextorstr(b64tohex(key_base64))))
-    return Q(fingerprint)
+    return rstrtohex(rstr_sha1(hextorstr(b64tohex(key_base64))))
 
 
 zc.nacl = nacl_factory.instantiate()

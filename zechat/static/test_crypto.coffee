@@ -111,16 +111,11 @@ describe 'crypto', ->
         expect(out).toEqual('foo')
         test_done()
 
-  it 'should calculate the fingerprint', (test_done) ->
-    new zc.Crypto(FIX.PRIVATE_KEY_B).fingerprint()
-
-    .then (private_fingerprint) ->
-      expect(private_fingerprint).toEqual(FIX.FINGERPRINT_B)
-      new zc.Crypto(FIX.PUBLIC_KEY).fingerprint()
-
-    .done (public_fingerprint) ->
-      expect(public_fingerprint).toEqual(FIX.FINGERPRINT)
-      test_done()
+  it 'should calculate the fingerprint', ->
+    private_fingerprint = new zc.Crypto(FIX.PRIVATE_KEY_B).fingerprint()
+    expect(private_fingerprint).toEqual(FIX.FINGERPRINT_B)
+    public_fingerprint = new zc.Crypto(FIX.PUBLIC_KEY).fingerprint()
+    expect(public_fingerprint).toEqual(FIX.FINGERPRINT)
 
 
 describe 'curve25519 crypto', ->

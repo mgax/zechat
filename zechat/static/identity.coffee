@@ -12,9 +12,7 @@ zc.setup_identity = (app) ->
 
       .then (new_key) ->
         key = new_key
-        new zc.Crypto(key).fingerprint()
-
-      .then (fingerprint) ->
+        fingerprint = new zc.Crypto(key).fingerprint()
         secret = zc.curve.random_secret()
         model.set(key: key, fingerprint: fingerprint, secret: secret)
         return

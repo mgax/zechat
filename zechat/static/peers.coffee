@@ -23,10 +23,8 @@ class zc.AddContact extends zc.Controller
     view = new zc.AddContactView()
 
     view.on 'add', (peer_key) =>
-      @app.request('peerlist').register(peer_key)
-
-      .then (peer) =>
-        @app.commands.execute('open-thread', peer.get('fingerprint'))
+      peer = @app.request('peerlist').register(peer_key)
+      @app.commands.execute('open-thread', peer.get('fingerprint'))
 
     return view
 
@@ -79,11 +77,9 @@ class zc.Client extends zc.Controller
         @trigger('verification-failed', packed_data)
         return
 
-      sender.fingerprint()
-
-      .then (sender_fingerprint) =>
-        peer = @app.request('peer', sender_fingerprint, sender.key)
-        peer.message_col.add(JSON.parse(zc.b64decode(data.message)))
+      sender_fingerprint = sender.fingerprint()
+      peer = @app.request('peer', sender_fingerprint, sender.key)
+      peer.message_col.add(JSON.parse(zc.b64decode(data.message)))
 
     .done()
 
@@ -144,12 +140,8 @@ class zc.PeerList extends zc.Controller
     @app.reqres.setHandler 'peer', @get_peer
 
   register: (public_key) =>
-    rv = new zc.Crypto(public_key).fingerprint()
-
-    .then (fingerprint) =>
-      return @get_peer(fingerprint, public_key)
-
-    return rv
+    fingerprint = new zc.Crypto(public_key).fingerprint()
+    return @get_peer(fingerprint, public_key)
 
   get_peer: (fingerprint, public_key) =>
     unless @peer_col.get(fingerprint)?

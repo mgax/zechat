@@ -23,10 +23,8 @@ zc.create_app = (options) ->
 
     if options.talk_to_self
       public_key = zc.get_public_key(app.request('identity').get('key'))
-      app.request('peerlist').register(public_key)
-
-      .then (peer) ->
-        app.commands.execute('open-thread', peer)
+      peer = app.request('peerlist').register(public_key)
+      app.commands.execute('open-thread', peer)
 
   _.defer ->
     if setup_identity.isPending()
