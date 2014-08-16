@@ -27,7 +27,7 @@ describe 'conversation', ->
   it 'should generate a new identity', (test_done) ->
     create_testing_app()
     .then (app) =>
-      pubkey = app.request('identity-controller').pubkey()
+      pubkey = app.request('identity').pubkey()
       expect(pubkey.length).toEqual(47)
     .done ->
       test_done()
@@ -111,7 +111,7 @@ describe 'conversation', ->
       client = new zc.Client(
         app: sender_app
         transport: sender_transport
-        identity: new zc.Identity(app: sender_app)
+        identity: new zc.Identity(app: sender_app, model: sender_identity)
       )
       message = {text: "hello offline", sender: FIX.PUBKEY_B}
       peer = new Backbone.Model(pubkey: FIX.PUBKEY_A)

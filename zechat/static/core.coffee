@@ -57,7 +57,7 @@ class zc.Header extends zc.Controller
     view = new zc.HeaderView(model: @app.request('transport-state'))
 
     view.on 'click-myid', =>
-      myid = @app.request('identity-controller')
+      myid = @app.request('identity')
       @app.commands.execute('show-main', myid.createView())
 
     view.on 'click-add-contact', =>
@@ -75,11 +75,9 @@ zc.core_module = ->
     identity: new Backbone.Model
     peer_col: new Backbone.Collection
 
-  @app.reqres.setHandler 'identity', => @models.identity
-
   @transport = new zc.Transport(app: @app)
   @peerlist = new zc.PeerList(app: @app, peer_col: @models.peer_col)
-  @identity = new zc.Identity(app: @app)
+  @identity = new zc.Identity(app: @app, model: @models.identity)
   @client = new zc.Client(
     app: @app
     transport: @transport
@@ -89,7 +87,7 @@ zc.core_module = ->
   @client.on 'verification-failed', (data) =>
     console.log("message verification failed", data)
 
-  @app.reqres.setHandler 'identity-controller', => @identity
+  @app.reqres.setHandler 'identity', => @identity
   @app.reqres.setHandler 'client', => @client
   @app.reqres.setHandler 'peerlist', => @peerlist
 
@@ -122,7 +120,7 @@ zc.create_app = (options) ->
 
   Q().then ->
     if options.secret?
-      app.request('identity').set('secret', options.secret)
+      app.request('identity').model.set('secret', options.secret)
 
     else
       zc.setup_identity(app)
@@ -131,7 +129,7 @@ zc.create_app = (options) ->
     app.vent.trigger('start')
 
     if options.talk_to_self
-      pubkey = app.request('identity-controller').pubkey()
+      pubkey = app.request('identity').pubkey()
       peer = app.request('peerlist').register(pubkey)
       app.commands.execute('open-thread', peer)
 

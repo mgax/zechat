@@ -1,5 +1,5 @@
 zc.setup_identity = (app) ->
-  model = app.request('identity')
+  model = app.request('identity').model
 
   unless model.get('secret')
     model.set(secret: zc.curve.random_secret())
@@ -21,7 +21,7 @@ class zc.IdentityView extends Backbone.Marionette.ItemView
 class zc.Identity extends zc.Controller
 
   initialize: ->
-    @model = @app.request('identity')
+    @model = @options.model
 
   key: ->
     return zc.curve.derive_key(@model.get('secret'))
