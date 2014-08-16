@@ -64,14 +64,9 @@ class zc.CurveCrypto
       return null
     return zc.nacl.decode_utf8(plain)
 
-  derive_key: (secret_b64) ->
-    secret = zc.b64tou8array(secret_b64)
-    key = zc.nacl.crypto_box_keypair_from_seed(secret).boxSk
-    return zc.encode_secret_key(key)
-
   derive_pubkey: (secret_b64) ->
-    secret = zc.b64tou8array(secret_b64)
-    pubkey = zc.nacl.crypto_box_keypair_from_seed(secret).boxPk
+    secret = zc.secret_key(secret_b64)
+    pubkey = zc.nacl.crypto_box_keypair_from_raw_sk(secret).boxPk
     return zc.encode_public_key(pubkey)
 
 

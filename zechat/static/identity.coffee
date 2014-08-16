@@ -9,7 +9,7 @@ zc.scrypt = (input_txt) ->
     input, zc.SCRYPT_SALT, zc.SCRYPT_DIFFICULTY,
     8, 1, 32,
   )
-  return zc.b64fromu8array(secret)
+  return zc.encode_secret_key(secret)
 
 
 zc.setup_identity = (app) ->
@@ -60,7 +60,7 @@ class zc.Identity extends zc.Controller
     @model = @options.model
 
   key: ->
-    return zc.curve.derive_key(@model.get('secret'))
+    return @model.get('secret')
 
   pubkey: ->
     return zc.curve.derive_pubkey(@model.get('secret'))

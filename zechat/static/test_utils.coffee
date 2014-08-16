@@ -48,10 +48,4 @@ zc.fixtures = {
 
   A_B_ENCRYPTED: 'msg:zc+OgEhoQm3Yu8vqsFcuvzc0FJuQ2au4+wrxt8hGkss1jDAFXEMRoRU6+g=='
 
-  SECRET_A: 'IVK8lSlJXSE8FyY1J70bI3Yt+2y39MGCYaazfltvSMY='
-  PUBKEY_A: 'pk:hz2rYWLS+YoRWT67qi4E3/A8gBrhyj7JbnqEkCcDPFw='
-
-  SECRET_B: 'RyHxg2NfwAjreuV6KLz4K2hQAY21flFNEScRobnaFaQ='
-  PUBKEY_B: 'pk:G9YiDu/vITvomNltZmG9ooZIU2kONviSmwljThqR2Hc='
-
 }

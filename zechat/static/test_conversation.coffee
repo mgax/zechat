@@ -36,35 +36,35 @@ describe 'conversation', ->
     zc.create_app(urls: zc.TESTING_URL_MAP, el: $el[0])
     .done (app) ->
       secret = app.request('identity').model.get('secret')
-      expect(secret).toEqual('azDjpkcJyAER9LjmpYwzkTFU2ZLaaYrqk2lRSN0LQZU=')
+      expect(secret).toEqual('sk:azDjpkcJyAER9LjmpYwzkTFU2ZLaaYrqk2lRSN0LQZU=')
       test_done()
 
   it 'should begin a new conversation', (test_done) ->
     Q.all([
-      create_testing_app({channel: 'app_a', secret: FIX.SECRET_A})
-      create_testing_app({channel: 'app_b', secret: FIX.SECRET_B})
+      create_testing_app(channel: 'app_a', secret: FIX.A_KEY)
+      create_testing_app(channel: 'app_b', secret: FIX.B_KEY)
     ])
 
     .then ([@app_a, @app_b]) =>
       @app_a.$el.find('.header-btn-add-contact').click()
       $form_a = @app_a.$el.find('.app-main > form')
-      $form_a.find('[name=peer]').val(FIX.PUBKEY_B)
+      $form_a.find('[name=peer]').val(FIX.B_PUBKEY)
       $form_a.submit()
       zc.waitfor(=> zc.some(@app_a.$el.find('.peerlist')))
 
     .then ($peerlist) =>
-      expect($peerlist.text().trim()).toEqual(FIX.PUBKEY_B)
+      expect($peerlist.text().trim()).toEqual(FIX.B_PUBKEY)
       zc.waitfor(=> zc.some(@app_a.$el.find('.thread-compose form')))
 
     .then ($form) =>
       $form.find('[name=message]').val("hello from A")
       $form.submit()
-      peer = @app_b.request('peer', FIX.PUBKEY_A)
+      peer = @app_b.request('peer', FIX.A_PUBKEY)
       zc.waitfor(-> zc.some(peer.message_col))
 
     .then (messages_from_a) =>
       $peerlist_b = @app_b.$el.find('.peerlist')
-      expect($peerlist_b.text().trim()).toEqual(FIX.PUBKEY_A)
+      expect($peerlist_b.text().trim()).toEqual(FIX.A_PUBKEY)
       expect(messages_from_a.at(0).get('text')).toEqual("hello from A")
 
     .catch (err) =>
@@ -75,7 +75,7 @@ describe 'conversation', ->
       test_done()
 
   it 'should send a message and receive it back', (test_done) ->
-    create_testing_app({talk_to_self: true, secret: FIX.SECRET_A})
+    create_testing_app(talk_to_self: true, secret: FIX.A_KEY)
 
     .then (@app) =>
       zc.waitfor(=> zc.some(@app.$el.find('.thread-compose')))
@@ -106,9 +106,7 @@ describe 'conversation', ->
 
   it 'should read offline messages', (test_done) ->
     sender_app = new Backbone.Marionette.Application
-    sender_identity = new Backbone.Model(
-      secret: FIX.SECRET_B
-    )
+    sender_identity = new Backbone.Model(secret: FIX.B_KEY)
     sender_app.reqres.setHandler('identity', -> sender_identity)
     sender_app.reqres.setHandler('urls', -> zc.TESTING_URL_MAP)
 
@@ -120,16 +118,16 @@ describe 'conversation', ->
         transport: sender_transport
         identity: new zc.Identity(app: sender_app, model: sender_identity)
       )
-      message = {text: "hello offline", sender: FIX.PUBKEY_B}
-      peer = new Backbone.Model(pubkey: FIX.PUBKEY_A)
+      message = {text: "hello offline", sender: FIX.B_PUBKEY}
+      peer = new Backbone.Model(pubkey: FIX.A_PUBKEY)
       client.send(peer, message)
 
     .then =>
-      create_testing_app(secret: FIX.SECRET_A)
+      create_testing_app(secret: FIX.A_KEY)
 
     .then (@app) =>
       get_messages = =>
-        message_col = @app.request('peer', FIX.PUBKEY_B).message_col
+        message_col = @app.request('peer', FIX.B_PUBKEY).message_col
         if message_col.length
           return message_col.at(0)
 
