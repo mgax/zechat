@@ -1,10 +1,46 @@
+zc.SCRYPT_DIFFICULTY = 16384
+zc.SCRYPT_SALT = 'zechat'
+
+
+zc.scrypt = (input_txt) ->
+  scrypt = scrypt_module_factory()
+  input = scrypt.encode_utf8(input_txt)
+  secret = scrypt.crypto_scrypt(
+    input, zc.SCRYPT_SALT, zc.SCRYPT_DIFFICULTY,
+    8, 1, 32,
+  )
+  return zc.b64fromu8array(secret)
+
+
 zc.setup_identity = (app) ->
-  model = app.request('identity').model
+  deferred = Q.defer()
 
-  unless model.get('secret')
-    model.set(secret: zc.curve.random_secret())
+  login_view = new zc.LoginView()
+  app.commands.execute('show-main', login_view)
 
-  return Q()
+  login_view.on 'login', (data) ->
+    input_txt = data.email + ':' + data.passphrase
+    model = app.request('identity').model
+    model.set(secret: zc.scrypt(input_txt))
+    deferred.resolve()
+
+  return deferred.promise
+
+
+class zc.LoginView extends Backbone.Marionette.ItemView
+
+  tagName: 'form'
+  className: 'login'
+  template: 'login.html'
+
+  onShow: ->
+    @$el.find('[name=email]').focus()
+
+  events:
+    'submit': (evt) ->
+      evt.preventDefault()
+      data = zc.serialize_form(@el)
+      @trigger('login', data)
 
 
 class zc.IdentityView extends Backbone.Marionette.ItemView

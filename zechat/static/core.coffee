@@ -94,10 +94,10 @@ zc.core_module = ->
   @app.commands.setHandler 'show-main', (view) =>
     @layout.main.show(view)
 
-  @app.vent.on 'start', =>
-    @layout = new zc.AppLayout(el: @app.request('root_el'))
-    @layout.render()
+  @layout = new zc.AppLayout(el: @app.request('root_el'))
+  @layout.render()
 
+  @app.vent.on 'start', =>
     @header = new zc.Header(app: @app)
     @layout.header.show(@header.createView())
     @layout.peerlist.show(@peerlist.createView())

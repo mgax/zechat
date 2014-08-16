@@ -64,11 +64,6 @@ class zc.CurveCrypto
       return null
     return zc.nacl.decode_utf8(plain)
 
-  random_secret: ->
-    secret = new Uint8Array(32)
-    window.crypto.getRandomValues(secret)
-    return zc.b64fromu8array(secret)
-
   derive_key: (secret_b64) ->
     secret = zc.b64tou8array(secret_b64)
     key = zc.nacl.crypto_box_keypair_from_seed(secret).boxSk
