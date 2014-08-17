@@ -1,5 +1,6 @@
 import uuid
 import hashlib
+import base64
 from flask.ext.sqlalchemy import SQLAlchemy
 from sqlalchemy.dialects.postgresql import UUID
 
@@ -26,7 +27,9 @@ class Account(db.Model):
     state = db.Column(db.String, nullable=False)
 
 
-def hash(data):
+def hash(message):
+    assert message[:4] == 'msg:'
+    data = base64.b64decode(message[4:])
     return 'mh:' + hashlib.sha512(data).hexdigest()[:32]
 
 

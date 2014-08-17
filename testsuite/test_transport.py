@@ -81,7 +81,7 @@ class Identity(object):
         assert peer.out.pop()['success']
 
     def message(self, recipient, text):
-        payload = b64encode(json.dumps(dict(text=text)))
+        payload = 'msg:' + b64encode(json.dumps(dict(text=text)))
         return dict(
             type='message',
             sender=self.pubkey,
