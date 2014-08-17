@@ -6,15 +6,15 @@ describe 'account', ->
     $.post(zc.TESTING_URL_MAP.flush, -> done())
 
   it 'should prompt for email and password', (test_done) ->
-    $el = $('<div>')
+    app = zc.create_app(urls: zc.TESTING_URL_MAP, el: $('<div>')[0])
 
-    zc.waitfor(=> zc.some($el.find('form.login')))
+    zc.waitfor(=> zc.some(app.$el.find('form.login')))
     .done ($form) =>
       $form.find('[name=email]').val('foo@example.com')
       $form.find('[name=passphrase]').val('testing one two three')
       $form.submit()
 
-    zc.create_app(urls: zc.TESTING_URL_MAP, el: $el[0]).ready
+    app.ready
     .done (app) ->
       secret = app.request('identity').model.get('secret')
       expect(secret).toEqual('sk:WHls/a+QF+0YYLorUzLFRmE4l3bcndjJ2oStx6zeGp8=')
