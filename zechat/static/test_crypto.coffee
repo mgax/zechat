@@ -21,6 +21,11 @@ describe 'curve25519 public key crypto', ->
     nonce_set = (zc.nacl.to_hex(zc.curve.nonce()) for n in [1..100])
     expect(_.uniq(nonce_set).length).toEqual(100)
 
+  it 'should calculate message hash', ->
+    hash = zc.message_hash('msg:HXXiq0lxGqKC2eVJ638iO78f4roF1MGg' +
+                           'f5CUciV/cEUSH4nHbpt6WnoUp6G/FM+lIgLO')
+    expect(hash).toEqual('mh:9a11c4a1c7cdcef13ae605cca5d29d4c')
+
 
 describe 'curve25519 secret key crypto', ->
 

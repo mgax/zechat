@@ -52,6 +52,12 @@ zc.decode_secret = (message) ->
   return zc.b64tou8array(message.slice(4))
 
 
+zc.message_hash = (message) ->
+  message_data = zc.decode_message(message)
+  hash = zc.nacl.crypto_hash(message_data).subarray(0, 16)
+  return 'mh:' + zc.nacl.to_hex(hash)
+
+
 class zc.CurveCrypto
 
   constructor: ->
