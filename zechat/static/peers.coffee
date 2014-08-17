@@ -70,6 +70,7 @@ class zc.Client extends zc.Controller
       return
 
     message = JSON.parse(zc.b64decode(packed_message))
+    message.hash = zc.message_hash(packet.data)
     peer = @app.request('peer', sender)
     peer.message_col.add(message)
 
@@ -103,12 +104,22 @@ class zc.PeerListView extends Backbone.Marionette.CollectionView
   childView: zc.PeerListItemView
 
 
+class zc.MessageModel extends Backbone.Model
+
+  idAttribute: 'hash'
+
+
+class zc.MessageCollection extends Backbone.Collection
+
+  model: zc.MessageModel
+
+
 class zc.PeerModel extends Backbone.Model
 
   idAttribute: 'pubkey'
 
   initialize: ->
-    @message_col = new Backbone.Collection()
+    @message_col = new zc.MessageCollection()
 
 
 class zc.PeerList extends zc.Controller
