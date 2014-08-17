@@ -53,7 +53,7 @@ class Verifier(object):
         self.key = random_key()
         self.curve = CurveCrypto()
         self.pubkey = self.curve.pubkey(self.key)
-        self.signer = itsdangerous.Signer(random_key())
+        self.signer = itsdangerous.TimestampSigner(random_key())
 
     def challenge(self):
         challenge = self.curve.challenge()
@@ -62,7 +62,7 @@ class Verifier(object):
 
     def check(self, signature, pubkey, confirmation):
         try:
-            challenge = self.signer.unsign(signature)
+            challenge = self.signer.unsign(signature, max_age=20)
             recv = self.curve.decrypt(confirmation, pubkey, self.key)
 
         except (itsdangerous.BadSignature, DecryptionError):

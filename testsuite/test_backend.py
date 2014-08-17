@@ -1,5 +1,6 @@
 import pytest
 import flask
+from mock import patch
 
 
 @pytest.fixture
@@ -70,3 +71,11 @@ def test_verifier(curve):
         curve.encrypt(challenge, A_KEY, pubkey))
     assert not verifier.check(signature, A_PUBKEY,
         'asdf')
+
+    # old challenge
+    with patch('itsdangerous.time') as time:
+        time.time.return_value = 1408000000
+        (old_challenge, old_signature, pubkey) = verifier.challenge()
+
+    assert not verifier.check(old_signature, A_PUBKEY,
+        curve.encrypt(old_challenge, A_KEY, pubkey))
