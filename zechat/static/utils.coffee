@@ -8,14 +8,14 @@ zc.serialize_form = (el) ->
 
 
 zc.post_json = (url, data, callback) ->
-  $.ajax(
+  return Q($.ajax(
     type: "POST"
     url: url
     data: JSON.stringify(data)
     contentType: "application/json"
     dataType: "json"
     success: callback
-  )
+  ))
 
 
 zc.random_bytes = (size) ->

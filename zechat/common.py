@@ -22,6 +22,7 @@ def init_app(app):
         'identity.coffee',
         'peers.coffee',
         'thread.coffee',
+        'backend.coffee',
         filters='coffeescript',
         output='gen/app.js',
     ))
@@ -30,6 +31,7 @@ def init_app(app):
         'test_utils.coffee',
         'test_crypto.coffee',
         'test_conversation.coffee',
+        'test_backend.coffee',
         filters='coffeescript',
         output='gen/testsuite.js',
     ))
@@ -86,6 +88,11 @@ def get_url_map():
     base_url = get_base_url().lstrip('http://')
     return {
         'transport': ''.join(['ws://', base_url, 'ws/transport']),
+        'backend': {
+            'challenge': flask.url_for('backend.challenge'),
+            'save': flask.url_for('backend.save'),
+            'load': flask.url_for('backend.load'),
+        }
     }
 
 
@@ -106,11 +113,13 @@ def createaccount_page():
 def create_testing_app(**config):
     from zechat import node
     from zechat import models
+    from zechat import backend
 
     app = flask.Flask(__name__)
     app.config.update(config)
     models.db.init_app(app)
     app.register_blueprint(views)
+    backend.init_app(app)
     node.init_app(app)
 
     @app.route('/_flush', methods=['POST'])

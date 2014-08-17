@@ -83,6 +83,7 @@ zc.core_module = ->
     transport: @transport
     identity: @identity
   )
+  @backend = new zc.Backend(app: @app)
 
   @client.on 'verification-failed', (data) =>
     console.log("message verification failed", data)
@@ -90,6 +91,7 @@ zc.core_module = ->
   @app.reqres.setHandler 'identity', => @identity
   @app.reqres.setHandler 'client', => @client
   @app.reqres.setHandler 'peerlist', => @peerlist
+  @app.reqres.setHandler 'backend', => @backend
 
   @app.commands.setHandler 'show-main', (view) =>
     @layout.main.show(view)
