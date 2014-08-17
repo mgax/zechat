@@ -5,6 +5,7 @@ describe 'conversation', ->
   beforeEach (done) ->
     $.post(zc.TESTING_URL_MAP.flush, -> done())
 
+
   it 'should begin a new conversation', (test_done) ->
     Q.all([
       zc.create_testing_app(channel: 'app_a', secret: FIX.A_KEY)
@@ -40,6 +41,7 @@ describe 'conversation', ->
     .done ->
       test_done()
 
+
   it 'should send a message and receive it back', (test_done) ->
     zc.create_testing_app(talk_to_self: true, secret: FIX.A_KEY)
 
@@ -69,6 +71,7 @@ describe 'conversation', ->
 
     .done =>
       test_done()
+
 
   it 'should read offline messages', (test_done) ->
     sender_app = new Backbone.Marionette.Application
