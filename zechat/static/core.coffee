@@ -104,8 +104,6 @@ zc.core_module = ->
 
 
 zc.create_app = (options) ->
-  app_deferred = Q.defer()
-
   channel = options.channel or 'global'
   Backbone.Wreqr.radio.channel(channel).reset()
   app = new Backbone.Marionette.Application(channelName: channel)
@@ -117,6 +115,9 @@ zc.create_app = (options) ->
   app.reqres.setHandler 'root_el', -> app.$el
 
   app.module('core', zc.core_module)
+
+  app_deferred = Q.defer()
+  app.ready = app_deferred.promise
 
   Q().then ->
     if options.secret?
@@ -136,4 +137,4 @@ zc.create_app = (options) ->
   .done ->
     app_deferred.resolve(app)
 
-  return app_deferred.promise
+  return app

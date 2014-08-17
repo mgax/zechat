@@ -63,7 +63,7 @@ zc.create_testing_app = (options={}) ->
   app = null
 
   return (
-    zc.create_app(options)
+    zc.create_app(options).ready
 
     .then (new_app) ->
       app = new_app

@@ -14,7 +14,7 @@ describe 'conversation', ->
       $form.find('[name=passphrase]').val('testing one two three')
       $form.submit()
 
-    zc.create_app(urls: zc.TESTING_URL_MAP, el: $el[0])
+    zc.create_app(urls: zc.TESTING_URL_MAP, el: $el[0]).ready
     .done (app) ->
       secret = app.request('identity').model.get('secret')
       expect(secret).toEqual('sk:WHls/a+QF+0YYLorUzLFRmE4l3bcndjJ2oStx6zeGp8=')
