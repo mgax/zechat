@@ -146,12 +146,7 @@ class Transport(object):
         self.ws.send(flask.json.dumps(pkt))
 
 
-views = flask.Blueprint('node', __name__)
-
-
 def init_app(app):
-    app.register_blueprint(views)
-
     if app.config.get('LISTEN_WEBSOCKET'):
         from flask.ext.uwsgi_websocket import GeventWebSocket
 
