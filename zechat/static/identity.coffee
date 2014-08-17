@@ -51,10 +51,16 @@ class zc.CreateAccoutView extends Backbone.Marionette.ItemView
 zc.create_account = (app) ->
   deferred = Q.defer()
 
-  createaccount_view = new zc.CreateAccoutView()
+  createaccount_view = new zc.CreateAccoutView(model: new Backbone.Model())
   app.commands.execute('show-main', createaccount_view)
 
   createaccount_view.on 'submit', (data) ->
+    if data.passphrase != data.passphrase_confirm
+      createaccount_view.model.set(password_mismatch: true)
+      createaccount_view.render()
+      createaccount_view.onShow()
+      return
+
     secret = zc.generate_secret(data.email, data.passphrase)
     model = app.request('identity').model
     model.set(secret: secret)

@@ -16,9 +16,20 @@ describe 'account', ->
     )
 
     zc.waitfor(=> zc.some(app.$el.find('form.createaccount')))
-    .done ($form) =>
+    .then ($form) =>
       $form.find('[name=email]').val('foo@example.com')
       $form.find('[name=passphrase]').val('testing one two three')
+      $form.submit()
+
+      zc.waitfor(=> zc.some(app.$el.find('.has-error .help-block')))
+
+    .done (msg) =>
+      expect(msg.text()).toEqual("passwords don't match")
+
+      $form = app.$el.find('form.createaccount')
+      $form.find('[name=email]').val('foo@example.com')
+      $form.find('[name=passphrase]').val('testing one two three')
+      $form.find('[name=passphrase_confirm]').val('testing one two three')
       $form.submit()
 
     app.ready
