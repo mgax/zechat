@@ -17,3 +17,11 @@ describe 'curve25519 crypto', ->
   it 'should generate unique nonces', ->
     nonce_set = (zc.nacl.to_hex(zc.curve.nonce()) for n in [1..100])
     expect(_.uniq(nonce_set).length).toEqual(100)
+
+
+describe 'scrypt', ->
+
+  FIX = zc.fixtures
+
+  it 'should hash this passphrase', ->
+    expect(zc.scrypt(FIX.PASSWORD)).toEqual(FIX.HASHED)

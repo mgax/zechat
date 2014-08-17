@@ -1,3 +1,15 @@
+zc.SCRYPT_DIFFICULTY = 16384
+zc.SCRYPT_SALT = 'zechat'
+
+
+zc.scrypt = (input_txt) ->
+  scrypt = scrypt_module_factory()
+  input = scrypt.encode_utf8(input_txt)
+  salt = scrypt.encode_utf8(zc.SCRYPT_SALT)
+  secret = scrypt.crypto_scrypt(input, salt, zc.SCRYPT_DIFFICULTY, 8, 1, 32)
+  return zc.encode_secret_key(secret)
+
+
 zc.nacl = nacl_factory.instantiate()
 
 

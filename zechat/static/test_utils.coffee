@@ -48,4 +48,7 @@ zc.fixtures = {
 
   A_B_ENCRYPTED: 'msg:zc+OgEhoQm3Yu8vqsFcuvzc0FJuQ2au4+wrxt8hGkss1jDAFXEMRoRU6+g=='
 
+  PASSWORD: 'hello world'
+  HASHED: 'sk:LRSKXz3q8Pfv3s2TMyiowXj2C5YjJ2+9WMFU4MeEk9o='
+
 }
