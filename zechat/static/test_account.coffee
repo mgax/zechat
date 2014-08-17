@@ -13,6 +13,7 @@ describe 'account', ->
       create_account: true
       urls: zc.TESTING_URL_MAP
       el: $('<div>')[0]
+      transport: false
     )
 
     zc.waitfor(=> zc.some(app.$el.find('form.createaccount')))
@@ -37,11 +38,16 @@ describe 'account', ->
       expect(window.history.pushState).toHaveBeenCalled()
       secret = app.request('identity').model.get('secret')
       expect(secret).toEqual('sk:WHls/a+QF+0YYLorUzLFRmE4l3bcndjJ2oStx6zeGp8=')
+      app.stop()
       test_done()
 
 
   it 'should prompt for email and password', (test_done) ->
-    app = zc.create_app(urls: zc.TESTING_URL_MAP, el: $('<div>')[0])
+    app = zc.create_app(
+      urls: zc.TESTING_URL_MAP
+      el: $('<div>')[0]
+      transport: false
+    )
 
     zc.waitfor(=> zc.some(app.$el.find('form.login')))
     .done ($form) =>
@@ -53,5 +59,5 @@ describe 'account', ->
     .done (app) ->
       secret = app.request('identity').model.get('secret')
       expect(secret).toEqual('sk:WHls/a+QF+0YYLorUzLFRmE4l3bcndjJ2oStx6zeGp8=')
+      app.stop()
       test_done()
-

@@ -38,7 +38,9 @@ describe 'conversation', ->
       throw(err) if err != 'timeout'
       expect('timed out').toBe(false)
 
-    .done ->
+    .done =>
+      @app_a.stop()
+      @app_b.stop()
       test_done()
 
 
@@ -70,6 +72,7 @@ describe 'conversation', ->
       throw(err)
 
     .done =>
+      @app.stop()
       test_done()
 
 
@@ -81,10 +84,10 @@ describe 'conversation', ->
 
     new zc.Transport(app: sender_app).connect()
 
-    .then (sender_transport) =>
+    .then (@sender_transport) =>
       client = new zc.Client(
         app: sender_app
-        transport: sender_transport
+        transport: @sender_transport
         identity: new zc.Identity(app: sender_app, model: sender_identity)
       )
       message = {text: "hello offline", sender: FIX.B_PUBKEY}
@@ -112,4 +115,6 @@ describe 'conversation', ->
       throw(err)
 
     .done =>
+      @sender_transport.disconnect()
+      @app.stop()
       test_done()

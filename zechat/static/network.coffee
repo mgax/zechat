@@ -34,7 +34,6 @@ class zc.Transport extends zc.Controller
     @in_flight = new zc.InFlight(app: @app)
     @model = new Backbone.Model(state: 'closed')
     @deferred = Q.defer()
-    @app.vent.on('start', @connect)
     @app.commands.setHandler('reconnect', @connect)
     @app.reqres.setHandler 'transport-state', => @model
     setInterval(@ping, @PING_INTERVAL * 1000)
@@ -48,6 +47,12 @@ class zc.Transport extends zc.Controller
 
     return @deferred.promise
 
+  disconnect: ->
+    if @model.get('state') in ['open', 'connecting']
+      @ws.close()
+    clearTimeout(@backoff_timeout)
+    @model.set(state: 'closed')
+
   attempt_connection: =>
     @model.set(state: 'connecting')
     transport_url = @app.request('urls')['transport']
@@ -60,6 +65,9 @@ class zc.Transport extends zc.Controller
       @deferred.resolve(@)
 
     @ws.onclose = () =>
+      if @model.get('state') == 'closed'
+        return
+
       if @model.get('state') == 'open'
         @deferred = Q.defer()
         @in_flight.flush()

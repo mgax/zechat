@@ -104,8 +104,12 @@ zc.core_module = ->
     @layout.header.show(@header.createView())
     @layout.peerlist.show(@peerlist.createView())
 
+  @app.stop = () =>
+    @transport.disconnect()
+
 
 zc.create_app = (options) ->
+  options = _.defaults({}, options, {transport: true})
   channel = options.channel or 'global'
   Backbone.Wreqr.radio.channel(channel).reset()
   app = new Backbone.Marionette.Application(channelName: channel)
@@ -132,6 +136,9 @@ zc.create_app = (options) ->
       return zc.setup_identity(app)
 
   .then ->
+    if options.transport
+      app.core.transport.connect()
+
     app.vent.trigger('start')
 
     if options.talk_to_self
