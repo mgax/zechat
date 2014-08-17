@@ -32,7 +32,7 @@ class zc.HeaderView extends Backbone.Marionette.ItemView
     state = @model.get('state')
     if state == 'closed'
       return cls: 'btn-danger header-btn-connect', text: "✘"
-    if state == 'connecting'
+    if state == 'connecting' or state == 'backoff'
       return cls: 'btn-warning', disabled: true, text: "…"
     if state == 'open'
       return cls: 'btn-success', disabled: true, text: "✔"
