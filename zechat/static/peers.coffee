@@ -36,6 +36,7 @@ class zc.Client extends zc.Controller
     @transport = @options.transport
     @transport.on('open', @on_open)
     @transport.on('packet', @on_packet)
+    @seen = {}
 
   on_open: (open) =>
     @identity.authenticate(@transport)
@@ -44,10 +45,14 @@ class zc.Client extends zc.Controller
       @transport.send(type: 'list', identity: @identity.pubkey())
 
     .then (resp) =>
+      messages = (h for h in resp.messages when not @seen[h])
+      unless messages.length
+        return {messages: []}
+
       @transport.send(
         type: 'get'
         identity: @identity.pubkey()
-        messages: resp.messages
+        messages: messages
       )
 
     .done (resp) =>
@@ -71,6 +76,7 @@ class zc.Client extends zc.Controller
 
     message = JSON.parse(zc.b64decode(packed_message))
     message.hash = zc.message_hash(packet.data)
+    @seen[message.hash] = true
     peer = @app.request('peer', sender)
     peer.message_col.add(message)
 
