@@ -48,10 +48,9 @@ class zc.CurveCrypto
 
   nonce: ->
     now = zc.nacl.encode_latin1(""+Date.now())
-    hash = zc.nacl.crypto_hash(zc.u8cat(@last_nonce, now))
-    new_nonce = hash.subarray(0, @NONCE_SIZE)
+    new_nonce = zc.nacl.crypto_hash(zc.u8cat(@last_nonce, now))
     @last_nonce = new_nonce
-    return new_nonce
+    return new_nonce.subarray(0, @NONCE_SIZE)
 
   encrypt: (message, sender_b64, recipient_pub_b64) ->
     sender = zc.secret_key(sender_b64)
