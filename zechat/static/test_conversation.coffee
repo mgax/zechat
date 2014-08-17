@@ -2,25 +2,6 @@ describe 'conversation', ->
 
   FIX = zc.fixtures
 
-  create_testing_app = (options={}) ->
-    _.defaults(options, {
-      urls: zc.TESTING_URL_MAP
-      el: $('<div>')[0]
-    })
-
-    app = null
-
-    return (
-      zc.create_app(options)
-
-      .then (new_app) ->
-        app = new_app
-        zc.waitevent(app.request('client'), 'ready')
-
-      .then ->
-        return app
-    )
-
   beforeEach (done) ->
     $.post(zc.TESTING_URL_MAP.flush, -> done())
 
@@ -41,8 +22,8 @@ describe 'conversation', ->
 
   it 'should begin a new conversation', (test_done) ->
     Q.all([
-      create_testing_app(channel: 'app_a', secret: FIX.A_KEY)
-      create_testing_app(channel: 'app_b', secret: FIX.B_KEY)
+      zc.create_testing_app(channel: 'app_a', secret: FIX.A_KEY)
+      zc.create_testing_app(channel: 'app_b', secret: FIX.B_KEY)
     ])
 
     .then ([@app_a, @app_b]) =>
@@ -75,7 +56,7 @@ describe 'conversation', ->
       test_done()
 
   it 'should send a message and receive it back', (test_done) ->
-    create_testing_app(talk_to_self: true, secret: FIX.A_KEY)
+    zc.create_testing_app(talk_to_self: true, secret: FIX.A_KEY)
 
     .then (@app) =>
       zc.waitfor(=> zc.some(@app.$el.find('.thread-compose')))
@@ -123,7 +104,7 @@ describe 'conversation', ->
       client.send(peer, message)
 
     .then =>
-      create_testing_app(secret: FIX.A_KEY)
+      zc.create_testing_app(secret: FIX.A_KEY)
 
     .then (@app) =>
       get_messages = =>

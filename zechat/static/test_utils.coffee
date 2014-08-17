@@ -52,3 +52,23 @@ zc.fixtures = {
   HASHED: 'sk:LRSKXz3q8Pfv3s2TMyiowXj2C5YjJ2+9WMFU4MeEk9o='
 
 }
+
+
+zc.create_testing_app = (options={}) ->
+  _.defaults(options, {
+    urls: zc.TESTING_URL_MAP
+    el: $('<div>')[0]
+  })
+
+  app = null
+
+  return (
+    zc.create_app(options)
+
+    .then (new_app) ->
+      app = new_app
+      zc.waitevent(app.request('client'), 'ready')
+
+    .then ->
+      return app
+  )
