@@ -1,12 +1,15 @@
 zc.SCRYPT_DIFFICULTY = 16384
 zc.SCRYPT_SALT = 'zechat'
+zc.NONCE_SIZE = 24
+zc.KEY_SIZE = 32
 
 
 zc.scrypt = (input_txt) ->
   scrypt = scrypt_module_factory()
   input = scrypt.encode_utf8(input_txt)
   salt = scrypt.encode_utf8(zc.SCRYPT_SALT)
-  secret = scrypt.crypto_scrypt(input, salt, zc.SCRYPT_DIFFICULTY, 8, 1, 32)
+  secret = scrypt.crypto_scrypt(input, salt, zc.SCRYPT_DIFFICULTY,
+                                8, 1, zc.KEY_SIZE)
   return zc.encode_secret_key(secret)
 
 
@@ -40,17 +43,25 @@ zc.decode_message = (message) ->
   return zc.b64tou8array(message.slice(4))
 
 
+zc.encode_secret = (data) ->
+  return 'sec:' + zc.b64fromu8array(data)
+
+
+zc.decode_secret = (message) ->
+  throw "Not a secret box" unless (message.slice(0, 4) == 'sec:')
+  return zc.b64tou8array(message.slice(4))
+
+
 class zc.CurveCrypto
 
   constructor: ->
     @last_nonce = zc.nacl.crypto_box_random_nonce()
-    @NONCE_SIZE = @last_nonce.byteLength
 
   nonce: ->
     now = zc.nacl.encode_latin1(""+Date.now())
     new_nonce = zc.nacl.crypto_hash(zc.u8cat(@last_nonce, now))
     @last_nonce = new_nonce
-    return new_nonce.subarray(0, @NONCE_SIZE)
+    return new_nonce.subarray(0, zc.NONCE_SIZE)
 
   encrypt: (message, sender_b64, recipient_pub_b64) ->
     sender = zc.secret_key(sender_b64)
@@ -65,12 +76,33 @@ class zc.CurveCrypto
 
   decrypt: (encrypted_b64, sender_pub_b64, recipient_b64) ->
     encrypted = zc.decode_message(encrypted_b64)
-    nonce = encrypted.subarray(0, @NONCE_SIZE)
-    ciphertext = encrypted.subarray(@NONCE_SIZE)
+    nonce = encrypted.subarray(0, zc.NONCE_SIZE)
+    ciphertext = encrypted.subarray(zc.NONCE_SIZE)
     sender_pub = zc.public_key(sender_pub_b64)
     recipient = zc.secret_key(recipient_b64)
     try
       plain = zc.nacl.crypto_box_open(ciphertext, nonce, sender_pub, recipient)
+    catch e
+      return null
+    return zc.nacl.decode_utf8(plain)
+
+  secret_encrypt: (message, key_b64) ->
+    key = zc.secret_key(key_b64)
+    nonce = @nonce()
+    plain = zc.nacl.encode_utf8(message)
+    ciphertext = zc.nacl.crypto_secretbox(plain, nonce, key)
+    encrypted = new Uint8Array(nonce.byteLength + ciphertext.byteLength)
+    encrypted.set(nonce, 0)
+    encrypted.set(ciphertext, nonce.byteLength)
+    return zc.encode_secret(encrypted)
+
+  secret_decrypt: (encrypted_b64, key_b64) ->
+    encrypted = zc.decode_secret(encrypted_b64)
+    nonce = encrypted.subarray(0, zc.NONCE_SIZE)
+    ciphertext = encrypted.subarray(zc.NONCE_SIZE)
+    key = zc.secret_key(key_b64)
+    try
+      plain = zc.nacl.crypto_secretbox_open(ciphertext, nonce, key)
     catch e
       return null
     return zc.nacl.decode_utf8(plain)

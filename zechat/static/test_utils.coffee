@@ -51,6 +51,9 @@ zc.fixtures = {
   PASSWORD: 'hello world'
   HASHED: 'sk:LRSKXz3q8Pfv3s2TMyiowXj2C5YjJ2+9WMFU4MeEk9o='
 
+  SEC_PLAIN: 'hello world'
+  SEC_ENCRYPTED: 'sec:k9paM2pM5oW4jru/JsDWunOFkz6zY1ygDwbk5i0K22Ciz2fVQZMK/MkisDv4SKjfPbd5'
+
 }
 
 
