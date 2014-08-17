@@ -30,30 +30,31 @@ class zc.Transport extends zc.Controller
     @in_flight = new zc.InFlight(app: @app)
     @model = new Backbone.Model(state: 'closed')
     @app.vent.on('start', @connect)
-    @app.commands.setHandler 'reconnect', =>
-      if @model.get('state') == 'closed'
-        @connect()
+    @app.commands.setHandler('reconnect', @connect)
     @app.reqres.setHandler 'transport-state', => @model
 
   connect: =>
+    if @model.get('state') == 'open'
+      return Q(@)
+
     deferred = Q.defer()
     transport_url = @app.request('urls')['transport']
     @ws = new WebSocket(transport_url)
     @ws.onmessage = @on_receive
+
     @ws.onopen = () =>
-      @on_open()
+      @model.set(state: 'open')
+      @trigger('open')
       deferred.resolve(@)
-    @ws.onclose = @on_close
+
+    @ws.onclose = () =>
+      old_state = @model.get('state')
+      @model.set(state: 'closed')
+      @in_flight.flush()
+      deferred.reject() if old_state == 'connecting'
+
     @model.set(state: 'connecting')
     return deferred.promise
-
-  on_open: =>
-    @model.set(state: 'open')
-    @trigger('open')
-
-  on_close: =>
-    @model.set(state: 'closed')
-    @in_flight.flush()
 
   on_receive: (evt) =>
     packet = JSON.parse(evt.data)
