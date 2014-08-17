@@ -36,3 +36,31 @@ def test_persistence(client):
 
     state = json_get(client, '/state/foo')['state']
     assert state == 'hello world'
+
+
+def test_verifier(curve):
+    from test_crypto import A_KEY, A_PUBKEY, B_KEY
+    from zechat.backend import Verifier
+
+    verifier = Verifier()
+    (challenge, signature, pubkey) = verifier.challenge()
+    (other_challenge, other_signature, pubkey) = verifier.challenge()
+
+    assert verifier.check(signature, A_PUBKEY,
+        curve.encrypt(challenge, A_KEY, pubkey))
+
+    # other challenge
+    assert not verifier.check(other_signature, A_PUBKEY,
+        curve.encrypt(challenge, A_KEY, pubkey))
+    assert not verifier.check(signature, A_PUBKEY,
+        curve.encrypt(other_challenge, A_KEY, pubkey))
+
+    # key mismatch
+    assert not verifier.check(signature, A_PUBKEY,
+        curve.encrypt(challenge, B_KEY, pubkey))
+
+    # bogus values
+    assert not verifier.check('asdf', A_PUBKEY,
+        curve.encrypt(challenge, A_KEY, pubkey))
+    assert not verifier.check(signature, A_PUBKEY,
+        'asdf')

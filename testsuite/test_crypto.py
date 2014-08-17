@@ -9,12 +9,6 @@ B_PUBKEY = 'pk:YCBnGbI2GbfWjmJl22o4IH3sIACU8Sv58fcxfDQojhI='
 A_B_ENCRYPTED = 'msg:zc+OgEhoQm3Yu8vqsFcuvzc0FJuQ2au4+wrxt8hGkss1jDAFXEMRoRU6+g=='
 
 
-@pytest.fixture(scope='module')
-def curve():
-    from zechat.cryptos import CurveCrypto
-    return CurveCrypto()
-
-
 def test_encryption(curve):
     assert curve.decrypt(A_B_ENCRYPTED, A_PUBKEY, B_KEY) == 'foo'
 

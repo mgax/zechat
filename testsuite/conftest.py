@@ -21,3 +21,9 @@ def app():
         models.db.create_all()
 
     return app
+
+
+@pytest.fixture(scope='module')
+def curve():
+    from zechat.cryptos import CurveCrypto
+    return CurveCrypto()

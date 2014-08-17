@@ -20,11 +20,6 @@ def public_key(key):
     return PublicKey(key[3:], Base64Encoder)
 
 
-def message(msg):
-    assert msg[:4] == 'msg:'
-    return Base64Encoder.decode(msg[4:])
-
-
 def random_key():
     return 'sk:' + PrivateKey.generate().encode(Base64Encoder)
 
@@ -47,8 +42,11 @@ class CurveCrypto(object):
 
     def decrypt(self, encrypted, sender_pub, recipient):
         box = Box(secret_key(recipient), public_key(sender_pub))
+        if encrypted[:4] != 'msg:':
+            raise DecryptionError
+
         try:
-            return box.decrypt(message(encrypted))
+            return box.decrypt(Base64Encoder.decode(encrypted[4:]))
         except CryptoError:
             raise DecryptionError
 
