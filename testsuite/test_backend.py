@@ -27,14 +27,20 @@ def json_get(client, url):
     return flask.json.loads(resp.data)
 
 
-def test_persistence(client):
-    data = dict(
-        signature='',
-        state='hello world',
-    )
-    json_post(client, '/state/foo', data)
+def test_persistence(client, curve):
+    from test_crypto import A_KEY, A_PUBKEY
 
-    state = json_get(client, '/state/foo')['state']
+    ch = json_post(client, '/state/challenge', {})
+    server_pubkey = str(ch['pubkey'])
+    confirmation = curve.encrypt(str(ch['challenge']), A_KEY, server_pubkey)
+    auth = dict(
+        pubkey=A_PUBKEY,
+        signature=ch['signature'],
+        confirmation=confirmation,
+    )
+
+    json_post(client, '/state/save', dict(auth, state='hello world'))
+    state = json_post(client, '/state/load', auth)['state']
     assert state == 'hello world'
 
 

@@ -6,20 +6,44 @@ from zechat.models import db, Account
 views = flask.Blueprint('backend', __name__)
 
 
-@views.route('/state/<path:pubkey>', methods=['POST'])
-def save(pubkey):
-    account = Account.query.filter_by(pubkey=pubkey).first()
+@views.route('/state/challenge', methods=['POST'])
+def challenge():
+    (challenge, signature, pubkey) = verifier().challenge()
+    return flask.jsonify(
+        challenge=challenge,
+        signature=signature,
+        pubkey=pubkey,
+    )
+
+
+def auth(data):
+    return verifier().check(
+        data['signature'],
+        data['pubkey'],
+        data['confirmation'],
+    )
+
+
+@views.route('/state/save', methods=['POST'])
+def save():
+    data = flask.request.get_json()
+    if not auth(data):
+        flask.abort(403)
+    account = Account.query.filter_by(pubkey=data['pubkey']).first()
     if account is None:
-        account = Account(pubkey=pubkey)
+        account = Account(pubkey=data['pubkey'])
         db.session.add(account)
-    account.state = flask.request.get_json()['state']
+    account.state = data['state']
     db.session.commit()
     return flask.jsonify(ok=True)
 
 
-@views.route('/state/<path:pubkey>')
-def load(pubkey):
-    account = Account.query.filter_by(pubkey=pubkey).first_or_404()
+@views.route('/state/load', methods=['POST'])
+def load():
+    data = flask.request.get_json()
+    if not auth(data):
+        flask.abort(403)
+    account = Account.query.filter_by(pubkey=data['pubkey']).first_or_404()
     return flask.jsonify(state=account.state)
 
 
@@ -48,5 +72,10 @@ class Verifier(object):
             return recv == challenge
 
 
+def verifier():
+    return flask.current_app.extensions['zechat-verifier']
+
+
 def init_app(app):
+    app.extensions['zechat-verifier'] = Verifier()
     app.register_blueprint(views)
