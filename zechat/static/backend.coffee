@@ -17,10 +17,13 @@ class zc.Backend extends zc.Controller
       }
 
   save: (state) ->
+    key = @app.request('identity').key()
+    enc_state = zc.curve.secret_encrypt(state, key)
+
     @auth()
 
     .then (auth) =>
-      zc.post_json(@urls.save, _.extend({state: state}, auth))
+      zc.post_json(@urls.save, _.extend({state: enc_state}, auth))
 
     .then (resp) =>
       unless resp.ok?
@@ -34,4 +37,5 @@ class zc.Backend extends zc.Controller
       zc.post_json(@urls.load, auth)
 
     .then (resp) =>
-      return resp.state
+      key = @app.request('identity').key()
+      return zc.curve.secret_decrypt(resp.state, key)
