@@ -63,6 +63,11 @@ def check_identity(func):
     return wrapper
 
 
+@Node.on('ping')
+def ping(node, transport, pkt):
+    return dict()
+
+
 @Node.on('challenge')
 def challenge(node, transport, pkt):
     transport.challenge = node.curve.challenge()

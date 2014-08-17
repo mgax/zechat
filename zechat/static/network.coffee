@@ -26,7 +26,8 @@ class zc.InFlight extends zc.Controller
 
 class zc.Transport extends zc.Controller
 
-  INCREMENT: 1  # one second
+  PING_INTERVAL: 45  # seconds
+  BACKOFF_INCREMENT: 1  # seconds
   ATTEMPT_CUTOFF: 6  # wait at most 2^6 (64) seconds
 
   initialize: (options) ->
@@ -36,6 +37,7 @@ class zc.Transport extends zc.Controller
     @app.vent.on('start', @connect)
     @app.commands.setHandler('reconnect', @connect)
     @app.reqres.setHandler 'transport-state', => @model
+    setInterval(@ping, @PING_INTERVAL * 1000)
 
   connect: =>
     if @model.get('state') != 'open'
@@ -65,8 +67,12 @@ class zc.Transport extends zc.Controller
       @model.set(state: 'backoff')
       attempt = Math.min(@model.get('attempt'), @ATTEMPT_CUTOFF)
       @model.set(attempt: attempt + 1)
-      delay = @INCREMENT * Math.pow(2, attempt) * 1000
+      delay = @BACKOFF_INCREMENT * Math.pow(2, attempt) * 1000
       @backoff_timeout = setTimeout(@attempt_connection, delay)
+
+  ping: =>
+    if @model.get('state') == 'open'
+      @send(type: 'ping')
 
   on_receive: (evt) =>
     packet = JSON.parse(evt.data)
