@@ -4,6 +4,7 @@ import flask
 def create_app(**config):
     from zechat import models
     from zechat import node
+    from zechat import backend
     from zechat import common
     app = flask.Flask(__name__)
     app.config.update(common.DEFAULTS)
@@ -11,6 +12,7 @@ def create_app(**config):
     app.config.from_pyfile('../settings.py', silent=False)
     models.db.init_app(app)
     node.init_app(app)
+    backend.init_app(app)
     common.init_app(app)
     return app
 

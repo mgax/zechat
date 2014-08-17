@@ -19,6 +19,13 @@ class Message(db.Model):
     payload = db.Column(db.String, nullable=False)
 
 
+class Account(db.Model):
+
+    id = db.Column(UUID, primary_key=True, default=random_uuid)
+    pubkey = db.Column(db.String, nullable=False, unique=True, index=True)
+    state = db.Column(db.String, nullable=False)
+
+
 def hash(data):
     return 'mh:' + hashlib.sha512(data).hexdigest()[:32]
 
