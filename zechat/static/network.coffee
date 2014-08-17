@@ -31,19 +31,23 @@ class zc.Transport extends zc.Controller
 
   initialize: (options) ->
     @in_flight = new zc.InFlight(app: @app)
-    @model = new Backbone.Model(state: 'closed', attempt: 0)
+    @model = new Backbone.Model(state: 'closed')
     @deferred = Q.defer()
     @app.vent.on('start', @connect)
     @app.commands.setHandler('reconnect', @connect)
     @app.reqres.setHandler 'transport-state', => @model
 
   connect: =>
-    if @model.get('state') == 'closed'
-      @attempt_connection()
+    if @model.get('state') != 'open'
+      @model.set(attempt: 0)
+      if @model.get('state') != 'connecting'
+        clearTimeout(@backoff_timeout)
+        @attempt_connection()
 
     return @deferred.promise
 
   attempt_connection: =>
+    @model.set(state: 'connecting')
     transport_url = @app.request('urls')['transport']
     @ws = new WebSocket(transport_url)
     @ws.onmessage = @on_receive
@@ -62,9 +66,7 @@ class zc.Transport extends zc.Controller
       attempt = Math.min(@model.get('attempt'), @ATTEMPT_CUTOFF)
       @model.set(attempt: attempt + 1)
       delay = @INCREMENT * Math.pow(2, attempt) * 1000
-      setTimeout(@attempt_connection, delay)
-
-    @model.set(state: 'connecting')
+      @backoff_timeout = setTimeout(@attempt_connection, delay)
 
   on_receive: (evt) =>
     packet = JSON.parse(evt.data)
