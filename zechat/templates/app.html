@@ -14,11 +14,16 @@
 
 <script>
   $(function() {
-    zc.create_app({
+    var options = _.extend(
+      {{ options|tojson }},
+      {
         urls: {{ url_map|tojson }},
         el: $('body')[0],
         talk_to_self: true
-    })
+      }
+    )
+
+    zc.create_app(options)
     .then(function(app) {
         zc.app = app;
     });

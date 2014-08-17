@@ -90,8 +90,17 @@ def get_url_map():
 
 
 @views.route('/')
-def app_page():
-    return flask.render_template('app.html', url_map=get_url_map())
+def app_page(**options):
+    return flask.render_template(
+        'app.html',
+        url_map=get_url_map(),
+        options=options,
+    )
+
+
+@views.route('/create-account')
+def createaccount_page():
+    return app_page(create_account=True)
 
 
 def create_testing_app(**config):
