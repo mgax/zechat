@@ -32,6 +32,7 @@ def init_app(app):
         'test_crypto.coffee',
         'test_conversation.coffee',
         'test_backend.coffee',
+        'test_account.coffee',
         filters='coffeescript',
         output='gen/testsuite.js',
     ))
@@ -87,6 +88,7 @@ def get_base_url():
 def get_url_map():
     base_url = get_base_url().lstrip('http://')
     return {
+        'home': flask.url_for('.app_page'),
         'transport': ''.join(['ws://', base_url, 'ws/transport']),
         'backend': {
             'challenge': flask.url_for('backend.challenge'),

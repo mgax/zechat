@@ -1,3 +1,7 @@
+zc.generate_secret = (email, passphrase) ->
+  return zc.scrypt(email + ':' + passphrase)
+
+
 zc.setup_identity = (app) ->
   deferred = Q.defer()
 
@@ -5,9 +9,8 @@ zc.setup_identity = (app) ->
   app.commands.execute('show-main', login_view)
 
   login_view.on 'login', (data) ->
-    input_txt = data.email + ':' + data.passphrase
     model = app.request('identity').model
-    model.set(secret: zc.scrypt(input_txt))
+    model.set(secret: zc.generate_secret(data.email, data.passphrase))
     deferred.resolve()
 
   return deferred.promise
@@ -27,6 +30,44 @@ class zc.LoginView extends Backbone.Marionette.ItemView
       evt.preventDefault()
       data = zc.serialize_form(@el)
       @trigger('login', data)
+
+
+class zc.CreateAccoutView extends Backbone.Marionette.ItemView
+
+  tagName: 'form'
+  className: 'createaccount'
+  template: 'createaccount.html'
+
+  onShow: ->
+    @$el.find('[name=email]').focus()
+
+  events:
+    'submit': (evt) ->
+      evt.preventDefault()
+      data = zc.serialize_form(@el)
+      @trigger('submit', data)
+
+
+zc.create_account = (app) ->
+  deferred = Q.defer()
+
+  createaccount_view = new zc.CreateAccoutView()
+  app.commands.execute('show-main', createaccount_view)
+
+  createaccount_view.on 'submit', (data) ->
+    secret = zc.generate_secret(data.email, data.passphrase)
+    model = app.request('identity').model
+    model.set(secret: secret)
+
+    app.request('backend').save('{}')
+
+    .done ->
+      home = app.request('urls').home
+      history.pushState(null, "ZeChat", home)
+      deferred.resolve()
+
+
+  return deferred.promise
 
 
 class zc.IdentityView extends Backbone.Marionette.ItemView

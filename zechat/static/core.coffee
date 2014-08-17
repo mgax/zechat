@@ -123,10 +123,13 @@ zc.create_app = (options) ->
 
   Q().then ->
     if options.secret?
-      app.request('identity').model.set('secret', options.secret)
+      return app.request('identity').model.set('secret', options.secret)
+
+    else if options.create_account?
+      return zc.create_account(app)
 
     else
-      zc.setup_identity(app)
+      return zc.setup_identity(app)
 
   .then ->
     app.vent.trigger('start')
