@@ -36,7 +36,7 @@ describe 'conversation', ->
     zc.create_app(urls: zc.TESTING_URL_MAP, el: $el[0])
     .done (app) ->
       secret = app.request('identity').model.get('secret')
-      expect(secret).toEqual('sk:azDjpkcJyAER9LjmpYwzkTFU2ZLaaYrqk2lRSN0LQZU=')
+      expect(secret).toEqual('sk:WHls/a+QF+0YYLorUzLFRmE4l3bcndjJ2oStx6zeGp8=')
       test_done()
 
   it 'should begin a new conversation', (test_done) ->
